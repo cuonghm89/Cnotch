@@ -799,6 +799,15 @@ struct ContentView: View {
                             physicalNotchWidth: max(0, vm.closedNotchSize.width - cornerRadiusInsets.closed.top)
                         )
                         .frame(height: closedNotchContentSize.height, alignment: .center)
+                      } else if !showsMusicSneakPeek
+                        && coordinator.expandingView.type == .screenshot && coordinator.expandingView.show
+                        && vm.notchState == .closed
+                      {
+                        ScreenshotQuickActionsIndicator(
+                            item: coordinator.expandingView,
+                            physicalNotchWidth: max(0, vm.closedNotchSize.width - cornerRadiusInsets.closed.top)
+                        )
+                        .frame(height: closedNotchContentSize.height, alignment: .center)
                       } else if showsClosedSystemHUD {
                           SystemEventIndicatorModifier(
                               eventType: $coordinator.sneakPeek.type,

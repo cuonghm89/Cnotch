@@ -65,6 +65,9 @@ struct CNotchHeader: View {
                             }
                             .font(.system(size: 12, weight: .medium))
                         }
+                        if Defaults[.quickNoteEnabled] {
+                            QuickNoteButton()
+                        }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(
                                 icon: "gear",

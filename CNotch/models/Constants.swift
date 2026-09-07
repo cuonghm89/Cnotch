@@ -249,4 +249,10 @@ extension Defaults.Keys {
 
     // MARK: Weather
     static let weatherEnabled = Key<Bool>("weatherEnabled", default: false)
+
+    // MARK: Quick Note
+    static let quickNoteEnabled = Key<Bool>("quickNoteEnabled", default: true)
+
+    // MARK: Screenshot Quick Actions
+    static let screenshotQuickActionsEnabled = Key<Bool>("screenshotQuickActionsEnabled", default: true)
 }

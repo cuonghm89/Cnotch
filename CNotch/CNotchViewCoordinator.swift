@@ -20,6 +20,7 @@ enum SneakContentType {
     case download
     case bluetoothDevice
     case liveActivity
+    case screenshot
 }
 
 struct sneakPeek {
@@ -53,6 +54,7 @@ struct ExpandedItem {
     var title: String = ""
     var subtitle: String = ""
     var icon: String = "airpodspro"
+    var url: URL?
 }
 
 @MainActor
@@ -217,9 +219,23 @@ class CNotchViewCoordinator: ObservableObject {
                     WeatherManager.shared.stop()
                 }
             }
+
+        if Defaults[.screenshotQuickActionsEnabled] {
+            ScreenshotWatcher.shared.start()
+        }
+        screenshotQuickActionsCancellable = Defaults.publisher(.screenshotQuickActionsEnabled)
+            .dropFirst()
+            .sink { change in
+                if change.newValue {
+                    ScreenshotWatcher.shared.start()
+                } else {
+                    ScreenshotWatcher.shared.stop()
+                }
+            }
     }
 
     private var weatherEnabledCancellable: AnyCancellable?
+    private var screenshotQuickActionsCancellable: AnyCancellable?
 
     // MARK: - Third-Party Live Activities
     //
@@ -311,7 +327,8 @@ class CNotchViewCoordinator: ObservableObject {
         browser: BrowserType = .chromium,
         title: String = "",
         subtitle: String = "",
-        icon: String = "airpodspro"
+        icon: String = "airpodspro",
+        url: URL? = nil
     ) {
         Task { @MainActor in
             withAnimation(.smooth) {
@@ -322,6 +339,7 @@ class CNotchViewCoordinator: ObservableObject {
                 self.expandingView.title = title
                 self.expandingView.subtitle = subtitle
                 self.expandingView.icon = icon
+                self.expandingView.url = url
             }
         }
     }
@@ -332,7 +350,7 @@ class CNotchViewCoordinator: ObservableObject {
         didSet {
             if expandingView.show {
                 expandingViewTask?.cancel()
-                let duration: TimeInterval = (expandingView.type == .download ? 2 : 3)
+                let duration: TimeInterval = (expandingView.type == .download ? 2 : expandingView.type == .screenshot ? 6 : 3)
                 let currentType = expandingView.type
                 expandingViewTask = Task { [weak self] in
                     try? await Task.sleep(for: .seconds(duration))

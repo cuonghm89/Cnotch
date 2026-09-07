@@ -2510,6 +2510,26 @@ struct Advanced: View {
             } footer: {
                 Text("Uses your location to show the current temperature on the notch. Weather data from Open-Meteo.")
             }
+
+            Section {
+                Defaults.Toggle(key: .quickNoteEnabled) {
+                    Text("Show Quick Note button")
+                }
+            } header: {
+                Text("Quick Note")
+            } footer: {
+                Text("Adds a button in the open notch to jot a note and save it straight to Notes.app.")
+            }
+
+            Section {
+                Defaults.Toggle(key: .screenshotQuickActionsEnabled) {
+                    Text("Show quick actions after a screenshot")
+                }
+            } header: {
+                Text("Screenshot Quick Actions")
+            } footer: {
+                Text("Watches your screenshot folder and offers Copy, Reveal, and Delete on the notch right after you take one.")
+            }
         }
         .accentColor(.effectiveAccent)
         .onAppear {
