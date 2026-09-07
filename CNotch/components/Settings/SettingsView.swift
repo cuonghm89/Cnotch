@@ -2530,6 +2530,32 @@ struct Advanced: View {
             } footer: {
                 Text("Watches your screenshot folder and offers Copy, Reveal, and Delete on the notch right after you take one.")
             }
+
+            Section {
+                Defaults.Toggle(key: .pomodoroButtonEnabled) {
+                    Text("Show Pomodoro Timer button")
+                }
+            } header: {
+                Text("Pomodoro Timer")
+            }
+
+            Section {
+                Defaults.Toggle(key: .voiceMemoButtonEnabled) {
+                    Text("Show Voice Memo button")
+                }
+            } header: {
+                Text("Voice Memo")
+            } footer: {
+                Text("Records straight into the Shelf. Asks for Microphone access the first time you use it.")
+            }
+
+            Section {
+                Defaults.Toggle(key: .systemStatsEnabled) {
+                    Text("Show CPU and memory usage")
+                }
+            } header: {
+                Text("System Stats")
+            }
         }
         .accentColor(.effectiveAccent)
         .onAppear {

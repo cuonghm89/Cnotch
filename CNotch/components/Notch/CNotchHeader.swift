@@ -15,6 +15,7 @@ struct CNotchHeader: View {
     @ObservedObject private var clipboardHistory = ClipboardHistoryStore.shared
     @ObservedObject private var modules = FeatureModuleRegistry.shared
     @ObservedObject private var weather = WeatherManager.shared
+    @ObservedObject private var systemStats = SystemStatsManager.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var motion: NotchMotionPolicy {
@@ -65,8 +66,23 @@ struct CNotchHeader: View {
                             }
                             .font(.system(size: 12, weight: .medium))
                         }
+                        if Defaults[.systemStatsEnabled] {
+                            HStack(spacing: 3) {
+                                Image(systemName: "cpu")
+                                Text("\(Int((systemStats.cpuUsage * 100).rounded()))%")
+                                Image(systemName: "memorychip")
+                                Text("\(Int((systemStats.memoryUsage * 100).rounded()))%")
+                            }
+                            .font(.system(size: 11, weight: .medium))
+                        }
                         if Defaults[.quickNoteEnabled] {
                             QuickNoteButton()
+                        }
+                        if Defaults[.pomodoroButtonEnabled] {
+                            PomodoroButton()
+                        }
+                        if Defaults[.voiceMemoButtonEnabled] {
+                            VoiceMemoButton()
                         }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(

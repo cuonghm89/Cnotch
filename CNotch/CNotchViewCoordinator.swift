@@ -232,10 +232,24 @@ class CNotchViewCoordinator: ObservableObject {
                     ScreenshotWatcher.shared.stop()
                 }
             }
+
+        if Defaults[.systemStatsEnabled] {
+            SystemStatsManager.shared.start()
+        }
+        systemStatsCancellable = Defaults.publisher(.systemStatsEnabled)
+            .dropFirst()
+            .sink { change in
+                if change.newValue {
+                    SystemStatsManager.shared.start()
+                } else {
+                    SystemStatsManager.shared.stop()
+                }
+            }
     }
 
     private var weatherEnabledCancellable: AnyCancellable?
     private var screenshotQuickActionsCancellable: AnyCancellable?
+    private var systemStatsCancellable: AnyCancellable?
 
     // MARK: - Third-Party Live Activities
     //

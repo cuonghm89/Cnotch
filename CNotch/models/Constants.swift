@@ -255,4 +255,13 @@ extension Defaults.Keys {
 
     // MARK: Screenshot Quick Actions
     static let screenshotQuickActionsEnabled = Key<Bool>("screenshotQuickActionsEnabled", default: true)
+
+    // MARK: Pomodoro Timer
+    static let pomodoroButtonEnabled = Key<Bool>("pomodoroButtonEnabled", default: true)
+
+    // MARK: Voice Memo
+    static let voiceMemoButtonEnabled = Key<Bool>("voiceMemoButtonEnabled", default: true)
+
+    // MARK: System Stats
+    static let systemStatsEnabled = Key<Bool>("systemStatsEnabled", default: false)
 }

@@ -120,6 +120,9 @@
 		C1A0B2073B00000100000004 /* MicrophoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B2083B00000100000005 /* MicrophoneManager.swift */; };
 		C1A0B2093B00000100000006 /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B20A3B00000100000007 /* WeatherManager.swift */; };
 		C1A0B30B3B00000100000008 /* ScreenshotWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */; };
+		C1A0B4153B00000100000012 /* SystemStatsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4163B00000100000013 /* SystemStatsManager.swift */; };
+		C1A0B4133B00000100000010 /* PomodoroManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4143B00000100000011 /* PomodoroManager.swift */; };
+		C1A0B4113B0000010000000E /* VoiceMemoRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4123B0000010000000F /* VoiceMemoRecorder.swift */; };
 		9A0887322C7A693000C160EA /* TabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0887312C7A693000C160EA /* TabButton.swift */; };
 		9A0887352C7AFF8E00C160EA /* TabSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0887342C7AFF8E00C160EA /* TabSelectionView.swift */; };
 		9A987A0D2C73CA66005CA465 /* ShelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A987A032C73CA66005CA465 /* ShelfView.swift */; };
@@ -158,6 +161,10 @@
 		C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */; };
 		C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */; };
 		C1A0B30F3B0000010000000C /* QuickNoteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B3103B0000010000000D /* QuickNoteButton.swift */; };
+		C1A0B41D3B0000010000001A /* VoiceMemoIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */; };
+		C1A0B41B3B00000100000018 /* VoiceMemoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B41C3B00000100000019 /* VoiceMemoButton.swift */; };
+		C1A0B4193B00000100000016 /* PomodoroIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */; };
+		C1A0B4173B00000100000014 /* PomodoroButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4183B00000100000015 /* PomodoroButton.swift */; };
 		C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */; };
 		F38DE6482D8243E7008B5C6D /* BatteryActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */; };
 /* End PBXBuildFile section */
@@ -305,6 +312,9 @@
 		C1A0B2083B00000100000005 /* MicrophoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneManager.swift; sourceTree = "<group>"; };
 		C1A0B20A3B00000100000007 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotWatcher.swift; sourceTree = "<group>"; };
+		C1A0B4163B00000100000013 /* SystemStatsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemStatsManager.swift; sourceTree = "<group>"; };
+		C1A0B4143B00000100000011 /* PomodoroManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroManager.swift; sourceTree = "<group>"; };
+		C1A0B4123B0000010000000F /* VoiceMemoRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoRecorder.swift; sourceTree = "<group>"; };
 		9A0887312C7A693000C160EA /* TabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabButton.swift; sourceTree = "<group>"; };
 		9A0887342C7AFF8E00C160EA /* TabSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSelectionView.swift; sourceTree = "<group>"; };
 		9A987A032C73CA66005CA465 /* ShelfView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShelfView.swift; sourceTree = "<group>"; };
@@ -339,6 +349,10 @@
 		C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothConnectionIndicator.swift; sourceTree = "<group>"; };
 		C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalLiveActivityIndicator.swift; sourceTree = "<group>"; };
 		C1A0B3103B0000010000000D /* QuickNoteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickNoteButton.swift; sourceTree = "<group>"; };
+		C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoIndicator.swift; sourceTree = "<group>"; };
+		C1A0B41C3B00000100000019 /* VoiceMemoButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoButton.swift; sourceTree = "<group>"; };
+		C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroIndicator.swift; sourceTree = "<group>"; };
+		C1A0B4183B00000100000015 /* PomodoroButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroButton.swift; sourceTree = "<group>"; };
 		C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotQuickActionsIndicator.swift; sourceTree = "<group>"; };
 		F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryActivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -558,6 +572,9 @@
 				C1A0B2083B00000100000005 /* MicrophoneManager.swift */,
 				C1A0B20A3B00000100000007 /* WeatherManager.swift */,
 				C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */,
+				C1A0B4163B00000100000013 /* SystemStatsManager.swift */,
+				C1A0B4143B00000100000011 /* PomodoroManager.swift */,
+				C1A0B4123B0000010000000F /* VoiceMemoRecorder.swift */,
 			);
 			path = managers;
 			sourceTree = "<group>";
@@ -768,6 +785,10 @@
 				C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */,
 				C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */,
 				C1A0B3103B0000010000000D /* QuickNoteButton.swift */,
+				C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */,
+				C1A0B41C3B00000100000019 /* VoiceMemoButton.swift */,
+				C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */,
+				C1A0B4183B00000100000015 /* PomodoroButton.swift */,
 				C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */,
 				1471A8582C6281BD0058408D /* CNotchWindow.swift */,
 			);
@@ -1048,6 +1069,9 @@
 				C1A0B2073B00000100000004 /* MicrophoneManager.swift in Sources */,
 				C1A0B2093B00000100000006 /* WeatherManager.swift in Sources */,
 				C1A0B30B3B00000100000008 /* ScreenshotWatcher.swift in Sources */,
+				C1A0B4153B00000100000012 /* SystemStatsManager.swift in Sources */,
+				C1A0B4133B00000100000010 /* PomodoroManager.swift in Sources */,
+				C1A0B4113B0000010000000E /* VoiceMemoRecorder.swift in Sources */,
 				1163988D2DF5CAB40052E6AF /* EventModel.swift in Sources */,
 				14D570B92C5E98A20011E668 /* drop.swift in Sources */,
 				11EFCD702E8E92D600D0B974 /* ShelfItemViewModel.swift in Sources */,
@@ -1142,6 +1166,10 @@
 				C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */,
 				C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */,
 				C1A0B30F3B0000010000000C /* QuickNoteButton.swift in Sources */,
+				C1A0B41D3B0000010000001A /* VoiceMemoIndicator.swift in Sources */,
+				C1A0B41B3B00000100000018 /* VoiceMemoButton.swift in Sources */,
+				C1A0B4193B00000100000016 /* PomodoroIndicator.swift in Sources */,
+				C1A0B4173B00000100000014 /* PomodoroButton.swift in Sources */,
 				C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1393,6 +1421,7 @@
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app uses the calendar to display your calendar events";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to display a live camera view";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app uses the microphone to record voice memos.";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "This app uses Reminders to display your scheduled reminder in the calendar";
 				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "This app uses Reminders to display your scheduled reminder in the calendar.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1449,6 +1478,7 @@
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "This app uses the calendar to display your calendar events";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to display a live camera view";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app uses the microphone to record voice memos.";
 				INFOPLIST_KEY_NSRemindersUsageDescription = "This app uses Reminders to display your scheduled reminder in the calendar";
 				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "This app uses Reminders to display your scheduled reminder in the calendar.";
 				LD_RUNPATH_SEARCH_PATHS = (

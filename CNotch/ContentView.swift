@@ -30,6 +30,8 @@ struct ContentView: View {
     @ObservedObject var brightnessManager = BrightnessManager.shared
     @ObservedObject private var clipboardHistory = ClipboardHistoryStore.shared
     @ObservedObject private var modules = FeatureModuleRegistry.shared
+    @ObservedObject private var voiceMemo = VoiceMemoRecorder.shared
+    @ObservedObject private var pomodoro = PomodoroManager.shared
     @State private var hoverTask: Task<Void, Never>?
     @State private var closingShellTask: Task<Void, Never>?
     @State private var closingTransitionID: UUID?
@@ -751,6 +753,18 @@ struct ContentView: View {
         if let entry = clipboardHistory.hudEntry, vm.notchState == .closed {
                         ClipboardHUD(entry: entry, physicalNotchMaskSize: clipboardNotchMaskSize)
                             .transition(.opacity)
+                    } else if voiceMemo.isRecording && vm.notchState == .closed {
+                        VoiceMemoIndicator(
+                            recorder: voiceMemo,
+                            physicalNotchWidth: max(0, vm.closedNotchSize.width - cornerRadiusInsets.closed.top)
+                        )
+                        .frame(height: closedNotchContentSize.height, alignment: .center)
+                    } else if pomodoro.isRunning && vm.notchState == .closed {
+                        PomodoroIndicator(
+                            pomodoro: pomodoro,
+                            physicalNotchWidth: max(0, vm.closedNotchSize.width - cornerRadiusInsets.closed.top)
+                        )
+                        .frame(height: closedNotchContentSize.height, alignment: .center)
                     } else if !showsMusicSneakPeek
                         && coordinator.expandingView.type == .battery && coordinator.expandingView.show
                         && vm.notchState == .closed && Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] && Defaults[.showPowerStatusNotifications]
