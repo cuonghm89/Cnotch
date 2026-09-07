@@ -153,6 +153,7 @@
 		C1A0B0013B00000100000001 /* ClipboardHistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B0023B00000100000001 /* ClipboardHistoryStore.swift */; };
 		C1A0B0033B00000100000001 /* ClipboardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B0043B00000100000001 /* ClipboardViews.swift */; };
 		C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */; };
+		C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */; };
 		F38DE6482D8243E7008B5C6D /* BatteryActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -328,6 +329,7 @@
 		C1A0B0023B00000100000001 /* ClipboardHistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardHistoryStore.swift; sourceTree = "<group>"; };
 		C1A0B0043B00000100000001 /* ClipboardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardViews.swift; sourceTree = "<group>"; };
 		C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothConnectionIndicator.swift; sourceTree = "<group>"; };
+		C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalLiveActivityIndicator.swift; sourceTree = "<group>"; };
 		F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryActivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -751,6 +753,7 @@
 				14D570C52C5F38210011E668 /* CNotchHeader.swift */,
 				14D570D12C5F6C6A0011E668 /* CNotchExtrasMenu.swift */,
 				C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */,
+				C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */,
 				1471A8582C6281BD0058408D /* CNotchWindow.swift */,
 			);
 			path = Notch;
@@ -1119,6 +1122,7 @@
 				C1A0B0013B00000100000001 /* ClipboardHistoryStore.swift in Sources */,
 				C1A0B0033B00000100000001 /* ClipboardViews.swift in Sources */,
 				C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */,
+				C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -2490,6 +2490,16 @@ struct Advanced: View {
             } header: {
                 Text("Window Behavior")
             }
+
+            Section {
+                Defaults.Toggle(key: .externalLiveActivitiesEnabled) {
+                    Text("Allow other apps to show live activities")
+                }
+            } header: {
+                Text("Third-Party Live Activities")
+            } footer: {
+                Text("Any local app or script can push a status update onto the notch. Turn this off if you don't want that.")
+            }
         }
         .accentColor(.effectiveAccent)
         .onAppear {

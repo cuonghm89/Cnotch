@@ -19,6 +19,7 @@ enum SneakContentType {
     case battery
     case download
     case bluetoothDevice
+    case liveActivity
 }
 
 struct sneakPeek {
@@ -28,11 +29,15 @@ struct sneakPeek {
     var icon: String = ""
 }
 
-struct SharedSneakPeek: Codable {
+/// Wire format for third-party apps pushing a live activity onto the notch.
+/// `value` is an optional 0...1 progress fraction; omit it for activities
+/// with no progress to report.
+struct ExternalLiveActivityPayload: Codable {
     var show: Bool
-    var type: String
-    var value: String
-    var icon: String
+    var title: String
+    var subtitle: String?
+    var icon: String?
+    var value: Double?
 }
 
 enum BrowserType {
@@ -197,34 +202,50 @@ class CNotchViewCoordinator: ObservableObject {
                 }
             }
         }
+
+        setupExternalLiveActivityObserver()
     }
-    
-    @objc func sneakPeekEvent(_ notification: Notification) {
-        let decoder = JSONDecoder()
-        guard let data = notification.userInfo?.values.first(where: { $0 is Data }) as? Data,
-              let decodedData = try? decoder.decode(SharedSneakPeek.self, from: data)
-        else {
-            print("Failed to decode JSON data")
-            return
+
+    // MARK: - Third-Party Live Activities
+    //
+    // Any local process can push a live activity onto the notch by posting a
+    // distributed notification named `externalLiveActivityNotificationName`
+    // with a JSON-encoded `ExternalLiveActivityPayload` under the
+    // "payload" key in its userInfo. Example from the command line:
+    //
+    //   osascript -l JavaScript -e '
+    //     ObjC.import("Foundation")
+    //     const json = JSON.stringify({title: "Building…", subtitle: "42%", icon: "hammer.fill", value: 0.42})
+    //     $.NSDistributedNotificationCenter.defaultCenter
+    //       .postNotificationNameObjectUserInfo("com.cuonghm89.cnotch.liveActivity", "", $({payload: json}))'
+    //
+    private func setupExternalLiveActivityObserver() {
+        DistributedNotificationCenter.default().addObserver(
+            forName: Self.externalLiveActivityNotificationName,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard let json = notification.userInfo?["payload"] as? String,
+                  let data = json.data(using: .utf8),
+                  let payload = try? JSONDecoder().decode(ExternalLiveActivityPayload.self, from: data)
+            else { return }
+
+            Task { @MainActor in
+                guard Defaults[.externalLiveActivitiesEnabled] else { return }
+
+                CNotchViewCoordinator.shared.toggleExpandingView(
+                    status: payload.show,
+                    type: .liveActivity,
+                    value: CGFloat(min(max(payload.value ?? -1, -1), 1)),
+                    title: payload.title,
+                    subtitle: payload.subtitle ?? "",
+                    icon: payload.icon ?? "app.badge"
+                )
+            }
         }
-
-        let contentType =
-            decodedData.type == "brightness"
-            ? SneakContentType.brightness
-            : decodedData.type == "volume"
-                ? SneakContentType.volume
-                : decodedData.type == "backlight"
-                    ? SneakContentType.backlight
-                    : decodedData.type == "mic"
-                        ? SneakContentType.mic : SneakContentType.brightness
-
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.numberStyle = .decimal
-        let value = CGFloat((formatter.number(from: decodedData.value) ?? 0.0).floatValue)
-
-        toggleSneakPeek(status: decodedData.show, type: contentType, value: value, icon: decodedData.icon)
     }
+
+    static let externalLiveActivityNotificationName = Notification.Name("com.cuonghm89.cnotch.liveActivity")
 
     func toggleSneakPeek(
         status: Bool, type: SneakContentType, duration: TimeInterval = 1.5, value: CGFloat = 0,

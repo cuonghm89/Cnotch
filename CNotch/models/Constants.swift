@@ -243,4 +243,7 @@ extension Defaults.Keys {
     }
 
     static let didClearLegacyURLCacheV1 = Key<Bool>("didClearLegacyURLCache_v1", default: false)
+
+    // MARK: Third-Party Live Activities
+    static let externalLiveActivitiesEnabled = Key<Bool>("externalLiveActivitiesEnabled", default: true)
 }
