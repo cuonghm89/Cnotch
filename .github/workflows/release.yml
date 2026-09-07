@@ -1,4 +1,4 @@
-name: "Deploy Another Notch"
+name: "Deploy CNotch"
 on:
   issue_comment:
     types: [created]
@@ -8,8 +8,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PROJECT_NAME: anotherNotch
-  ARTIFACT_NAME: anotherNotch
+  PROJECT_NAME: CNotch
+  ARTIFACT_NAME: CNotch
   BETA_CHANNEL_NAME: beta
   RELEASE_COMMAND: /release
   CODE_SIGN_IDENTITY: "Apple Development: quocthao23061998.tg@icloud.com (XW87KZT6AP)"
@@ -251,12 +251,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_NOTES: ${{ needs.preparation.outputs.release_notes }}
         run: |
-          gh api markdown -f text="$RELEASE_NOTES" > Release/anotherNotch.html
+          gh api markdown -f text="$RELEASE_NOTES" > Release/CNotch.html
 
       - name: Build Sparkle generate_appcast from source
         run: |
           set -euo pipefail
-          SPARKLE_METADATA_PATH="anotherNotch.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+          SPARKLE_METADATA_PATH="CNotch.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
           SPARKLE_SRC="$RUNNER_TEMP/Sparkle"
           SPARKLE_DERIVED="$RUNNER_TEMP/sparkle-derived"
           SPARKLE_REPO_URL="https://github.com/sparkle-project/Sparkle"
@@ -388,7 +388,7 @@ jobs:
           if [[ "${IS_BETA}" == "true" ]]; then
             RELEASE_FLAGS=(--prerelease)
           fi
-          gh release create "v${VERSION}" Release/anotherNotch.dmg \
+          gh release create "v${VERSION}" Release/CNotch.dmg \
             --title "v${VERSION} - ${TITLE}" \
             --notes "$NOTES" \
             "${RELEASE_FLAGS[@]}"
@@ -405,7 +405,7 @@ jobs:
       - name: Generate cask files
         run: |
           set -euo pipefail
-          DMG_URL="${{ github.server_url }}/${{ github.repository }}/releases/download/v${VERSION}/anotherNotch.dmg"
+          DMG_URL="${{ github.server_url }}/${{ github.repository }}/releases/download/v${VERSION}/CNotch.dmg"
 
           # Retry SHA calculation (release may need a moment to propagate)
           for attempt in 1 2 3; do
@@ -430,36 +430,36 @@ jobs:
             end
             auto_updates true
             depends_on macos: :sonoma
-            app "anotherNotch.app"
+            app "CNotch.app"
             
             postflight do
-              app_path = appdir/"anotherNotch.app"
+              app_path = appdir/"CNotch.app"
               next unless app_path.exist?
               system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", app_path]
             end
 
-            uninstall quit: "com.jinkun1998.anothernotch"
+            uninstall quit: "com.cuonghm89.cnotch"
 
             zap trash: [
-              "~/Library/Application Scripts/com.jinkun1998.anothernotch/",
-              "~/Library/Containers/com.jinkun1998.anothernotch/",
+              "~/Library/Application Scripts/com.cuonghm89.cnotch/",
+              "~/Library/Containers/com.cuonghm89.cnotch/",
             ]
           end
           CASK
           }
 
-          write_cask "another-notch@rc" "Another Notch RC" \
-            "Not so another notch That Rocks (Release Candidate)" > another-notch@rc.rb
+          write_cask "cnotch@rc" "CNotch RC" \
+            "Not so another notch That Rocks (Release Candidate)" > cnotch@rc.rb
           if [[ "${IS_BETA}" == "false" ]]; then
-            write_cask "another-notch" "Another Notch" \
-              "Another notch utility" > another-notch.rb
+            write_cask "cnotch" "CNotch" \
+              "Another notch utility" > cnotch.rb
           fi
 
       - name: Upload cask artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: homebrew-cask-${{ env.VERSION }}
-          path: another-notch*.rb
+          path: cnotch*.rb
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -470,11 +470,11 @@ jobs:
       - name: Update casks in tap
         run: |
           set -euo pipefail
-          cp another-notch@rc.rb homebrew-tap/Casks/another-notch@rc.rb
-          COMMIT_MSG="Update another-notch@rc to v${VERSION}"
+          cp cnotch@rc.rb homebrew-tap/Casks/cnotch@rc.rb
+          COMMIT_MSG="Update cnotch@rc to v${VERSION}"
           if [[ "${IS_BETA}" == "false" ]]; then
-            cp another-notch.rb homebrew-tap/Casks/another-notch.rb
-            COMMIT_MSG="Update another-notch and another-notch@rc to v${VERSION}"
+            cp cnotch.rb homebrew-tap/Casks/cnotch.rb
+            COMMIT_MSG="Update cnotch and cnotch@rc to v${VERSION}"
           fi
           cd homebrew-tap
           git config user.name "github-actions[bot]"
@@ -550,10 +550,10 @@ jobs:
           fi
           {
             if [[ "${RELEASE_SUCCEEDED}" == "true" ]]; then
-              echo "✅ Released Another Notch v${VERSION} (${BUILD_TYPE} build ${BUILD_NUMBER})"
+              echo "✅ Released CNotch v${VERSION} (${BUILD_TYPE} build ${BUILD_NUMBER})"
               echo "🍺 Homebrew cask updated"
               echo "📱 Sparkle appcast updated"
             else
-              echo "❌ Release failed${VERSION:+ for Another Notch v${VERSION}}"
+              echo "❌ Release failed${VERSION:+ for CNotch v${VERSION}}"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

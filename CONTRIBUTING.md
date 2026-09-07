@@ -4,7 +4,7 @@ Thank you for taking the time to contribute! ❤️
 
 These guidelines help streamline the contribution process for everyone involved. By following them, you'll make it easier for maintainers to review your work and collaborate with you effectively.
 
-You can contribute in many ways: writing code, improving documentation, reporting bugs, requesting features, or creating tutorials and blog posts. Every contribution, large or small, helps make Another Notch better.
+You can contribute in many ways: writing code, improving documentation, reporting bugs, requesting features, or creating tutorials and blog posts. Every contribution, large or small, helps make CNotch better.
 
 ## Table of Contents
 
@@ -35,8 +35,8 @@ You can contribute in many ways: writing code, improving documentation, reportin
 
 2. **Clone your fork**:
    ```bash
-   git clone https://github.com/{your-username}/another.notch.git
-   cd another.notch
+   git clone https://github.com/{your-username}/Cnotch.git
+   cd Cnotch
    ```
    Replace `{your-username}` with your GitHub username.
 
@@ -125,4 +125,4 @@ If you need help or have questions:
 
 ---
 
-Thank you for contributing to Another Notch! Your efforts help make this project better for everyone. 🎉
+Thank you for contributing to CNotch! Your efforts help make this project better for everyone. 🎉
