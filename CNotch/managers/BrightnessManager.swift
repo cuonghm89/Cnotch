@@ -97,14 +97,14 @@ final class KeyboardBacklightManager: ObservableObject {
 			let ok = await client.setKeyboardBrightness(target)
 			if ok {
 				publish(brightness: target, touchDate: true)
+				CNotchViewCoordinator.shared.toggleSneakPeek(
+					status: true,
+					type: .backlight,
+					value: CGFloat(target)
+				)
 			} else {
 				refresh()
 			}
-			CNotchViewCoordinator.shared.toggleSneakPeek(
-				status: true,
-				type: .backlight,
-				value: CGFloat(target)
-			)
 		}
 	}
 

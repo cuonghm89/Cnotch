@@ -21,7 +21,8 @@ final class ShelfPersistenceService {
     private init() {
         let fm = FileManager.default
         let support = try? fm.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        let dir = (support ?? fm.temporaryDirectory).appendingPathComponent("CNotch", isDirectory: true).appendingPathComponent("Shelf", isDirectory: true)
+        let storageIdentifier = Bundle.main.bundleIdentifier ?? "CNotch"
+        let dir = (support ?? fm.temporaryDirectory).appendingPathComponent(storageIdentifier, isDirectory: true).appendingPathComponent("Shelf", isDirectory: true)
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         fileURL = dir.appendingPathComponent("items.json")
         encoder.outputFormatting = [.prettyPrinted]
