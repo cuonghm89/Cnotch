@@ -678,6 +678,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.isRestorable = false
             window.identifier = NSUserInterfaceItemIdentifier("OnboardingWindow")
 
+            // If the onboarding window closes any other way (e.g. Cmd+W) before
+            // reaching the final step, firstLaunch would otherwise stay stuck at
+            // true forever, permanently blanking the expanded notch content.
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.willCloseNotification,
+                object: window,
+                queue: .main
+            ) { [weak self] _ in
+                self?.coordinator.firstLaunch = false
+                UserDefaults.standard.set(true, forKey: Self.onboardingCompletedKey)
+            }
+
             onboardingWindowController = NSWindowController(window: window)
         }
 
