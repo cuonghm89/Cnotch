@@ -82,17 +82,17 @@ jobs:
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
-    - name: Build Another Notch
+    - name: Build CNotch
       if: matrix.language == 'swift'
       run: |
         set -o pipefail
 
         xcodebuild \
-          -project anotherNotch.xcodeproj \
-          -scheme anotherNotch \
+          -project CNotch.xcodeproj \
+          -scheme CNotch \
           -configuration Release \
           -destination "platform=macOS" \
-          -derivedDataPath "$RUNNER_TEMP/anotherNotch-derived-data" \
+          -derivedDataPath "$RUNNER_TEMP/CNotch-derived-data" \
           CODE_SIGNING_ALLOWED=NO \
           CODE_SIGNING_REQUIRED=NO \
           build

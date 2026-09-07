@@ -1,23 +1,23 @@
-# anotherNotch - Another Notch app for macOS
+# CNotch - a macOS notch app
 
 
 <p align="center">
-  <img src="https://github.com/jinkun1998/another.notch/actions/workflows/cicd.yml/badge.svg" alt="Another Notch Build & Test" style="margin-right: 10px;" />
+  <img src="https://github.com/cuonghm89/Cnotch/actions/workflows/cicd.yml/badge.svg" alt="CNotch Build & Test" style="margin-right: 10px;" />
 </p>
 
-**Another Notch** is a free, open-source macOS menu bar app that turns your MacBook notch into a Dynamic Island-style utility. Music controls, calendar integration, file shelf with AirDrop support, system HUD replacement, battery status, and camera features stay one hover away.
+**CNotch** is a free, open-source macOS menu bar app that turns your MacBook notch into a Dynamic Island-style utility. Music controls, calendar integration, file shelf with AirDrop support, system HUD replacement, battery status, and camera features stay one hover away.
 
 <p align="center">
-  <a href="https://jinkun1998.github.io/another.notch/">Website</a> ·
-  <a href="https://github.com/jinkun1998/another.notch/releases/latest">Download for macOS</a> ·
-  <a href="https://github.com/jinkun1998/another.notch">Source code</a>
+  <a href="https://cuonghm89.github.io/Cnotch/">Website</a> ·
+  <a href="https://github.com/cuonghm89/Cnotch/releases/latest">Download for macOS</a> ·
+  <a href="https://github.com/cuonghm89/Cnotch">Source code</a>
 </p>
 
-> **Upstream attribution:** Another Notch is a modified version of [TheBoredTeam’s original Boring Notch](https://github.com/TheBoredTeam/boring.notch). Original copyright and GPL-3.0 notices are retained. Last materially modified on August 23, 2026.
+> **Upstream attribution:** CNotch is a modified version of [TheBoredTeam’s original Boring Notch](https://github.com/TheBoredTeam/boring.notch). Original copyright and GPL-3.0 notices are retained. Last materially modified on August 23, 2026.
 
 <p align="center">
   <a href="assets/another-notch-demo.mp4">
-    <img src="assets/another-notch-demo.gif" alt="Another Notch cropped feature demo" />
+    <img src="assets/another-notch-demo.gif" alt="CNotch cropped feature demo" />
   </a>
 </p>
 
@@ -32,12 +32,12 @@
 
 ### Download and Install Manually
 
-[Download the latest release](https://github.com/jinkun1998/another.notch/releases/latest)
+[Download the latest release](https://github.com/cuonghm89/Cnotch/releases/latest)
 
-Once downloaded, open the `.dmg` and move **Another Notch** to your `/Applications` folder.
+Once downloaded, open the `.dmg` and move **CNotch** to your `/Applications` folder.
 
 > [!IMPORTANT]
-> I don't have an Apple Developer account (yet 👀), so macOS will warn you that Another Notch is from an unidentified developer on first launch. This is expected behavior.
+> I don't have an Apple Developer account (yet 👀), so macOS will warn you that CNotch is from an unidentified developer on first launch. This is expected behavior.
 >
 > You'll need to bypass this before the app will open. You only need to do this once. Use the Terminal command below.
 
@@ -47,10 +47,10 @@ Once downloaded, open the `.dmg` and move **Another Notch** to your `/Applicatio
 
 This is the quickest and easiest method. It only requires a single command and works consistently for all users. System Settings can sometimes fail and won't work for non-admin users.
 
-After moving Another Notch to your Applications folder, run:
+After moving CNotch to your Applications folder, run:
 
 ```bash
-xattr -dr com.apple.quarantine /Applications/anotherNotch.app
+xattr -dr com.apple.quarantine /Applications/CNotch.app
 ```
 
 Then open the app normally.
@@ -73,11 +73,11 @@ Homebrew support is coming soon. Until then, install manually using the release 
 
 ### Star History
 
-<a href="https://star-history.com/#jinkun1998/another.notch&Date">
+<a href="https://star-history.com/#cuonghm89/Cnotch&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=jinkun1998/another.notch&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=jinkun1998/another.notch&type=Date" />
-   <img alt="Another Notch GitHub star history" src="https://api.star-history.com/svg?repos=jinkun1998/another.notch&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cuonghm89/Cnotch&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=cuonghm89/Cnotch&type=Date" />
+   <img alt="CNotch GitHub star history" src="https://api.star-history.com/svg?repos=cuonghm89/Cnotch&type=Date" />
  </picture>
 </a>
 
@@ -117,13 +117,13 @@ Homebrew support is coming soon. Until then, install manually using the release 
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/jinkun1998/another.notch.git
-   cd another.notch
+   git clone https://github.com/cuonghm89/Cnotch.git
+   cd Cnotch
    ```
 
 2. **Open the Project in Xcode**:
    ```bash
-   open anotherNotch.xcodeproj
+   open CNotch.xcodeproj
    ```
 
 3. **Build and Run**:
@@ -139,7 +139,7 @@ Notch motion inspiration: [NotchKit](https://github.com/duongductrong/NotchKit) 
 
 ## Licenses
 
-*anotherNotch* is licensed under the GNU General Public License v3.0 (GPL-3.0).
+*CNotch* is licensed under the GNU General Public License v3.0 (GPL-3.0).
 
 This project has been substantially modified and developed independently from the original project. It is not affiliated with or endorsed by TheBoredTeam.
 

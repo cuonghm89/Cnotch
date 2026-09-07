@@ -1,0 +1,2639 @@
+//
+//  SettingsView.swift
+//  CNotch
+//
+//  Created by Richard Kunkli on 07/08/2024.
+//
+
+import AVFoundation
+import AppKit
+import Defaults
+import EventKit
+import KeyboardShortcuts
+import LaunchAtLogin
+import Sparkle
+import SwiftUI
+import SwiftUIIntrospect
+import UniformTypeIdentifiers
+import CoreBluetooth
+
+private struct SettingsWindowBackground: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(macOS 15.0, *), !reduceTransparency {
+            content
+                .containerBackground(.thinMaterial, for: .window)
+                .background(Color(nsColor: .windowBackgroundColor))
+        } else {
+            content.background(Color(NSColor.windowBackgroundColor))
+        }
+    }
+}
+
+private extension View {
+    func readableSettingsPicker() -> some View {
+        tint(.primary)
+            .foregroundStyle(.white)
+    }
+}
+
+private struct LiquidGlassSegmentedPicker<Item: Hashable>: View {
+    let title: LocalizedStringKey?
+    @Binding var selection: Item
+    let items: [Item]
+    let label: (Item) -> String
+    var icon: ((Item) -> String?)? = nil
+    var fillsWidth: Bool = false
+
+    @Namespace private var selectionNamespace
+    @State private var hoveredItem: Item?
+
+    private let selectionAnimation = Animation.spring(response: 0.32, dampingFraction: 0.82)
+
+    init(
+        _ title: LocalizedStringKey? = nil,
+        selection: Binding<Item>,
+        items: [Item],
+        fillsWidth: Bool = false,
+        icon: ((Item) -> String?)? = nil,
+        label: @escaping (Item) -> String
+    ) {
+        self.title = title
+        self._selection = selection
+        self.items = items
+        self.fillsWidth = fillsWidth
+        self.icon = icon
+        self.label = label
+    }
+
+    var body: some View {
+        if let title {
+            HStack(spacing: 12) {
+                Text(title)
+                Spacer(minLength: 8)
+                controlBody
+            }
+        } else {
+            controlBody
+        }
+    }
+
+    private var controlBody: some View {
+        HStack(spacing: 2) {
+            ForEach(items, id: \.self) { item in
+                segment(for: item)
+            }
+        }
+        .padding(2)
+        .background {
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(Color.primary.opacity(0.06))
+        }
+        .animation(selectionAnimation, value: selection)
+    }
+
+    private func segment(for item: Item) -> some View {
+        let isSelected = selection == item
+
+        return Button {
+            guard selection != item else { return }
+            withAnimation(selectionAnimation) {
+                selection = item
+            }
+        } label: {
+            HStack(spacing: 5) {
+                if let iconName = icon?(item) {
+                    Image(systemName: iconName)
+                        .font(.system(size: 10, weight: .semibold))
+                }
+                Text(label(item))
+                    .lineLimit(1)
+            }
+            .font(.system(size: 11.5, weight: .medium))
+            .foregroundStyle(isSelected ? Color.white : Color.secondary)
+            .padding(.horizontal, 10)
+            .frame(maxWidth: fillsWidth ? .infinity : nil)
+            .frame(height: 24)
+            .background {
+                if isSelected {
+                    selectedSegmentBackground
+                        .matchedGeometryEffect(id: "selectedSegment", in: selectionNamespace)
+                } else if hoveredItem == item {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(Color.primary.opacity(0.07))
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovering in
+            withAnimation(.easeOut(duration: 0.12)) {
+                hoveredItem = isHovering ? item : nil
+            }
+        }
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+
+    private var selectedSegmentBackground: some View {
+        RoundedRectangle(cornerRadius: 7, style: .continuous)
+            .fill(Color.effectiveAccent)
+    }
+}
+
+private enum SettingsPage: String, CaseIterable, Identifiable {
+    case general = "General"
+    case appearance = "Appearance"
+    case modules = "Modules"
+    case media = "Media"
+    case calendar = "Calendar"
+    case hud = "HUD"
+    case clipboard = "Clipboard"
+    case battery = "Battery"
+    case bluetooth = "Bluetooth"
+    case shelf = "Shelf"
+    case camera = "Camera"
+    case advanced = "Advanced"
+    case about = "About"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .general: "gearshape"
+        case .appearance: "paintbrush"
+        case .modules: "square.grid.2x2"
+        case .media: "play.laptopcomputer"
+        case .calendar: "calendar"
+        case .hud: "slider.horizontal.3"
+        case .clipboard: "clipboard"
+        case .battery: "battery.100percent"
+        case .bluetooth: "airpodspro"
+        case .shelf: "books.vertical"
+        case .camera: "web.camera"
+        case .advanced: "gearshape.2"
+        case .about: "info.circle"
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .general: "Core app behavior, display, and interaction settings."
+        case .appearance: "Personalize the notch, tabs, and visual style."
+        case .modules: "Install bundled notch modules and manage their availability."
+        case .media: "Music controls, player sources, and visualizers."
+        case .calendar: "Events, reminders, and calendar display."
+        case .hud: "System volume, brightness, and status indicators."
+        case .clipboard: "Clipboard history, image storage, and capture settings."
+        case .battery: "Battery status notifications and charging options."
+        case .bluetooth: "Bluetooth output connection notifications."
+        case .shelf: "Drag, drop, and saved Shelf items."
+        case .camera: "Camera mirror appearance and access."
+        case .advanced: "Accent color, window behavior, and privacy."
+        case .about: "Version, updates, and project information."
+        }
+    }
+}
+
+struct SettingsView: View {
+    @State private var selectedTab: SettingsPage = .general
+    @State private var accentColorUpdateTrigger = UUID()
+    @ObservedObject private var modules = FeatureModuleRegistry.shared
+
+    let updaterController: SPUStandardUpdaterController?
+
+    init(updaterController: SPUStandardUpdaterController? = nil) {
+        self.updaterController = updaterController
+    }
+
+    var body: some View {
+        NavigationSplitView {
+            List {
+                HStack(spacing: 10) {
+                    Image("logo2")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(Bundle.main.appName)
+                            .font(.system(size: 14, weight: .semibold))
+                            .lineLimit(1)
+                        if let badgeText = Bundle.main.buildBadgeText {
+                            buildBadge(text: badgeText)
+                        }
+                    }
+                }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 10)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .accessibilityElement(children: .combine)
+
+                Section("Preferences") {
+                    sidebarRow(.general)
+                    sidebarRow(.appearance)
+                }
+
+                Section("Features") {
+                    sidebarRow(.media)
+                    sidebarRow(.hud)
+                    sidebarRow(.battery)
+                    sidebarRow(.bluetooth)
+                }
+
+                Section("Modules") {
+                    sidebarRow(.modules)
+                    if modules.isInstalled(.clipboard) {
+                        sidebarRow(.clipboard)
+                    }
+                    if modules.isInstalled(.shelf) {
+                        sidebarRow(.shelf)
+                    }
+                    if modules.isInstalled(.calendar) {
+                        sidebarRow(.calendar)
+                    }
+                    if modules.isInstalled(.camera) {
+                        sidebarRow(.camera)
+                    }
+                }
+
+                Section("System") {
+                    sidebarRow(.advanced)
+                }
+
+                Section {
+                    sidebarRow(.about)
+                }
+            }
+            .listStyle(.sidebar)
+            .scrollContentBackground(.hidden)
+            .tint(.effectiveAccent)
+            .toolbar(removing: .sidebarToggle)
+            .navigationSplitViewColumnWidth(min: 190, ideal: 210, max: 230)
+        } detail: {
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(selectedTab.rawValue)
+                        .font(.system(size: 26, weight: .semibold))
+                    Text(selectedTab.summary)
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 30)
+                .padding(.top, 26)
+                .padding(.bottom, 20)
+
+                Divider()
+
+                Group {
+                    switch selectedTab {
+                    case .general:
+                    GeneralSettings()
+                    case .appearance:
+                    Appearance()
+                    case .modules:
+                    ModulesSettings()
+                    case .media:
+                    Media()
+                    case .calendar:
+                    ModuleSettings(moduleID: .calendar) {
+                        CalendarSettings()
+                    }
+                    case .hud:
+                    HUD()
+                    case .clipboard:
+                    ModuleSettings(moduleID: .clipboard) {
+                        ClipboardSettings()
+                    }
+                    case .battery:
+                    Charge()
+                    case .bluetooth:
+                    BluetoothDeviceNotifications()
+                    case .shelf:
+                    ModuleSettings(moduleID: .shelf) {
+                        Shelf()
+                    }
+                    case .camera:
+                    ModuleSettings(moduleID: .camera) {
+                        CameraSettings()
+                    }
+                    case .advanced:
+                    Advanced()
+                    case .about:
+                    if let controller = updaterController {
+                        About(updaterController: controller)
+                    } else {
+                        About(
+                            updaterController: SPUStandardUpdaterController(
+                                startingUpdater: false, updaterDelegate: SoftwareUpdateDelegate.shared,
+                                userDriverDelegate: nil))
+                    }
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .id(selectedTab)
+                .transition(.opacity)
+                .animation(.easeOut(duration: 0.15), value: selectedTab)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(nsColor: .windowBackgroundColor))
+            .navigationTitle(selectedTab.rawValue)
+        }
+        .navigationSplitViewStyle(.balanced)
+        .toolbar(removing: .sidebarToggle)
+        .formStyle(.grouped)
+        .frame(minWidth: 740, minHeight: 520)
+        .modifier(SettingsWindowBackground())
+        .tint(.effectiveAccent)
+        .id(accentColorUpdateTrigger)
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccentColorChanged"))) { _ in
+            accentColorUpdateTrigger = UUID()
+        }
+    }
+
+    @ViewBuilder
+    private func sidebarRow(_ page: SettingsPage) -> some View {
+        SettingsSidebarRow(page: page, isSelected: selectedTab == page) {
+            selectedTab = page
+        }
+        .listRowInsets(EdgeInsets(top: 1, leading: 8, bottom: 1, trailing: 8))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
+    }
+}
+
+private struct SettingsSidebarRow: View {
+    let page: SettingsPage
+    let isSelected: Bool
+    let onSelect: () -> Void
+    @State private var isHovering = false
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(spacing: 9) {
+                Image(systemName: page.icon)
+                    .font(.system(size: 16, weight: .medium))
+                    .frame(width: 18, height: 18)
+                Text(page.rawValue)
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(isSelected ? Color.primary : Color.primary.opacity(0.9))
+            .frame(height: 34)
+            .padding(.horizontal, 8)
+            .background {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(
+                        isSelected
+                            ? Color.effectiveAccent.opacity(0.2)
+                            : isHovering ? Color.primary.opacity(0.05) : .clear
+                    )
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovering = $0 }
+        .animation(.easeOut(duration: 0.12), value: isHovering)
+        .animation(.easeOut(duration: 0.15), value: isSelected)
+    }
+}
+
+private struct ModulesSettings: View {
+    @ObservedObject private var modules = FeatureModuleRegistry.shared
+    @State private var draggedModuleID: FeatureModuleID?
+    @State private var dropTargetID: FeatureModuleID?
+
+    var body: some View {
+        Form {
+            Section("Bundled modules") {
+                ForEach(modules.orderedModules) { module in
+                    HStack(spacing: 12) {
+                        Image(systemName: "line.3.horizontal")
+                            .foregroundStyle(.white)
+                            .opacity(module.id == .home ? 0 : 1)
+                        Image(systemName: module.icon)
+                            .frame(width: 20)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(module.title)
+                            Text(modules.isInstalled(module.id) ? "Installed" : "Not installed")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if module.id != .home {
+                            if modules.isInstalled(module.id) {
+                                Button("Remove") {
+                                    modules.remove(module.id)
+                                }
+                                .foregroundStyle(.red)
+                                .buttonStyle(.plain)
+                            } else {
+                                ModuleInstallButton(moduleID: module.id)
+                                    .foregroundStyle(.white)
+                                    .buttonStyle(.plain)
+                            }
+                        } else {
+                            Text("Built in")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .opacity(draggedModuleID == module.id ? 0.55 : 1)
+                    .background {
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(dropTargetID == module.id ? Color.effectiveAccent.opacity(0.2) : .clear)
+                    }
+                    .onDrag {
+                        draggedModuleID = module.id
+                        return NSItemProvider(object: module.id.rawValue as NSString)
+                    } preview: {
+                        Image(systemName: module.icon)
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                            .frame(width: 32, height: 32)
+                            .background(.black.opacity(0.8), in: Circle())
+                    }
+                    .onDrop(
+                        of: [.plainText],
+                        delegate: ModuleSettingsDropDelegate(
+                            destination: module.id,
+                            draggedModuleID: $draggedModuleID,
+                            dropTargetID: $dropTargetID,
+                            modules: modules
+                        )
+                    )
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.82), value: modules.tabOrder)
+            Text("Drag modules to arrange left-wing tabs. Removing a module keeps its data and settings.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct ModuleSettingsDropDelegate: DropDelegate {
+    let destination: FeatureModuleID
+    @Binding var draggedModuleID: FeatureModuleID?
+    @Binding var dropTargetID: FeatureModuleID?
+    let modules: FeatureModuleRegistry
+
+    func dropEntered(info _: DropInfo) {
+        guard let draggedModuleID else { return }
+        dropTargetID = destination
+        modules.moveTab(draggedModuleID, before: destination)
+    }
+
+    func dropExited(info _: DropInfo) {
+        if dropTargetID == destination {
+            dropTargetID = nil
+        }
+    }
+
+    func dropUpdated(info _: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info _: DropInfo) -> Bool {
+        draggedModuleID = nil
+        dropTargetID = nil
+        return true
+    }
+}
+
+private struct ModuleSettings<Content: View>: View {
+    let moduleID: FeatureModuleID
+    @ViewBuilder let content: () -> Content
+    @ObservedObject private var modules = FeatureModuleRegistry.shared
+
+    var body: some View {
+        if modules.isInstalled(moduleID) {
+            content()
+        } else if let module = FeatureModuleRegistry.modules.first(where: { $0.id == moduleID }) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("\(module.title) is not installed.")
+                    .font(.headline)
+                Text("Install it to use these settings. Existing data and settings remain available after reinstalling.")
+                    .foregroundStyle(.secondary)
+                ModuleInstallButton(moduleID: moduleID)
+            }
+            .padding(30)
+        }
+    }
+}
+
+private struct ModuleInstallButton: View {
+    let moduleID: FeatureModuleID
+    @ObservedObject private var modules = FeatureModuleRegistry.shared
+    @State private var isInstalling = false
+
+    var body: some View {
+        Button {
+            isInstalling = true
+            let delay = Double.random(in: 0.1...0.9)
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled else {
+                    isInstalling = false
+                    return
+                }
+                modules.install(moduleID)
+            }
+        } label: {
+            if isInstalling {
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Install")
+                }
+            } else {
+                Text("Install")
+            }
+        }
+        .disabled(isInstalling)
+    }
+}
+
+private struct CameraSettings: View {
+    @ObservedObject private var webcamManager = WebcamManager.shared
+    @Default(.mirrorShape) private var mirrorShape
+    @Default(.showMirror) private var showMirror
+
+    private var isAuthorized: Bool {
+        webcamManager.authorizationStatus == .authorized
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Enable camera mirror")
+                            .font(.headline)
+                        Text("Show a live camera mirror dropdown view under the notch.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Defaults.Toggle(key: .showMirror) {
+                        EmptyView()
+                    }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                    .disabled(!isAuthorized)
+                }
+            }
+
+            Section("Camera permission") {
+                HStack {
+                    Text(isAuthorized ? "Allowed" : "Not allowed")
+                        .foregroundStyle(isAuthorized ? .green : .secondary)
+                    Spacer()
+                    Button(isAuthorized ? "Manage" : "Grant") {
+                        if isAuthorized {
+                            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        } else {
+                            if webcamManager.authorizationStatus == .notDetermined {
+                                webcamManager.checkAndRequestVideoAuthorization()
+                            } else if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "Mirror shape",
+                    selection: $mirrorShape,
+                    items: [MirrorShapeEnum.circle, MirrorShapeEnum.rectangle]
+                ) { shape in
+                    shape == .circle ? "Circle" : "Square"
+                }
+                .disabled(!isAuthorized || !showMirror)
+            } header: {
+                Text("Appearance")
+            }
+        }
+        .accentColor(.effectiveAccent)
+    }
+}
+
+struct GeneralSettings: View {
+    @State private var screens: [(uuid: String, name: String)] = NSScreen.screens.compactMap { screen in
+        guard let uuid = screen.displayUUID else { return nil }
+        return (uuid, screen.localizedName)
+    }
+    @EnvironmentObject var vm: CNotchViewModel
+    @ObservedObject var coordinator = CNotchViewCoordinator.shared
+
+    @Default(.mirrorShape) var mirrorShape
+    @Default(.showEmojis) var showEmojis
+    @Default(.gestureSensitivity) var gestureSensitivity
+    @Default(.minimumHoverDuration) var minimumHoverDuration
+    @Default(.nonNotchHeight) var nonNotchHeight
+    @Default(.nonNotchHeightMode) var nonNotchHeightMode
+    @Default(.notchHeight) var notchHeight
+    @Default(.notchHeightMode) var notchHeightMode
+    @Default(.showOnAllDisplays) var showOnAllDisplays
+    @Default(.automaticallySwitchDisplay) var automaticallySwitchDisplay
+    @Default(.enableGestures) var enableGestures
+    @Default(.openNotchOnHover) var openNotchOnHover
+    
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle(isOn: Binding(
+                    get: { Defaults[.menubarIcon] },
+                    set: { Defaults[.menubarIcon] = $0 }
+                )) {
+                    Text("Show menu bar icon")
+                }
+                .tint(.effectiveAccent)
+                LaunchAtLogin.Toggle("Launch at login")
+                Defaults.Toggle(key: .showOnAllDisplays) {
+                    Text("Show on all displays")
+                }
+                .onChange(of: showOnAllDisplays) {
+                    NotificationCenter.default.post(
+                        name: Notification.Name.showOnAllDisplaysChanged, object: nil)
+                }
+                LiquidGlassSegmentedPicker(
+                    "Preferred display",
+                    selection: $coordinator.preferredScreenUUID,
+                    items: screens.map { $0.uuid as String? }
+                ) { uuid in
+                    screens.first(where: { $0.uuid == uuid })?.name ?? "Default"
+                }
+                .onChange(of: NSScreen.screens) {
+                    screens = NSScreen.screens.compactMap { screen in
+                        guard let uuid = screen.displayUUID else { return nil }
+                        return (uuid, screen.localizedName)
+                    }
+                }
+                .disabled(showOnAllDisplays)
+                
+                Defaults.Toggle(key: .automaticallySwitchDisplay) {
+                    Text("Automatically switch displays")
+                }
+                    .onChange(of: automaticallySwitchDisplay) {
+                        NotificationCenter.default.post(
+                            name: Notification.Name.automaticallySwitchDisplayChanged, object: nil)
+                    }
+                    .disabled(showOnAllDisplays)
+            } header: {
+                Text("System features")
+            }
+
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "Notch height on notch displays",
+                    selection: $notchHeightMode,
+                    items: [
+                        WindowHeightMode.matchRealNotchSize,
+                        WindowHeightMode.matchMenuBar,
+                        WindowHeightMode.custom
+                    ]
+                ) { mode in
+                    switch mode {
+                    case .matchRealNotchSize: return "Real Notch"
+                    case .matchMenuBar: return "Menu Bar"
+                    case .custom: return "Custom"
+                    }
+                }
+                .onChange(of: notchHeightMode) {
+                    switch notchHeightMode {
+                    case .matchRealNotchSize:
+                        notchHeight = 38
+                    case .matchMenuBar:
+                        notchHeight = 44
+                    case .custom:
+                        notchHeight = 38
+                    }
+                    NotificationCenter.default.post(
+                        name: Notification.Name.notchHeightChanged, object: nil)
+                }
+                if notchHeightMode == .custom {
+                    Slider(value: $notchHeight, in: 15...45, step: 1) {
+                        Text("Custom notch size - \(notchHeight, specifier: "%.0f")")
+                    }
+                    .onChange(of: notchHeight) {
+                        NotificationCenter.default.post(
+                            name: Notification.Name.notchHeightChanged, object: nil)
+                    }
+                }
+                LiquidGlassSegmentedPicker(
+                    "Notch height on non-notch displays",
+                    selection: $nonNotchHeightMode,
+                    items: [
+                        WindowHeightMode.matchMenuBar,
+                        WindowHeightMode.matchRealNotchSize,
+                        WindowHeightMode.custom
+                    ]
+                ) { mode in
+                    switch mode {
+                    case .matchMenuBar: return "Menu Bar"
+                    case .matchRealNotchSize: return "Real Notch"
+                    case .custom: return "Custom"
+                    }
+                }
+                .onChange(of: nonNotchHeightMode) {
+                    switch nonNotchHeightMode {
+                    case .matchMenuBar:
+                        nonNotchHeight = 24
+                    case .matchRealNotchSize:
+                        nonNotchHeight = 32
+                    case .custom:
+                        nonNotchHeight = 32
+                    }
+                    NotificationCenter.default.post(
+                        name: Notification.Name.notchHeightChanged, object: nil)
+                }
+                if nonNotchHeightMode == .custom {
+                    Slider(value: $nonNotchHeight, in: 0...40, step: 1) {
+                        Text("Custom notch size - \(nonNotchHeight, specifier: "%.0f")")
+                    }
+                    .onChange(of: nonNotchHeight) {
+                        NotificationCenter.default.post(
+                            name: Notification.Name.notchHeightChanged, object: nil)
+                    }
+                }
+            } header: {
+                Text("Notch sizing")
+            }
+
+            notchBehavior()
+
+            gestureControls()
+        }
+        .accentColor(.effectiveAccent)
+        .onChange(of: openNotchOnHover) {
+            if !openNotchOnHover {
+                enableGestures = true
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func gestureControls() -> some View {
+        Section {
+            Defaults.Toggle(key: .enableGestures) {
+                Text("Enable gestures")
+            }
+                .disabled(!openNotchOnHover)
+            if enableGestures {
+                Toggle("Change media with horizontal gestures", isOn: .constant(false))
+                    .disabled(true)
+                Defaults.Toggle(key: .closeGestureEnabled) {
+                    Text("Close gesture")
+                }
+                Slider(value: $gestureSensitivity, in: 100...300, step: 100) {
+                    HStack {
+                        Text("Gesture sensitivity")
+                        Spacer()
+                        Text(
+                            Defaults[.gestureSensitivity] == 100
+                                ? "High" : Defaults[.gestureSensitivity] == 200 ? "Medium" : "Low"
+                        )
+                        .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        } header: {
+            HStack {
+                Text("Gesture control")
+                settingsBadge(text: "Beta")
+            }
+        } footer: {
+            Text(
+                "Two-finger swipe up on notch to close, two-finger swipe down on notch to open when **Open notch on hover** option is disabled"
+            )
+            .multilineTextAlignment(.trailing)
+            .foregroundStyle(.secondary)
+            .font(.caption)
+        }
+    }
+
+    @ViewBuilder
+    private func notchBehavior() -> some View {
+        Section {
+            Defaults.Toggle(key: .openNotchOnHover) {
+                Text("Open notch on hover")
+            }
+            Defaults.Toggle(key: .enableHaptics) {
+                    Text("Enable haptic feedback")
+            }
+            Toggle("Remember last tab", isOn: $coordinator.openLastTabByDefault)
+            if openNotchOnHover {
+                Slider(value: $minimumHoverDuration, in: 0...1, step: 0.1) {
+                    HStack {
+                        Text("Hover delay")
+                        Spacer()
+                        Text("\(minimumHoverDuration, specifier: "%.1f")s")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .onChange(of: minimumHoverDuration) {
+                    NotificationCenter.default.post(
+                        name: Notification.Name.notchHeightChanged, object: nil)
+                }
+            }
+        } header: {
+            Text("Notch behavior")
+        }
+    }
+}
+
+struct Charge: View {
+    @Default(.batteryFeatureEnabled) private var batteryFeatureEnabled
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Enable battery status")
+                            .font(.headline)
+                        Text("Enable battery status notifications and display controls.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Defaults.Toggle(key: .batteryFeatureEnabled) {
+                        EmptyView()
+                    }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                }
+            }
+
+            Section("Display") {
+                Defaults.Toggle(key: .showBatteryIndicator) {
+                    Text("Show battery indicator")
+                }
+            }
+            .disabled(!batteryFeatureEnabled)
+
+            Section {
+                Defaults.Toggle(key: .showPowerStatusNotifications) {
+                    Text("Show power status notifications")
+                }
+            } header: {
+                Text("Notifications")
+            }
+            .disabled(!batteryFeatureEnabled)
+
+            Section {
+                Defaults.Toggle(key: .showBatteryPercentage) {
+                    Text("Show battery percentage")
+                }
+                Defaults.Toggle(key: .showPowerStatusIcons) {
+                    Text("Show power status icons")
+                }
+            } header: {
+                Text("Battery Information")
+            }
+            .disabled(!batteryFeatureEnabled)
+        }
+        .onAppear {
+            Task { @MainActor in
+                await XPCHelperClient.shared.isAccessibilityAuthorized()
+            }
+        }
+        .accentColor(.effectiveAccent)
+    }
+}
+
+struct BluetoothDeviceNotifications: View {
+    @Default(.bluetoothDeviceIndicatorRows) private var indicatorRows
+    @Default(.showBluetoothDeviceConnectionIndicator) private var showConnectionIndicator
+    @State private var bluetoothAuthorized = CBManager.authorization == .allowedAlways
+    @State private var centralManager: CBCentralManager?
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Bluetooth connection indicator")
+                            .font(.headline)
+                        Text("Show connected accessory notifications and battery status in the notch.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Defaults.Toggle(key: .showBluetoothDeviceConnectionIndicator) {
+                        EmptyView()
+                    }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                    .disabled(!bluetoothAuthorized)
+                }
+            }
+
+            Section("Bluetooth permission") {
+                HStack {
+                    Text(bluetoothAuthorized ? "Allowed" : "Not allowed")
+                        .foregroundStyle(bluetoothAuthorized ? .green : .secondary)
+                    Spacer()
+                    Button(bluetoothAuthorized ? "Manage" : "Grant") {
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Bluetooth") {
+                            NSWorkspace.shared.open(url)
+                        }
+                        if CBManager.authorization == .notDetermined {
+                            centralManager = CBCentralManager(delegate: nil, queue: .main)
+                        }
+                    }
+                }
+            }
+            Section("Indicator Layout") {
+                LiquidGlassSegmentedPicker(
+                    "Rows",
+                    selection: $indicatorRows,
+                    items: BluetoothDeviceIndicatorRows.allCases
+                ) { $0.rawValue }
+                Defaults.Toggle(key: .showBluetoothDeviceName) {
+                    Text("Show device name")
+                }
+            }
+            .disabled(!bluetoothAuthorized || !showConnectionIndicator)
+        }
+        .accentColor(.effectiveAccent)
+        .onAppear {
+            bluetoothAuthorized = CBManager.authorization == .allowedAlways
+        }
+    }
+}
+
+//struct Downloads: View {
+//    @Default(.selectedDownloadIndicatorStyle) var selectedDownloadIndicatorStyle
+//    @Default(.selectedDownloadIconStyle) var selectedDownloadIconStyle
+//    var body: some View {
+//        Form {
+//            warningBadge("We don't support downloads yet", "It will be supported later on.")
+//            Section {
+//                Defaults.Toggle(key: .enableDownloadListener) {
+//                    Text("Show download progress")
+//                }
+//                    .disabled(true)
+//                Defaults.Toggle(key: .enableSafariDownloads) {
+//                    Text("Enable Safari Downloads")
+//                }
+//                    .disabled(!Defaults[.enableDownloadListener])
+//                Picker("Download indicator style", selection: $selectedDownloadIndicatorStyle) {
+//                    Text("Progress bar")
+//                        .tag(DownloadIndicatorStyle.progress)
+//                    Text("Percentage")
+//                        .tag(DownloadIndicatorStyle.percentage)
+//                }
+//                Picker("Download icon style", selection: $selectedDownloadIconStyle) {
+//                    Text("Only app icon")
+//                        .tag(DownloadIconStyle.onlyAppIcon)
+//                    Text("Only download icon")
+//                        .tag(DownloadIconStyle.onlyIcon)
+//                    Text("Both")
+//                        .tag(DownloadIconStyle.iconAndAppIcon)
+//                }
+//
+//            } header: {
+//                HStack {
+//                    Text("Download indicators")
+//                    comingSoonTag()
+//                }
+//            }
+//            Section {
+//                List {
+//                    ForEach([].indices, id: \.self) { index in
+//                        Text("\(index)")
+//                    }
+//                }
+//                .frame(minHeight: 96)
+//                .overlay {
+//                    if true {
+//                        Text("No excluded apps")
+//                            .foregroundStyle(Color(.secondaryLabelColor))
+//                    }
+//                }
+//                .actionBar(padding: 0) {
+//                    Group {
+//                        Button {
+//                        } label: {
+//                            Image(systemName: "plus")
+//                                .frame(width: 25, height: 16, alignment: .center)
+//                                .contentShape(Rectangle())
+//                                .foregroundStyle(.secondary)
+//                        }
+//
+//                        Divider()
+//                        Button {
+//                        } label: {
+//                            Image(systemName: "minus")
+//                                .frame(width: 20, height: 16, alignment: .center)
+//                                .contentShape(Rectangle())
+//                                .foregroundStyle(.secondary)
+//                        }
+//                    }
+//                }
+//            } header: {
+//                HStack(spacing: 4) {
+//                    Text("Exclude apps")
+//                    comingSoonTag()
+//                }
+//            }
+//        }
+//        .navigationTitle("Downloads")
+//    }
+//}
+
+struct HUD: View {
+    @EnvironmentObject var vm: CNotchViewModel
+    @Default(.closedHUDRows) var closedHUDRows
+    @Default(.enableGradient) var enableGradient
+    @Default(.optionKeyAction) var optionKeyAction
+    @Default(.hudReplacement) var hudReplacement
+    @ObservedObject var coordinator = CNotchViewCoordinator.shared
+    @State private var accessibilityAuthorized = false
+    
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Replace system HUD")
+                            .font(.headline)
+                        Text("Replaces the standard macOS volume, display brightness, and keyboard brightness HUDs with a custom design.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Toggle("", isOn: Binding(
+                        get: { hudReplacement },
+                        set: setHUDReplacement
+                    ))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                }
+            }
+
+            Section("Accessibility permission") {
+                HStack {
+                    Text(accessibilityAuthorized ? "Allowed" : "Not allowed")
+                        .foregroundStyle(accessibilityAuthorized ? .green : .secondary)
+                    Spacer()
+                    Button(accessibilityAuthorized ? "Manage" : "Grant") {
+                        if accessibilityAuthorized {
+                            openPrivacySettings("Privacy_Accessibility")
+                        } else {
+                            XPCHelperClient.shared.requestAccessibilityAuthorization()
+                        }
+                    }
+                }
+            }
+            
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "Option key behaviour",
+                    selection: $optionKeyAction,
+                    items: OptionKeyAction.allCases
+                ) { $0.rawValue }
+
+                LiquidGlassSegmentedPicker(
+                    "Progress bar style",
+                    selection: $enableGradient,
+                    items: [false, true]
+                ) { $0 ? "Gradient" : "Hierarchical" }
+                Defaults.Toggle(key: .systemEventIndicatorShadow) {
+                    Text("Enable glowing effect")
+                }
+                Defaults.Toggle(key: .systemEventIndicatorUseAccent) {
+                    Text("Tint progress bar with accent color")
+                }
+            } header: {
+                Text("General")
+            }
+            .disabled(!hudReplacement)
+            
+            Section {
+                Defaults.Toggle(key: .showOpenNotchHUD) {
+                    Text("Show HUD in open notch")
+                }
+                Defaults.Toggle(key: .showOpenNotchHUDPercentage) {
+                    Text("Show percentage")
+                }
+                .disabled(!Defaults[.showOpenNotchHUD])
+            } header: {
+                HStack {
+                    Text("Open Notch")
+                    settingsBadge(text: "Beta")
+                }
+            }
+            .disabled(!hudReplacement)
+            
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "HUD rows",
+                    selection: $closedHUDRows,
+                    items: ClosedHUDRows.allCases
+                ) { $0.rawValue }
+
+                Defaults.Toggle(key: .showClosedNotchHUDPercentage) {
+                    Text("Show percentage")
+                }
+            } header: {
+                Text("Closed Notch")
+            }
+            .disabled(!Defaults[.hudReplacement])
+        }
+        .accentColor(.effectiveAccent)
+        .task {
+            accessibilityAuthorized = await XPCHelperClient.shared.isAccessibilityAuthorized()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .accessibilityAuthorizationChanged)) { notification in
+            if let granted = notification.userInfo?["granted"] as? Bool {
+                accessibilityAuthorized = granted
+            }
+        }
+    }
+
+    private func openPrivacySettings(_ pane: String) {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    private func setHUDReplacement(_ enabled: Bool) {
+        guard enabled else {
+            hudReplacement = false
+            MediaKeyInterceptor.shared.stop()
+            return
+        }
+
+        Task { @MainActor in
+            let granted = await XPCHelperClient.shared.isAccessibilityAuthorized()
+            accessibilityAuthorized = granted
+
+            guard granted else {
+                hudReplacement = false
+                XPCHelperClient.shared.requestAccessibilityAuthorization()
+                return
+            }
+
+            hudReplacement = true
+            await MediaKeyInterceptor.shared.start(promptIfNeeded: false)
+        }
+    }
+}
+
+struct Media: View {
+    @Default(.waitInterval) var waitInterval
+    @Default(.mediaController) var mediaController
+    @ObservedObject var coordinator = CNotchViewCoordinator.shared
+    @Default(.hideNotchOption) var hideNotchOption
+    @Default(.enableSneakPeek) private var enableSneakPeek
+    @Default(.sneakPeekStyles) var sneakPeekStyles
+    @Default(.sneakPeekDuration) private var sneakPeekDuration
+
+    @Default(.enableLyrics) var enableLyrics
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Show music live activity")
+                            .font(.headline)
+                        Text("Display interactive player controls and album artwork in the notch.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Toggle(
+                        "",
+                        isOn: $coordinator.musicLiveActivityEnabled.animation()
+                    )
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                }
+            }
+
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "Music Source",
+                    selection: $mediaController,
+                    items: availableMediaControllers
+                ) { $0.rawValue }
+                .onChange(of: mediaController) { _, _ in
+                    NotificationCenter.default.post(
+                        name: Notification.Name.mediaControllerChanged,
+                        object: nil
+                    )
+                }
+            } header: {
+                Text("Media Source")
+            } footer: {
+                if MusicManager.shared.isNowPlayingDeprecated {
+                    HStack {
+                        Text("YouTube Music requires this third-party app to be installed: ")
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                        Link(
+                            "https://github.com/pear-devs/pear-desktop",
+                            destination: URL(string: "https://github.com/pear-devs/pear-desktop")!
+                        )
+                        .font(.caption)
+                        .foregroundColor(.blue)  // Ensures it's visibly a link
+                    }
+                } else {
+                    Text(
+                        "'Now Playing' was the only option on previous versions and works with all media apps."
+                    )
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+                }
+            }
+            .disabled(!coordinator.musicLiveActivityEnabled)
+
+            Section {
+                Toggle("Show sneak peek on playback changes", isOn: $enableSneakPeek)
+                LiquidGlassSegmentedPicker(
+                    "Sneak Peek Style",
+                    selection: $sneakPeekStyles,
+                    items: SneakPeekStyle.allCases
+                ) { $0.rawValue }
+                Stepper(value: $sneakPeekDuration, in: 0.5...10, step: 0.5) {
+                    HStack {
+                        Text("Sneak Peek Duration")
+                        Spacer()
+                        Text("\(sneakPeekDuration, specifier: "%.1f") seconds")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                HStack {
+                    Stepper(value: $waitInterval, in: 0...10, step: 1) {
+                        HStack {
+                            Text("Media inactivity timeout")
+                            Spacer()
+                            Text("\(Defaults[.waitInterval], specifier: "%.0f") seconds")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                LiquidGlassSegmentedPicker(
+                    "Full screen behavior",
+                    selection: $hideNotchOption,
+                    items: [
+                        HideNotchOption.always,
+                        HideNotchOption.nowPlayingOnly,
+                        HideNotchOption.never
+                    ]
+                ) { opt in
+                    switch opt {
+                    case .always: return "All Apps"
+                    case .nowPlayingOnly: return "Media App"
+                    case .never: return "Never"
+                    }
+                }
+            } header: {
+                Text("Media playback live activity")
+            }
+            .disabled(!coordinator.musicLiveActivityEnabled)
+
+            Section {
+                MusicSlotConfigurationView()
+                Defaults.Toggle(key: .enableLyrics) {
+                    HStack {
+                        Text("Show lyrics below artist name")
+                        settingsBadge(text: "Beta")
+                    }
+                }
+            } header: {
+                Text("Media controls")
+            }  footer: {
+                Text("Customize controls and reorder them in the expanded music player.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .disabled(!coordinator.musicLiveActivityEnabled)
+        }
+        .accentColor(.effectiveAccent)
+    }
+
+    // Only show controller options that are available on this macOS version
+    private var availableMediaControllers: [MediaControllerType] {
+        if MusicManager.shared.isNowPlayingDeprecated {
+            return MediaControllerType.allCases.filter { $0 != .nowPlaying }
+        } else {
+            return MediaControllerType.allCases
+        }
+    }
+}
+
+struct CalendarSettings: View {
+    @ObservedObject private var calendarManager = CalendarManager.shared
+    @Default(.showCalendar) var showCalendar
+    @Default(.hideCompletedReminders) var hideCompletedReminders
+    @Default(.hideAllDayEvents) var hideAllDayEvents
+    @Default(.autoScrollToNextEvent) var autoScrollToNextEvent
+
+    private var hasAnyAccess: Bool {
+        calendarManager.calendarAuthorizationStatus == .fullAccess || calendarManager.reminderAuthorizationStatus == .fullAccess
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Show calendar & reminders")
+                            .font(.headline)
+                        Text("View upcoming schedule, events, and reminders in the notch.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Defaults.Toggle(key: .showCalendar) {
+                        EmptyView()
+                    }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                    .disabled(!hasAnyAccess)
+                }
+            }
+
+            Section("Calendar & Reminders permissions") {
+                HStack {
+                    Text("Calendars")
+                    Spacer()
+                    Text(calendarManager.calendarAuthorizationStatus == .fullAccess ? "Allowed" : "Not allowed")
+                        .foregroundStyle(calendarManager.calendarAuthorizationStatus == .fullAccess ? .green : .secondary)
+                    Button(calendarManager.calendarAuthorizationStatus == .fullAccess ? "Manage" : "Grant") {
+                        if calendarManager.calendarAuthorizationStatus == .notDetermined {
+                            Task { await calendarManager.checkCalendarAuthorization() }
+                        } else if let settingsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") {
+                            NSWorkspace.shared.open(settingsURL)
+                        }
+                    }
+                }
+
+                HStack {
+                    Text("Reminders")
+                    Spacer()
+                    Text(calendarManager.reminderAuthorizationStatus == .fullAccess ? "Allowed" : "Not allowed")
+                        .foregroundStyle(calendarManager.reminderAuthorizationStatus == .fullAccess ? .green : .secondary)
+                    Button(calendarManager.reminderAuthorizationStatus == .fullAccess ? "Manage" : "Grant") {
+                        if calendarManager.reminderAuthorizationStatus == .notDetermined {
+                            Task { await calendarManager.checkReminderAuthorization() }
+                        } else if let settingsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Reminders") {
+                            NSWorkspace.shared.open(settingsURL)
+                        }
+                    }
+                }
+            }
+
+            Section("General") {
+                Defaults.Toggle(key: .hideCompletedReminders) {
+                    Text("Hide completed reminders")
+                }
+                Defaults.Toggle(key: .hideAllDayEvents) {
+                    Text("Hide all-day events")
+                }
+                Defaults.Toggle(key: .autoScrollToNextEvent) {
+                    Text("Auto-scroll to next event")
+                }
+                Defaults.Toggle(key: .showFullEventTitles) {
+                    Text("Always show full event titles")
+                }
+            }
+            .disabled(!hasAnyAccess || !showCalendar)
+            Section(header: Text("Calendars")) {
+                if calendarManager.calendarAuthorizationStatus != .fullAccess {
+                    Text("Calendar access is required to show events.")
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                    Button(calendarManager.calendarAuthorizationStatus == .notDetermined ? "Grant Calendar Access" : "Open Calendar Settings") {
+                        if calendarManager.calendarAuthorizationStatus == .notDetermined {
+                            Task { await calendarManager.checkCalendarAuthorization() }
+                        } else if let settingsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") {
+                            NSWorkspace.shared.open(settingsURL)
+                        }
+                    }
+                } else {
+                    List {
+                        ForEach(calendarManager.eventCalendars, id: \.id) { calendar in
+                            Toggle(
+                                isOn: Binding(
+                                    get: { calendarManager.getCalendarSelected(calendar) },
+                                    set: { isSelected in
+                                        Task {
+                                            await calendarManager.setCalendarSelected(
+                                                calendar, isSelected: isSelected)
+                                        }
+                                    }
+                                )
+                            ) {
+                                Text(calendar.title)
+                            }
+                            .accentColor(lighterColor(from: calendar.color))
+                        }
+                    }
+                }
+            }
+            .disabled(!hasAnyAccess || !showCalendar)
+
+            Section(header: Text("Reminders")) {
+                if calendarManager.reminderAuthorizationStatus != .fullAccess {
+                    Text("Reminder access is required to show reminders.")
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                    Button(calendarManager.reminderAuthorizationStatus == .notDetermined ? "Grant Reminder Access" : "Open Reminder Settings") {
+                        if calendarManager.reminderAuthorizationStatus == .notDetermined {
+                            Task { await calendarManager.checkReminderAuthorization() }
+                        } else if let settingsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Reminders") {
+                            NSWorkspace.shared.open(settingsURL)
+                        }
+                    }
+                } else {
+                    List {
+                        ForEach(calendarManager.reminderLists, id: \.id) { calendar in
+                            Toggle(
+                                isOn: Binding(
+                                    get: { calendarManager.getCalendarSelected(calendar) },
+                                    set: { isSelected in
+                                        Task {
+                                            await calendarManager.setCalendarSelected(
+                                                calendar, isSelected: isSelected)
+                                        }
+                                    }
+                                )
+                            ) {
+                                Text(calendar.title)
+                            }
+                            .accentColor(lighterColor(from: calendar.color))
+                        }
+                    }
+                }
+            }
+            .disabled(!hasAnyAccess || !showCalendar)
+        }
+        .accentColor(.effectiveAccent)
+        .onAppear {
+            Task {
+                await calendarManager.checkCalendarAuthorization()
+                await calendarManager.checkReminderAuthorization()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task {
+                await calendarManager.checkCalendarAuthorization()
+                await calendarManager.checkReminderAuthorization()
+            }
+        }
+    }
+}
+
+func lighterColor(from nsColor: NSColor, amount: CGFloat = 0.14) -> Color {
+    let srgb = nsColor.usingColorSpace(.sRGB) ?? nsColor
+    var (r, g, b, a): (CGFloat, CGFloat, CGFloat, CGFloat) = (0,0,0,0)
+    srgb.getRed(&r, green: &g, blue: &b, alpha: &a)
+
+    func lighten(_ c: CGFloat) -> CGFloat {
+        let increased = c + (1.0 - c) * amount
+        return min(max(increased, 0), 1)
+    }
+
+    let nr = lighten(r)
+    let ng = lighten(g)
+    let nb = lighten(b)
+
+    return Color(red: Double(nr), green: Double(ng), blue: Double(nb), opacity: Double(a))
+}
+
+struct About: View {
+    @State private var showBuildNumber: Bool = false
+    @State private var showVietQRModal: Bool = false
+    @State private var showOnboarding: Bool = false
+    let updaterController: SPUStandardUpdaterController
+
+    var body: some View {
+        Form {
+            Section {
+                HStack(spacing: 12) {
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .frame(width: 48, height: 48)
+                        .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text(Bundle.main.appName)
+                                .font(.title3.weight(.semibold))
+                            if let badgeText = Bundle.main.buildBadgeText {
+                                buildBadge(text: badgeText)
+                            }
+                        }
+                        Text("Another Dynamic Island for macOS")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            Section("Application") {
+                LabeledContent("Version") {
+                    HStack(spacing: 4) {
+                        Text(Bundle.main.releaseVersionNumber ?? "Unknown")
+                        if showBuildNumber {
+                            Text("(\(Bundle.main.buildVersionNumber ?? ""))")
+                        }
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation { showBuildNumber.toggle() }
+                }
+
+                Button {
+                    if let url = URL(string: "https://github.com/cuonghm89/Cnotch") {
+                        NSWorkspace.shared.open(url)
+                    }
+                } label: {
+                    Label("View on GitHub", systemImage: "arrow.up.right.square")
+                }
+
+                Button {
+                    showOnboarding = true
+                } label: {
+                    Label("Run Onboarding Again", systemImage: "arrow.counterclockwise")
+                }
+
+                SoftwareUpdateChannelPicker()
+                CheckForUpdatesView(updater: updaterController.updater)
+            }
+
+            Section("Support & Donate") {
+                Button {
+                    if let url = URL(string: "https://github.com/sponsors/jinkun1998") {
+                        NSWorkspace.shared.open(url)
+                    }
+                } label: {
+                    Label("GitHub Sponsors", systemImage: "heart.fill")
+                }
+
+                Button {
+                    showVietQRModal = true
+                } label: {
+                    Label("VietQR / Bank Transfer", systemImage: "qrcode")
+                }
+            }
+
+            Section {
+                Button("Quit \(Bundle.main.appName)", role: .destructive) {
+                    NSApp.terminate(nil)
+                }
+                .tint(.red)
+                .foregroundStyle(.red)
+            }
+        }
+        .accentColor(.effectiveAccent)
+        .sheet(isPresented: $showVietQRModal) {
+            VStack(spacing: 16) {
+                HStack {
+                    Text("Donate via VietQR")
+                        .font(.headline)
+                    Spacer()
+                    Button {
+                        showVietQRModal = false
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Image("DonationVietQR")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 320, maxHeight: 420)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+            .padding(20)
+            .frame(width: 360)
+        }
+        .sheet(isPresented: $showOnboarding) {
+            OnboardingView(
+                onFinish: {
+                    CNotchViewCoordinator.shared.firstLaunch = false
+                    UserDefaults.standard.set(true, forKey: "onboardingCompleted")
+                    showOnboarding = false
+                },
+                onOpenSettings: {
+                    showOnboarding = false
+                }
+            )
+        }
+    }
+}
+
+struct ClipboardSettings: View {
+    @Default(.clipboardHistoryEnabled) private var enabled
+    @Default(.clipboardHistoryLimit) private var historyLimit
+    @Default(.clipboardImageLimitMB) private var imageLimitMB
+    @Default(.clipboardOCREnabled) private var ocrEnabled
+    @Default(.clipboardSearchMode) private var searchMode
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Enable clipboard history")
+                            .font(.headline)
+                        Text("Automatically save and search copied text, links, and images.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Toggle("", isOn: $enabled)
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.large)
+                }
+            }
+
+            Section("Capture") {
+                Stepper("History limit: \(historyLimit)", value: $historyLimit, in: 10...500, step: 10)
+                    .onChange(of: historyLimit) { ClipboardHistoryStore.shared.enforceRetention() }
+                Stepper("Image limit: \(imageLimitMB) MB", value: $imageLimitMB, in: 1...25)
+            }
+            .disabled(!enabled)
+
+            Section("Text Recognition") {
+                Toggle("Extract text from images (OCR)", isOn: $ocrEnabled)
+                Text("Uses on-device Vision to recognize text in copied images.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .disabled(!enabled)
+
+            Section("Search") {
+                LiquidGlassSegmentedPicker(
+                    "Mode",
+                    selection: $searchMode,
+                    items: ClipboardSearchMode.allCases
+                ) { $0.rawValue }
+            }
+            .disabled(!enabled)
+
+            Section {
+                Button("Clear History", role: .destructive) {
+                    ClipboardHistoryStore.shared.clear()
+                }
+                .foregroundStyle(.red)
+            }
+            .disabled(!enabled)
+        }
+        .accentColor(.effectiveAccent)
+    }
+}
+
+struct Shelf: View {
+    @Default(.boringShelf) var boringShelf: Bool
+    @Default(.shelfTapToOpen) var shelfTapToOpen: Bool
+    @Default(.quickShareProvider) var quickShareProvider
+    @Default(.expandedDragDetection) var expandedDragDetection: Bool
+    @StateObject private var quickShareService = QuickShareService.shared
+
+    private var selectedProvider: QuickShareProvider? {
+        quickShareService.availableProviders.first(where: { $0.id == quickShareProvider })
+    }
+    
+    init() {
+        Task { await QuickShareService.shared.discoverAvailableProviders() }
+    }
+    
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Enable shelf")
+                            .font(.headline)
+                        Text("Quickly drag, drop, stash, and share files directly from the notch.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 40)
+                    Defaults.Toggle(key: .boringShelf) {
+                        EmptyView()
+                    }
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+                }
+            }
+
+            Section {
+                Defaults.Toggle(key: .openShelfByDefault) {
+                    Text("Open shelf by default if items are present")
+                }
+                Defaults.Toggle(key: .expandedDragDetection) {
+                    Text("Expanded drag detection area")
+                }
+                .onChange(of: expandedDragDetection) {
+                    NotificationCenter.default.post(
+                        name: Notification.Name.expandedDragDetectionChanged,
+                        object: nil
+                    )
+                }
+                Defaults.Toggle(key: .copyOnDrag) {
+                    Text("Copy items on drag")
+                }
+                Defaults.Toggle(key: .autoRemoveShelfItems) {
+                    Text("Remove from shelf after dragging")
+                }
+
+            } header: {
+                HStack {
+                    Text("General")
+                }
+            }
+            .disabled(!boringShelf)
+            
+            Section {
+                Picker("Quick Share Service", selection: $quickShareProvider) {
+                    ForEach(quickShareService.availableProviders, id: \.id) { provider in
+                        HStack {
+                            Group {
+                                if let imgData = provider.imageData, let nsImg = NSImage(data: imgData) {
+                                    Image(nsImage: nsImg)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                } else {
+                                    Image(systemName: "square.and.arrow.up")
+                                }
+                            }
+                            .frame(width: 16, height: 16)
+                            .foregroundColor(.accentColor)
+                            Text(provider.id)
+                        }
+                        .tag(provider.id)
+                    }
+                }
+                .pickerStyle(.menu)
+                .readableSettingsPicker()
+                
+                if let selectedProvider = selectedProvider {
+                    HStack {
+                        Group {
+                            if let imgData = selectedProvider.imageData, let nsImg = NSImage(data: imgData) {
+                                Image(nsImage: nsImg)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } else {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                        }
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Currently selected: \(selectedProvider.id)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("Files dropped on the shelf will be shared via this service")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                // Providers are always enabled; user can pick default service above.
+                
+            } header: {
+                HStack {
+                    Text("Quick Share")
+                }
+            } footer: {
+                Text("Choose which service to use when sharing files from the shelf. Click the shelf button to select files, or drag files onto it to share immediately.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .accentColor(.effectiveAccent)
+    }
+}
+
+//struct Extensions: View {
+//    @State private var effectTrigger: Bool = false
+//    var body: some View {
+//        Form {
+//            Section {
+//                List {
+//                    ForEach(extensionManager.installedExtensions.indices, id: \.self) { index in
+//                        let item = extensionManager.installedExtensions[index]
+//                        HStack {
+//                            AppIcon(for: item.bundleIdentifier)
+//                                .resizable()
+//                                .frame(width: 24, height: 24)
+//                            Text(item.name)
+//                            ListItemPopover {
+//                                Text("Description")
+//                            }
+//                            Spacer(minLength: 0)
+//                            HStack(spacing: 6) {
+//                                Circle()
+//                                    .frame(width: 6, height: 6)
+//                                    .foregroundColor(
+//                                        isExtensionRunning(item.bundleIdentifier)
+//                                            ? .green : item.status == .disabled ? .gray : .red
+//                                    )
+//                                    .conditionalModifier(isExtensionRunning(item.bundleIdentifier))
+//                                { view in
+//                                    view
+//                                        .shadow(color: .green, radius: 3)
+//                                }
+//                                Text(
+//                                    isExtensionRunning(item.bundleIdentifier)
+//                                        ? "Running"
+//                                        : item.status == .disabled ? "Disabled" : "Stopped"
+//                                )
+//                                .contentTransition(.numericText())
+//                                .foregroundStyle(.secondary)
+//                                .font(.footnote)
+//                            }
+//                            .frame(width: 60, alignment: .leading)
+//
+//                            Menu(
+//                                content: {
+//                                    Button("Restart") {
+//                                        let ws = NSWorkspace.shared
+//
+//                                        if let ext = ws.runningApplications.first(where: {
+//                                            $0.bundleIdentifier == item.bundleIdentifier
+//                                        }) {
+//                                            ext.terminate()
+//                                        }
+//
+//                                        if let appURL = ws.urlForApplication(
+//                                            withBundleIdentifier: item.bundleIdentifier)
+//                                        {
+//                                            ws.openApplication(
+//                                                at: appURL, configuration: .init(),
+//                                                completionHandler: nil)
+//                                        }
+//                                    }
+//                                    .keyboardShortcut("R", modifiers: .command)
+//                                    Button("Disable") {
+//                                        if let ext = NSWorkspace.shared.runningApplications.first(
+//                                            where: { $0.bundleIdentifier == item.bundleIdentifier })
+//                                        {
+//                                            ext.terminate()
+//                                        }
+//                                        extensionManager.installedExtensions[index].status =
+//                                            .disabled
+//                                    }
+//                                    .keyboardShortcut("D", modifiers: .command)
+//                                    Divider()
+//                                    Button("Uninstall", role: .destructive) {
+//                                        //
+//                                    }
+//                                },
+//                                label: {
+//                                    Image(systemName: "ellipsis.circle")
+//                                        .foregroundStyle(.secondary)
+//                                }
+//                            )
+//                            .controlSize(.regular)
+//                        }
+//                        .buttonStyle(PlainButtonStyle())
+//                        .padding(.vertical, 5)
+//                    }
+//                }
+//                .frame(minHeight: 120)
+//                .actionBar {
+//                    Button {
+//                    } label: {
+//                        HStack(spacing: 3) {
+//                            Image(systemName: "plus")
+//                            Text("Add manually")
+//                        }
+//                        .foregroundStyle(.secondary)
+//                    }
+//                    .disabled(true)
+//                    Spacer()
+//                    Button {
+//                        withAnimation(.linear(duration: 1)) {
+//                            effectTrigger.toggle()
+//                        } completion: {
+//                            effectTrigger.toggle()
+//                        }
+//                        extensionManager.checkIfExtensionsAreInstalled()
+//                    } label: {
+//                        HStack(spacing: 3) {
+//                            Image(systemName: "arrow.triangle.2.circlepath")
+//                                .rotationEffect(effectTrigger ? .degrees(360) : .zero)
+//                        }
+//                        .foregroundStyle(.secondary)
+//                    }
+//                }
+//                .controlSize(.small)
+//                .buttonStyle(PlainButtonStyle())
+//                .overlay {
+//                    if extensionManager.installedExtensions.isEmpty {
+//                        Text("No extension installed")
+//                            .foregroundStyle(Color(.secondaryLabelColor))
+//                            .padding(.bottom, 22)
+//                    }
+//                }
+//            } header: {
+//                HStack(spacing: 0) {
+//                    Text("Installed extensions")
+//                    if !extensionManager.installedExtensions.isEmpty {
+//                        Text(" – \(extensionManager.installedExtensions.count)")
+//                            .foregroundStyle(.secondary)
+//                    }
+//                }
+//            }
+//        }
+//        .accentColor(.effectiveAccent)
+//        .navigationTitle("Extensions")
+//        // TipsView()
+//        // .padding(.horizontal, 19)
+//    }
+//}
+
+struct Appearance: View {
+    @ObservedObject var coordinator = CNotchViewCoordinator.shared
+    @Default(.mirrorShape) var mirrorShape
+    @Default(.sliderColor) var sliderColor
+    @Default(.useMusicVisualizer) var useMusicVisualizer
+    @Default(.customVisualizers) var customVisualizers
+    @Default(.selectedVisualizer) var selectedVisualizer
+    @Default(.rotateAlbumArt) var rotateAlbumArt
+    @Default(.notchTransparency) var notchTransparency
+    @Default(.notchGradientBlackCoverage) var notchGradientBlackCoverage
+    @Default(.bottomCornerRadius) var bottomCornerRadius
+    @Default(.notchMotionStyle) var notchMotionStyle
+
+    let icons: [String] = ["logo2"]
+    @State private var selectedIcon: String = "logo2"
+    @State private var selectedListVisualizer: CustomVisualizer? = nil
+    @State private var isPresented: Bool = false
+    @State private var name: String = ""
+    @State private var url: String = ""
+    @State private var speed: CGFloat = 1.0
+    var body: some View {
+        Form {
+            Section {
+                Toggle("Always show tabs", isOn: $coordinator.alwaysShowTabs)
+                Defaults.Toggle(key: .settingsIconInNotch) {
+                    Text("Show settings icon in notch")
+                }
+
+            } header: {
+                Text("General")
+            }
+
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "Style",
+                    selection: $notchMotionStyle,
+                    items: NotchMotionStyle.allCases,
+                    icon: { style in
+                        switch style {
+                        case .polished: return "sparkles"
+                        case .spring: return "waveform.path"
+                        case .minimal: return "minus"
+                        }
+                    }
+                ) { $0.rawValue }
+            } header: {
+                Text("Notch motion")
+            }
+
+            Section {
+                Slider(value: $notchTransparency, in: 0...1, step: 0.05) {
+                    HStack {
+                        Text("Edge opacity")
+                        Spacer()
+                        Text("\(Int(notchTransparency * 100))%")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Slider(value: $notchGradientBlackCoverage, in: 0.4...0.95, step: 0.05) {
+                    HStack {
+                        Text("Center black coverage")
+                        Spacer()
+                        Text("\(Int(notchGradientBlackCoverage * 100))%")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Slider(value: $bottomCornerRadius, in: 0...80, step: 1) {
+                    HStack {
+                        Text("Bottom corner radius")
+                        Spacer()
+                        Text("\(Int(bottomCornerRadius))")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Notch appearance")
+            }
+
+            Section {
+                Defaults.Toggle(key: .coloredSpectrogram) {
+                    Text("Colored spectrogram")
+                }
+                Defaults
+                    .Toggle("Player tinting", key: .playerColorTinting)
+                Defaults.Toggle(key: .lightingEffect) {
+                    Text("Enable blur effect behind album art")
+                }
+                Toggle("Rotate album artwork during playback", isOn: $rotateAlbumArt)
+                Defaults.Toggle("Match waveform to album artwork", key: .waveformMatchesAlbumArt)
+                LiquidGlassSegmentedPicker(
+                    "Slider color",
+                    selection: $sliderColor,
+                    items: SliderColorEnum.allCases
+                ) { $0.rawValue }
+            } header: {
+                Text("Media")
+            }
+
+            Section {
+                Toggle(
+                    "Use music visualizer spectrogram",
+                    isOn: $useMusicVisualizer.animation()
+                )
+                .disabled(true)
+                if !useMusicVisualizer {
+                    if customVisualizers.count > 0 {
+                        LiquidGlassSegmentedPicker(
+                            "Selected animation",
+                            selection: $selectedVisualizer,
+                            items: customVisualizers.map { Optional($0) }
+                        ) { visualizer in
+                            visualizer?.name ?? "None"
+                        }
+                    } else {
+                        HStack {
+                            Text("Selected animation")
+                            Spacer()
+                            Text("No custom animation available")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            } header: {
+                HStack {
+                    Text("Custom music live activity animation")
+                    settingsBadge(text: "Coming soon")
+                }
+            }
+
+            Section {
+                List {
+                    ForEach(customVisualizers, id: \.self) { visualizer in
+                        HStack {
+                            LottieView(
+                                url: visualizer.url, speed: visualizer.speed,
+                                loopMode: .loop
+                            )
+                            .frame(width: 30, height: 30, alignment: .center)
+                            Text(visualizer.name)
+                            Spacer(minLength: 0)
+                            if selectedVisualizer == visualizer {
+                                Text("selected")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.trailing, 8)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.vertical, 2)
+                        .background(
+                            selectedListVisualizer != nil
+                                ? selectedListVisualizer == visualizer
+                                    ? Color.effectiveAccent : Color.clear : Color.clear,
+                            in: RoundedRectangle(cornerRadius: 5)
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if selectedListVisualizer == visualizer {
+                                selectedListVisualizer = nil
+                                return
+                            }
+                            selectedListVisualizer = visualizer
+                        }
+                    }
+                }
+                .safeAreaPadding(
+                    EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0)
+                )
+                .frame(minHeight: 120)
+                .actionBar {
+                    HStack(spacing: 5) {
+                        Button {
+                            name = ""
+                            url = ""
+                            speed = 1.0
+                            isPresented.toggle()
+                        } label: {
+                            Image(systemName: "plus")
+                                .foregroundStyle(.secondary)
+                                .contentShape(Rectangle())
+                        }
+                        Divider()
+                        Button {
+                            if selectedListVisualizer != nil {
+                                let visualizer = selectedListVisualizer!
+                                selectedListVisualizer = nil
+                                customVisualizers.remove(
+                                    at: customVisualizers.firstIndex(of: visualizer)!)
+                                if visualizer == selectedVisualizer && customVisualizers.count > 0 {
+                                    selectedVisualizer = customVisualizers[0]
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "minus")
+                                .foregroundStyle(.secondary)
+                                .contentShape(Rectangle())
+                        }
+                    }
+                }
+                .controlSize(.small)
+                .buttonStyle(.plain)
+                .overlay {
+                    if customVisualizers.isEmpty {
+                        Text("No custom visualizer")
+                            .foregroundStyle(Color(.secondaryLabelColor))
+                            .padding(.bottom, 22)
+                    }
+                }
+                .sheet(isPresented: $isPresented) {
+                    VStack(alignment: .leading) {
+                        Text("Add new visualizer")
+                            .font(.largeTitle.bold())
+                            .padding(.vertical)
+                        TextField("Name", text: $name)
+                        TextField("Lottie JSON URL", text: $url)
+                        HStack {
+                            Text("Speed")
+                            Spacer(minLength: 80)
+                            Text("\(speed, specifier: "%.1f")s")
+                                .multilineTextAlignment(.trailing)
+                                .foregroundStyle(.secondary)
+                            Slider(value: $speed, in: 0...2, step: 0.1)
+                        }
+                        .padding(.vertical)
+                        HStack {
+                            Button {
+                                isPresented.toggle()
+                            } label: {
+                                Text("Cancel")
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+
+                            Button {
+                                let visualizer: CustomVisualizer = .init(
+                                    UUID: UUID(),
+                                    name: name,
+                                    url: URL(string: url)!,
+                                    speed: speed
+                                )
+
+                                if !customVisualizers.contains(visualizer) {
+                                    customVisualizers.append(visualizer)
+                                }
+
+                                isPresented.toggle()
+                            } label: {
+                                Text("Add")
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            .buttonStyle(BorderedProminentButtonStyle())
+                        }
+                    }
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .controlSize(.extraLarge)
+                    .padding()
+                }
+            } header: {
+                HStack(spacing: 0) {
+                    Text("Custom vizualizers (Lottie)")
+                    if !Defaults[.customVisualizers].isEmpty {
+                        Text(" – \(Defaults[.customVisualizers].count)")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            Section {
+                Defaults.Toggle(key: .showNotHumanFace) {
+                    Text("Show cool face animation while inactive")
+                }
+            } header: {
+                HStack {
+                    Text("Additional features")
+                }
+            }
+
+            Section {
+                Button(action: resetNotchAppearance) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.red)
+                            .frame(width: 24, height: 24)
+                            .background(Color.red.opacity(0.12), in: Circle())
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Restore Default Appearance")
+                                .fontWeight(.medium)
+                                .foregroundStyle(.red)
+                            Text("Resets motion, gradient, corners, and shadow")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer(minLength: 8)
+                    }
+                    .padding(.vertical, 4)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .accentColor(.effectiveAccent)
+    }
+
+    private func resetNotchAppearance() {
+        Defaults.reset(
+            .notchMotionStyle,
+            .notchTransparency,
+            .notchGradientBlackCoverage,
+            .bottomCornerRadius,
+            .enableShadow,
+            .cornerRadiusScaling
+        )
+    }
+}
+
+struct Advanced: View {
+    @Default(.useCustomAccentColor) var useCustomAccentColor
+    @Default(.customAccentColorData) var customAccentColorData
+    @Default(.extendHoverArea) var extendHoverArea
+    @Default(.showOnLockScreen) var showOnLockScreen
+    @Default(.hideFromScreenRecording) var hideFromScreenRecording
+    
+    @State private var customAccentColor: Color = .accentColor
+    @State private var selectedPresetColor: PresetAccentColor? = nil
+    let icons: [String] = ["logo2"]
+    @State private var selectedIcon: String = "logo2"
+    
+    // macOS accent colors
+    enum PresetAccentColor: String, CaseIterable, Identifiable {
+        case blue = "Blue"
+        case purple = "Purple"
+        case pink = "Pink"
+        case red = "Red"
+        case orange = "Orange"
+        case yellow = "Yellow"
+        case green = "Green"
+        case graphite = "Graphite"
+        
+        var id: String { self.rawValue }
+        
+        var color: Color {
+            switch self {
+            case .blue: return Color(red: 0.0, green: 0.478, blue: 1.0)
+            case .purple: return Color(red: 0.686, green: 0.322, blue: 0.871)
+            case .pink: return Color(red: 1.0, green: 0.176, blue: 0.333)
+            case .red: return Color(red: 1.0, green: 0.271, blue: 0.227)
+            case .orange: return Color(red: 1.0, green: 0.584, blue: 0.0)
+            case .yellow: return Color(red: 1.0, green: 0.8, blue: 0.0)
+            case .green: return Color(red: 0.4, green: 0.824, blue: 0.176)
+            case .graphite: return Color(red: 0.557, green: 0.557, blue: 0.576)
+            }
+        }
+    }
+    
+    var body: some View {
+        Form {
+            Section {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Toggle between system and custom
+                    LiquidGlassSegmentedPicker(
+                        selection: $useCustomAccentColor,
+                        items: [false, true],
+                        fillsWidth: true
+                    ) { $0 ? "Custom" : "System" }
+                    
+                    if !useCustomAccentColor {
+                        // System accent info
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 12) {
+                                AccentCircleButton(
+                                    isSelected: true,
+                                    color: .accentColor,
+                                    isSystemDefault: true
+                                ) {}
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Using System Accent")
+                                        .font(.body)
+                                    Text("Your macOS system accent color")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                            }
+                        }
+                    } else {
+                        // Custom color options
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Color Presets")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
+                            
+                            HStack(spacing: 12) {
+                                ForEach(PresetAccentColor.allCases) { preset in
+                                    AccentCircleButton(
+                                        isSelected: selectedPresetColor == preset,
+                                        color: preset.color,
+                                        isMulticolor: false
+                                    ) {
+                                        selectedPresetColor = preset
+                                        customAccentColor = preset.color
+                                        saveCustomColor(preset.color)
+                                        forceUiUpdate()
+                                    }
+                                }
+                                Spacer()
+                            }
+                            
+                            Divider()
+                                .padding(.vertical, 4)
+                            
+                            // Custom color picker
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Pick a Color")
+                                        .font(.body)
+                                    Text("Choose any color")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                ColorPicker(selection: Binding(
+                                    get: { customAccentColor },
+                                    set: { newColor in
+                                        customAccentColor = newColor
+                                        selectedPresetColor = nil
+                                        saveCustomColor(newColor)
+                                        forceUiUpdate()
+                                    }
+                                ), supportsOpacity: false) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(customAccentColor)
+                                            .frame(width: 32, height: 32)
+                                        
+                                        if selectedPresetColor == nil {
+                                            Circle()
+                                                .strokeBorder(.primary.opacity(0.3), lineWidth: 2)
+                                                .frame(width: 32, height: 32)
+                                        }
+                                    }
+                                }
+                                .labelsHidden()
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            } header: {
+                Text("Accent color")
+            } footer: {
+                Text("Choose between your system accent color or customize it with your own selection.")
+                    .multilineTextAlignment(.trailing)
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            }
+            .onAppear {
+                initializeAccentColorState()
+            }
+            
+            Section {
+                Defaults.Toggle(key: .enableShadow) {
+                    Text("Enable window shadow")
+                }
+                Defaults.Toggle(key: .cornerRadiusScaling) {
+                    Text("Corner radius scaling")
+                }
+            } header: {
+                Text("Window Appearance")
+            }
+            
+            Section {
+                HStack {
+                    ForEach(icons, id: \.self) { icon in
+                        Spacer()
+                        VStack {
+                            Image(icon)
+                                .resizable()
+                                .frame(width: 80, height: 80)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20, style: .circular)
+                                        .strokeBorder(
+                                            icon == selectedIcon ? Color.effectiveAccent : .clear,
+                                            lineWidth: 2.5
+                                        )
+                                )
+
+                            Text("Default")
+                                .fontWeight(.medium)
+                                .font(.caption)
+                                .foregroundStyle(icon == selectedIcon ? .white : .secondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 3)
+                                .background(
+                                    Capsule()
+                                        .fill(icon == selectedIcon ? Color.effectiveAccent : .clear)
+                                )
+                        }
+                        .onTapGesture {
+                            withAnimation {
+                                selectedIcon = icon
+                            }
+                            NSApp.applicationIconImage = NSImage(named: icon)
+                        }
+                        Spacer()
+                    }
+                }
+                .disabled(true)
+            } header: {
+                HStack {
+                    Text("App icon")
+                    settingsBadge(text: "Coming soon")
+                }
+            }
+            
+            Section {
+                Defaults.Toggle(key: .extendHoverArea) {
+                    Text("Extend hover area")
+                }
+                Defaults.Toggle(key: .hideTitleBar) {
+                    Text("Hide title bar")
+                }
+                Defaults.Toggle(key: .showOnLockScreen) {
+                    Text("Show notch on lock screen")
+                }
+                Defaults.Toggle(key: .hideFromScreenRecording) {
+                    Text("Hide from screen recording")
+                }
+            } header: {
+                Text("Window Behavior")
+            }
+        }
+        .accentColor(.effectiveAccent)
+        .onAppear {
+            loadCustomColor()
+        }
+    }
+    
+    private func forceUiUpdate() {
+        // Force refresh the UI
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: Notification.Name("AccentColorChanged"), object: nil)
+        }
+    }
+    
+    private func saveCustomColor(_ color: Color) {
+        let nsColor = NSColor(color)
+        if let colorData = try? NSKeyedArchiver.archivedData(withRootObject: nsColor, requiringSecureCoding: false) {
+            Defaults[.customAccentColorData] = colorData
+            forceUiUpdate()
+        }
+    }
+    
+    private func loadCustomColor() {
+        if let colorData = Defaults[.customAccentColorData],
+           let nsColor = AccentColorResolver.decode(colorData) {
+            customAccentColor = Color(nsColor: nsColor)
+            
+            // Check if loaded color matches a preset
+            selectedPresetColor = nil
+            for preset in PresetAccentColor.allCases {
+                if colorsAreEqual(Color(nsColor: nsColor), preset.color) {
+                    selectedPresetColor = preset
+                    break
+                }
+            }
+        }
+    }
+    
+    private func colorsAreEqual(_ color1: Color, _ color2: Color) -> Bool {
+        let nsColor1 = NSColor(color1).usingColorSpace(.sRGB) ?? NSColor(color1)
+        let nsColor2 = NSColor(color2).usingColorSpace(.sRGB) ?? NSColor(color2)
+        
+        return abs(nsColor1.redComponent - nsColor2.redComponent) < 0.01 &&
+               abs(nsColor1.greenComponent - nsColor2.greenComponent) < 0.01 &&
+               abs(nsColor1.blueComponent - nsColor2.blueComponent) < 0.01
+    }
+    
+    private func initializeAccentColorState() {
+        if !useCustomAccentColor {
+            selectedPresetColor = nil // Multicolor is selected when useCustomAccentColor is false
+        } else {
+            loadCustomColor()
+        }
+    }
+}
+
+// MARK: - Accent Circle Button Component
+struct AccentCircleButton: View {
+    let isSelected: Bool
+    let color: Color
+    var isSystemDefault: Bool = false
+    var isMulticolor: Bool = false
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                // Color circle
+                Circle()
+                    .fill(color)
+                    .frame(width: 32, height: 32)
+                
+                // Subtle border
+                Circle()
+                    .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
+                    .frame(width: 32, height: 32)
+                
+                // Apple-style highlight ring around the middle when selected
+                if isSelected {
+                    Circle()
+                        .strokeBorder(
+                            Color.white.opacity(0.5),
+                            lineWidth: 2
+                        )
+                        .frame(width: 28, height: 28)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .help(isSystemDefault ? "Use your macOS system accent color" : "")
+    }
+}
+
+private func buildBadge(text: String) -> some View {
+    Text(text)
+        .font(.system(size: 10, weight: .semibold))
+        .foregroundStyle(.orange)
+        .padding(.vertical, 2)
+        .padding(.horizontal, 6)
+        .background(Color.orange.opacity(0.18))
+        .clipShape(Capsule())
+}
+
+private func settingsBadge(text: String) -> some View {
+    Text(text)
+        .foregroundStyle(.secondary)
+        .font(.footnote.bold())
+        .padding(.vertical, 3)
+        .padding(.horizontal, 6)
+        .background(Color(nsColor: .secondarySystemFill))
+        .clipShape(.capsule)
+}
+
+#Preview {
+    HUD()
+}

@@ -1,4 +1,4 @@
-name: Build Another Notch
+name: Build CNotch
 
 on:
   push:
@@ -19,13 +19,13 @@ permissions:
 
 jobs:
   build:
-    name: Build Another Notch
+    name: Build CNotch
     runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Build
         run: >-
-          xcodebuild -project anotherNotch.xcodeproj -scheme anotherNotch
+          xcodebuild -project CNotch.xcodeproj -scheme CNotch
           -configuration Release -sdk macosx
           CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
