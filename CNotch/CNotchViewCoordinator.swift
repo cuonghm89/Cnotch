@@ -204,7 +204,22 @@ class CNotchViewCoordinator: ObservableObject {
         }
 
         setupExternalLiveActivityObserver()
+
+        if Defaults[.weatherEnabled] {
+            WeatherManager.shared.start()
+        }
+        weatherEnabledCancellable = Defaults.publisher(.weatherEnabled)
+            .dropFirst()
+            .sink { change in
+                if change.newValue {
+                    WeatherManager.shared.start()
+                } else {
+                    WeatherManager.shared.stop()
+                }
+            }
     }
+
+    private var weatherEnabledCancellable: AnyCancellable?
 
     // MARK: - Third-Party Live Activities
     //

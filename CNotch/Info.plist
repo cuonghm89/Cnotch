@@ -7,6 +7,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>CNotch uses your location to show the current weather on the notch. This is optional and only used while the Weather feature is enabled.</string>
 	<key>SUFeedURL</key>
 	<string>https://raw.githubusercontent.com/cuonghm89/Cnotch/main/updater/appcast.xml</string>
 	<key>SUPublicEDKey</key>

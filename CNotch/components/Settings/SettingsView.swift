@@ -2500,6 +2500,16 @@ struct Advanced: View {
             } footer: {
                 Text("Any local app or script can push a status update onto the notch. Turn this off if you don't want that.")
             }
+
+            Section {
+                Defaults.Toggle(key: .weatherEnabled) {
+                    Text("Show current weather")
+                }
+            } header: {
+                Text("Weather")
+            } footer: {
+                Text("Uses your location to show the current temperature on the notch. Weather data from Open-Meteo.")
+            }
         }
         .accentColor(.effectiveAccent)
         .onAppear {

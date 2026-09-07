@@ -246,4 +246,7 @@ extension Defaults.Keys {
 
     // MARK: Third-Party Live Activities
     static let externalLiveActivitiesEnabled = Key<Bool>("externalLiveActivitiesEnabled", default: true)
+
+    // MARK: Weather
+    static let weatherEnabled = Key<Bool>("weatherEnabled", default: false)
 }

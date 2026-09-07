@@ -14,6 +14,7 @@ struct CNotchHeader: View {
     @ObservedObject var coordinator = CNotchViewCoordinator.shared
     @ObservedObject private var clipboardHistory = ClipboardHistoryStore.shared
     @ObservedObject private var modules = FeatureModuleRegistry.shared
+    @ObservedObject private var weather = WeatherManager.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var motion: NotchMotionPolicy {
@@ -56,6 +57,13 @@ struct CNotchHeader: View {
                             }
                             .buttonStyle(.plain)
                             .disabled(clipboardHistory.entries.isEmpty)
+                        }
+                        if Defaults[.weatherEnabled], let celsius = weather.temperatureCelsius {
+                            HStack(spacing: 3) {
+                                Image(systemName: weather.symbolName)
+                                Text("\(Int(celsius.rounded()))°")
+                            }
+                            .font(.system(size: 12, weight: .medium))
                         }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(
