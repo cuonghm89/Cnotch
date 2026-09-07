@@ -2,76 +2,17 @@
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>CNotch</title>
-        <link>https://github.com/jinkun1998/another.notch/releases</link>
+        <link>https://github.com/cuonghm89/Cnotch/releases</link>
         <description>CNotch updates</description>
         <item>
-            <title>1.0.1-beta.4</title>
-            <pubDate>Fri, 04 Sep 2026 09:46:10 +0000</pubDate>
-            <link>https://github.com/jinkun1998/another.notch/releases</link>
-            <sparkle:channel>beta</sparkle:channel>
-            <sparkle:version>27</sparkle:version>
-            <sparkle:shortVersionString>1.0.1-beta.4</sparkle:shortVersionString>
+            <title>1.0.0</title>
+            <pubDate>Mon, 07 Sep 2026 18:08:00 +0000</pubDate>
+            <link>https://github.com/cuonghm89/Cnotch/releases</link>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description><![CDATA[<div class="markdown-heading"><h2 class="heading-element">Improvements</h2><a id="user-content-improvements" class="anchor" aria-label="Permalink: Improvements" href="#improvements"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<ul>
-<li>Notch motion profiles: added Polished, Spring, and Minimal styles under Appearance. Respects system Reduce Motion.</li>
-<li>Notch edge gradient: masked to expanding and open states only. Fixes transition flash near physical notch.</li>
-<li>Segmented pickers: converted settings comboboxes to sliding segmented controls.</li>
-<li>Action buttons: styled destructive and reset actions red. Standard buttons use configured accent color.</li>
-<li>Performance: stopped spectrogram timeline updates during idle audio to minimize closed-notch CPU usage.</li>
-</ul>
-<p>Full Changelog: <a href="https://github.com/jinkun1998/another.notch/compare/v1.0.1-beta.3...v1.0.1-beta.4">https://github.com/jinkun1998/another.notch/compare/v1.0.1-beta.3...v1.0.1-beta.4</a></p>
-]]></description>
-            <enclosure url="https://github.com/jinkun1998/another.notch/releases/download/v1.0.1-beta.4/anotherNotch.dmg" length="8990004" type="application/octet-stream" sparkle:edSignature="sY7KmKkAgaSp1i8s+Gwja+Zvasrwm+ep5Hpl5dG4XABM0u4T6vqARbpnIJb8mk3lJcLgLiRMu765zfhLpYiFBQ=="/>
-        </item>
-        <item>
-            <title>1.0.1-beta.3</title>
-            <pubDate>Fri, 04 Sep 2026 07:11:58 +0000</pubDate>
-            <link>https://github.com/jinkun1998/another.notch/releases</link>
-            <sparkle:channel>beta</sparkle:channel>
-            <sparkle:version>26</sparkle:version>
-            <sparkle:shortVersionString>1.0.1-beta.3</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description><![CDATA[<div class="markdown-heading"><h2 class="heading-element">What's Changed</h2><a id="user-content-whats-changed" class="anchor" aria-label="Permalink: What's Changed" href="#whats-changed"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<ul>
-<li>
-<p>Onboarding Module Selection: New users can now choose which notch modules to install and enable during onboarding (Clipboard, Shelf, Calendar, Camera) instead of starting with
-hidden tabs (#40, #45).</p>
-</li>
-<li>
-<p>Settings → About Improvements:</p>
-<ul>
-<li>Added a "Run Onboarding Again" button to re-trigger the onboarding flow at any time (#45).</li>
-<li>Cleaned up the About screen by removing the duplicate "Thanks" section (retained in README) (#45).</li>
-</ul>
-</li>
-<li>
-<p>Issue Templates: Version dropdown now sorts releases chronologically (newest first), grouping stable releases before betas and excluding upstream fork tags (#47).</p>
-</li>
-</ul>
-<p>Full Changelog: <a href="https://github.com/jinkun1998/another.notch/compare/v1.0.1-beta.2...v1.0.1-beta.3">https://github.com/jinkun1998/another.notch/compare/v1.0.1-beta.2...v1.0.1-beta.3</a></p>
-]]></description>
-            <enclosure url="https://github.com/jinkun1998/another.notch/releases/download/v1.0.1-beta.3/anotherNotch.dmg" length="8989844" type="application/octet-stream" sparkle:edSignature="BoHXfQLlnSBN3zFpFbOutYN2lQck7ETtILoOHL8JBoflj4QAtFqvcpMwl4/2qshwcVpXU91Tvd7Z4L5Z+VSgBQ=="/>
-        </item>
-        <item>
-            <title>1.0.1-beta.2</title>
-            <pubDate>Fri, 04 Sep 2026 04:29:40 +0000</pubDate>
-            <link>https://github.com/jinkun1998/another.notch/releases</link>
-            <sparkle:channel>beta</sparkle:channel>
-            <sparkle:version>25</sparkle:version>
-            <sparkle:shortVersionString>1.0.1-beta.2</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description><![CDATA[<div class="markdown-heading"><h1 class="heading-element">v1.0.0-beta.2</h1><a id="user-content-v100-beta2" class="anchor" aria-label="Permalink: v1.0.0-beta.2" href="#v100-beta2"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<div class="markdown-heading"><h2 class="heading-element">Improvements</h2><a id="user-content-improvements" class="anchor" aria-label="Permalink: Improvements" href="#improvements"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<ul>
-<li>Onboarding Access: Added an "Onboarding" entry to the menu bar extra to re-run onboarding anytime.</li>
-<li>Onboarding Visuals: Replaced raw visual-effect background with the standard liquid-glass notch material (LiquidGlassSurface + LiquidGlassEdge), respecting transparency
-settings.</li>
-<li>Sparkle Appcast: Updated release metadata for 1.0.0-beta.1 Sparkle feed.</li>
-</ul>
-<p>Full Changelog: <a href="https://github.com/jinkun1998/another.notch/compare/v1.0.0-beta.1...v1.0.0-beta.2">https://github.com/jinkun1998/another.notch/compare/v1.0.0-beta.1...v1.0.0-beta.2</a></p>
-]]></description>
-            <enclosure url="https://github.com/jinkun1998/another.notch/releases/download/v1.0.1-beta.2/anotherNotch.dmg" length="8987762" type="application/octet-stream" sparkle:edSignature="ZsAGVq/WYTcA5kD53sKvEo73MhoEWZLaE6EYeVH19Mtde6hQWPa5DfvdUnautT181zieSwKJGZ88l5SX0iCQDQ=="/>
+            <description><![CDATA[<p>First release under the CNotch name (renamed from anotherNotch).</p>]]></description>
+            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.0/CNotch.dmg" length="8547037" type="application/octet-stream" sparkle:edSignature="xWy2Ymur4zfUC0NKobcTDgigxfE9uw+UwPl6iNBtXlaPgysdyU1xx2bJouHSmYf2+4WprV4t4cz48/m5U/k4DQ=="/>
         </item>
     </channel>
 </rss>
