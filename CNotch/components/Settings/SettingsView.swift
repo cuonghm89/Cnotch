@@ -1530,7 +1530,6 @@ func lighterColor(from nsColor: NSColor, amount: CGFloat = 0.14) -> Color {
 
 struct About: View {
     @State private var showBuildNumber: Bool = false
-    @State private var showVietQRModal: Bool = false
     @State private var showOnboarding: Bool = false
     let updaterController: SPUStandardUpdaterController
 
@@ -1599,12 +1598,6 @@ struct About: View {
                 } label: {
                     Label("GitHub Sponsors", systemImage: "heart.fill")
                 }
-
-                Button {
-                    showVietQRModal = true
-                } label: {
-                    Label("VietQR / Bank Transfer", systemImage: "qrcode")
-                }
             }
 
             Section {
@@ -1616,30 +1609,6 @@ struct About: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .sheet(isPresented: $showVietQRModal) {
-            VStack(spacing: 16) {
-                HStack {
-                    Text("Donate via VietQR")
-                        .font(.headline)
-                    Spacer()
-                    Button {
-                        showVietQRModal = false
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                Image("DonationVietQR")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 320, maxHeight: 420)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            }
-            .padding(20)
-            .frame(width: 360)
-        }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(
                 onFinish: {
