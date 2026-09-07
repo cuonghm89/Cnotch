@@ -101,6 +101,17 @@ final class MediaKeyInterceptor {
     // MARK: - Event Handling
     
     private func handleEvent(_ cgEvent: CGEvent) -> Unmanaged<CGEvent>? {
+        // macOS disables a tap that is too slow to respond (or on user input,
+        // e.g. after sleep/wake or a debugger pause). Without re-enabling it here,
+        // the tap stays dead forever and every key press silently falls through
+        // to the system's own HUD, even though Accessibility is still granted.
+        if cgEvent.type == .tapDisabledByTimeout || cgEvent.type == .tapDisabledByUserInput {
+            if let eventTap {
+                CGEvent.tapEnable(tap: eventTap, enable: true)
+            }
+            return Unmanaged.passRetained(cgEvent)
+        }
+
         guard Defaults[.hudReplacement] else {
             return Unmanaged.passRetained(cgEvent)
         }
