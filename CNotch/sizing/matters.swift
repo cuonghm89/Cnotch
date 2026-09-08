@@ -76,16 +76,20 @@ let cornerRadiusInsets: (opened: (top: CGFloat, bottom: CGFloat), closed: (top: 
 @MainActor
 func trailingIconsWingWidth() -> CGFloat {
     var itemWidths: [CGFloat] = []
-    if Defaults[.weatherEnabled] { itemWidths.append(40) }
-    if Defaults[.systemStatsEnabled] { itemWidths.append(65) }
+    if Defaults[.weatherEnabled] { itemWidths.append(52) }
+    if Defaults[.systemStatsEnabled] { itemWidths.append(90) }
     if Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled] {
-        itemWidths.append(24)
+        itemWidths.append(30)
     }
-    if Defaults[.settingsIconInNotch] { itemWidths.append(24) }
-    if Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] { itemWidths.append(44) }
+    if Defaults[.settingsIconInNotch] { itemWidths.append(30) }
+    if Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] { itemWidths.append(52) }
     guard !itemWidths.isEmpty else { return 0 }
     let interItemSpacing = CGFloat(itemWidths.count - 1) * 4
-    return itemWidths.reduce(0, +) + interItemSpacing + 10 // trailing padding
+    // Extra safety margin -- these per-item widths are rough estimates of
+    // rendered SF-font content, not exact metrics, so pad generously rather
+    // than clip a digit off the last item again.
+    let safetyMargin: CGFloat = 24
+    return itemWidths.reduce(0, +) + interItemSpacing + 10 + safetyMargin
 }
 
 @MainActor
