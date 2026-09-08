@@ -83,7 +83,7 @@ final class ScreenshotWatcher {
         guard let (url, _) = candidate else { return }
 
         Task { @MainActor in
-            guard Defaults[.screenshotQuickActionsEnabled] else { return }
+            guard Defaults[.screenshotQuickActionsEnabled], !CNotchViewCoordinator.shared.isScreenLocked else { return }
             CNotchViewCoordinator.shared.toggleExpandingView(
                 status: true,
                 type: .screenshot,

@@ -131,6 +131,7 @@ final class FeatureModuleRegistry: ObservableObject {
 
     func isAvailable(_ id: FeatureModuleID) -> Bool {
         FeatureModuleAvailability.isAvailable(
+            id: id,
             moduleIsAvailable: Self.modules.first(where: { $0.id == id })?.isAvailable == true,
             isInstalled: isInstalled(id),
             isMainFeatureEnabled: FeatureModuleAvailability.isMainFeatureEnabled(
@@ -139,7 +140,8 @@ final class FeatureModuleRegistry: ObservableObject {
                 shelfEnabled: Defaults[.boringShelf],
                 calendarEnabled: Defaults[.showCalendar],
                 cameraEnabled: Defaults[.showMirror]
-            )
+            ),
+            screenIsLocked: CNotchViewCoordinator.shared.isScreenLocked
         )
     }
 

@@ -78,7 +78,9 @@ struct CNotchHeader: View {
                             }
                             .font(.system(size: 11, weight: .medium))
                         }
-                        if Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled] {
+                        if !coordinator.isScreenLocked
+                            && (Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled])
+                        {
                             NotchUtilitiesMenu()
                         }
                         if Defaults[.settingsIconInNotch] {

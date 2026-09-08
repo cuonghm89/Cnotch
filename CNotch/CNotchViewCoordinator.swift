@@ -76,6 +76,17 @@ class CNotchViewCoordinator: ObservableObject {
         }
     }
     @Published var helloAnimationRunning: Bool = false
+    /// Screen-lock state, shared so features that expose personal data
+    /// (Clipboard, Shelf, Calendar, Camera, Quick Note, Voice Memo,
+    /// Screenshot Quick Actions) can restrict themselves while locked --
+    /// anyone at a locked Mac shouldn't be able to browse or use them
+    /// without actually signing in.
+    @Published var isScreenLocked: Bool = false {
+        didSet {
+            guard isScreenLocked, !oldValue, currentView != .home else { return }
+            currentView = .home
+        }
+    }
     private var sneakPeekDispatch: DispatchWorkItem?
     private var expandingViewDispatch: DispatchWorkItem?
     private var hudEnableTask: Task<Void, Never>?
