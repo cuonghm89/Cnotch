@@ -554,7 +554,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if screensChanged {
             DispatchQueue.main.async { [weak self] in
-                self?.cleanupWindows()
+                // adjustWindowPosition() already reconciles incrementally --
+                // in "show on all displays" mode it only tears down windows
+                // for screens that actually disappeared and only creates
+                // ones for screens that are actually new (see its diffing
+                // against `windows.keys` below). Calling cleanupWindows()
+                // first used to wipe every window unconditionally, undoing
+                // that: plugging in or unplugging one unrelated monitor
+                // reset the notch on every other display too.
                 self?.adjustWindowPosition()
                 self?.setupDragDetectors()
             }

@@ -125,7 +125,10 @@ struct OnboardingView: View {
     @State private var accessibilityRequested: Bool = false
     @State private var bluetoothGranted: Bool = (CBManager.authorization == .allowedAlways)
     @State private var bluetoothRequested: Bool = false
-    @State private var selectedModules = Set<FeatureModuleID>()
+    // Pre-populate from whatever's already installed -- re-running
+    // onboarding (About > "Run Onboarding Again") used to always start with
+    // every module unchecked here, even ones already active.
+    @State private var selectedModules = FeatureModuleRegistry.shared.installedIDs
     let onFinish: () -> Void
     let onOpenSettings: () -> Void
 

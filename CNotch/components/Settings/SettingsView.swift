@@ -642,7 +642,6 @@ struct GeneralSettings: View {
     @ObservedObject var coordinator = CNotchViewCoordinator.shared
 
     @Default(.mirrorShape) var mirrorShape
-    @Default(.showEmojis) var showEmojis
     @Default(.gestureSensitivity) var gestureSensitivity
     @Default(.minimumHoverDuration) var minimumHoverDuration
     @Default(.nonNotchHeight) var nonNotchHeight
@@ -1623,6 +1622,8 @@ struct About: View {
                 CheckForUpdatesView(updater: updaterController.updater)
             }
 
+            UpdaterSettingsView(updater: updaterController.updater)
+
             Section("Support & Donate") {
                 Button {
                     if let url = URL(string: "https://github.com/sponsors/jinkun1998") {
@@ -1722,7 +1723,6 @@ struct ClipboardSettings: View {
 
 struct Shelf: View {
     @Default(.boringShelf) var boringShelf: Bool
-    @Default(.shelfTapToOpen) var shelfTapToOpen: Bool
     @Default(.quickShareProvider) var quickShareProvider
     @Default(.expandedDragDetection) var expandedDragDetection: Bool
     @StateObject private var quickShareService = QuickShareService.shared
@@ -2509,8 +2509,12 @@ struct Advanced: View {
             
             Section {
                 Defaults.Toggle(key: .extendHoverArea) {
-                    Text("Extend hover area")
+                    HStack {
+                        Text("Extend hover area")
+                        settingsBadge(text: "Coming soon")
+                    }
                 }
+                .disabled(true)
                 Defaults.Toggle(key: .hideTitleBar) {
                     Text("Hide title bar")
                 }

@@ -682,6 +682,15 @@ struct MusicSliderView: View {
     let isEnabled: Bool
     var onValueChange: (Double) -> Void
 
+    @Default(.sliderColor) private var sliderColorPreference
+
+    private var resolvedSliderColor: Color {
+        switch sliderColorPreference {
+        case .white: .white.opacity(0.85)
+        case .albumArt: Color(nsColor: color).opacity(0.85)
+        case .accent: .effectiveAccent.opacity(0.85)
+        }
+    }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -690,7 +699,7 @@ struct MusicSliderView: View {
             CustomSlider(
                 value: $sliderValue,
                 range: 0...max(0, duration),
-                color: .white.opacity(0.85),
+                color: resolvedSliderColor,
                 dragging: $dragging,
                 lastDragged: $lastDragged,
                 isEnabled: isEnabled,

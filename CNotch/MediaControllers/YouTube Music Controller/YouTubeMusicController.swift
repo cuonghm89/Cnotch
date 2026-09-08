@@ -66,7 +66,20 @@ final class YouTubeMusicController: MediaControllerProtocol {
             await initializeIfAppActive()
         }
     }
-    
+
+    deinit {
+        // Previously only torn down when the YouTube Music app itself quit
+        // (handleAppTerminated) -- switching CNotch's music source away from
+        // YouTube Music while pear-desktop kept running left this timer, the
+        // NSWorkspace-observing Task, and the open WebSocket connection all
+        // running/connected indefinitely, accumulating with every switch.
+        updateTimer?.invalidate()
+        appStateObserver?.cancel()
+        if let client = webSocketClient {
+            Task { await client.disconnect() }
+        }
+    }
+
     // MARK: - MediaControllerProtocol Implementation
     func play() async { await sendCommand(endpoint: "/play", method: "POST") }
     
