@@ -245,8 +245,17 @@ class MusicManager: ObservableObject {
             self.album = state.album
         }
 
-        if timeChanged {
+        // elapsedTime/timestampDate are a pair: every position estimate is
+        // elapsedTime extrapolated forward by (now - timestampDate) * rate,
+        // so the two must always be updated together. Previously
+        // timestampDate was bumped on every update regardless, so whenever
+        // the source reported the same currentTime twice in a row (which is
+        // often -- it doesn't update every animation frame), the estimate
+        // would snap back to the stale elapsedTime and re-extrapolate from
+        // there, producing exactly the intermittent drift this fixes.
+        if timeChanged || playbackRateChanged {
             self.elapsedTime = state.currentTime
+            self.timestampDate = state.lastUpdated
         }
 
         if durationChanged {
@@ -281,8 +290,6 @@ class MusicManager: ObservableObject {
         if shouldShowSneakPeek && !waitsForArtwork {
             self.updateSneakPeek()
         }
-        
-        self.timestampDate = state.lastUpdated
     }
 
     func toggleFavoriteTrack() {
