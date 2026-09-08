@@ -162,11 +162,9 @@
 		C1A0B0033B00000100000001 /* ClipboardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B0043B00000100000001 /* ClipboardViews.swift */; };
 		C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */; };
 		C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */; };
-		C1A0B30F3B0000010000000C /* QuickNoteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B3103B0000010000000D /* QuickNoteButton.swift */; };
+		C1A0B6013B0000010000002A /* NotchUtilitiesMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */; };
 		C1A0B41D3B0000010000001A /* VoiceMemoIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */; };
-		C1A0B41B3B00000100000018 /* VoiceMemoButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B41C3B00000100000019 /* VoiceMemoButton.swift */; };
 		C1A0B4193B00000100000016 /* PomodoroIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */; };
-		C1A0B4173B00000100000014 /* PomodoroButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4183B00000100000015 /* PomodoroButton.swift */; };
 		C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */; };
 		F38DE6482D8243E7008B5C6D /* BatteryActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */; };
 /* End PBXBuildFile section */
@@ -352,11 +350,9 @@
 		C1A0B0043B00000100000001 /* ClipboardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardViews.swift; sourceTree = "<group>"; };
 		C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothConnectionIndicator.swift; sourceTree = "<group>"; };
 		C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalLiveActivityIndicator.swift; sourceTree = "<group>"; };
-		C1A0B3103B0000010000000D /* QuickNoteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickNoteButton.swift; sourceTree = "<group>"; };
+		C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchUtilitiesMenu.swift; sourceTree = "<group>"; };
 		C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoIndicator.swift; sourceTree = "<group>"; };
-		C1A0B41C3B00000100000019 /* VoiceMemoButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoButton.swift; sourceTree = "<group>"; };
 		C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroIndicator.swift; sourceTree = "<group>"; };
-		C1A0B4183B00000100000015 /* PomodoroButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroButton.swift; sourceTree = "<group>"; };
 		C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotQuickActionsIndicator.swift; sourceTree = "<group>"; };
 		F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryActivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -789,11 +785,9 @@
 				14D570D12C5F6C6A0011E668 /* CNotchExtrasMenu.swift */,
 				C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */,
 				C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */,
-				C1A0B3103B0000010000000D /* QuickNoteButton.swift */,
+				C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */,
 				C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */,
-				C1A0B41C3B00000100000019 /* VoiceMemoButton.swift */,
 				C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */,
-				C1A0B4183B00000100000015 /* PomodoroButton.swift */,
 				C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */,
 				1471A8582C6281BD0058408D /* CNotchWindow.swift */,
 			);
@@ -1173,11 +1167,9 @@
 				C1A0B0033B00000100000001 /* ClipboardViews.swift in Sources */,
 				C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */,
 				C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */,
-				C1A0B30F3B0000010000000C /* QuickNoteButton.swift in Sources */,
+				C1A0B6013B0000010000002A /* NotchUtilitiesMenu.swift in Sources */,
 				C1A0B41D3B0000010000001A /* VoiceMemoIndicator.swift in Sources */,
-				C1A0B41B3B00000100000018 /* VoiceMemoButton.swift in Sources */,
 				C1A0B4193B00000100000016 /* PomodoroIndicator.swift in Sources */,
-				C1A0B4173B00000100000014 /* PomodoroButton.swift in Sources */,
 				C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

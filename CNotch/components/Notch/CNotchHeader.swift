@@ -75,14 +75,8 @@ struct CNotchHeader: View {
                             }
                             .font(.system(size: 11, weight: .medium))
                         }
-                        if Defaults[.quickNoteEnabled] {
-                            QuickNoteButton()
-                        }
-                        if Defaults[.pomodoroButtonEnabled] {
-                            PomodoroButton()
-                        }
-                        if Defaults[.voiceMemoButtonEnabled] {
-                            VoiceMemoButton()
+                        if Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled] {
+                            NotchUtilitiesMenu()
                         }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(
