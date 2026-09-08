@@ -306,16 +306,6 @@ struct ContentView: View {
         .easeInOut(duration: reduceMotion ? 0.12 : 0.24)
     }
 
-    // The physical-notch reservation rectangle inside musicLiveActivity() has
-    // to stay centered within the pill for it to line up with the real
-    // hardware notch. Adding width only on the trailing (lyrics) side pushes
-    // it off-center, so half of this budget goes to a blank leading spacer
-    // that exists purely to keep things balanced -- there's no way around
-    // that trade-off without changing how the whole notch window is
-    // positioned, which is a much bigger change than this feature warrants.
-    private let compactLyricsExtraWidth: CGFloat = 160
-    private var compactLyricsHalfWidth: CGFloat { compactLyricsExtraWidth / 2 }
-
     private var isScrollableTab: Bool {
         modules.supportsScrolling(coordinator.currentView)
     }
@@ -328,13 +318,12 @@ struct ContentView: View {
             return .init(width: baseSize.width * 1.26, height: 120)
         }
 
-        if showsMusicSneakPeek {
+        // Same slot/sizing as the sneak peek row below -- widening the main
+        // row instead would need a matching blank spacer on the other side
+        // to keep the physical-notch reservation centered, which left barely
+        // any usable room for the actual lyric text.
+        if showsMusicSneakPeek || showsCompactLyrics {
             return .init(width: max(baseSize.width, 260), height: baseSize.height + 40)
-        }
-
-        if showsCompactLyrics {
-            // Stays a single row -- widen instead of adding a second line below.
-            return .init(width: baseSize.width + compactLyricsExtraWidth, height: baseSize.height)
         }
 
         if let entry = clipboardHistory.hudEntry {
@@ -872,7 +861,7 @@ struct ContentView: View {
                           musicLiveActivity()
                               .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
                               .background {
-                                  if showsMusicSneakPeek {
+                                  if showsMusicSneakPeek || showsCompactLyrics {
                                       physicalNotchReservation
                                   }
                               }
@@ -894,6 +883,8 @@ struct ContentView: View {
                           .frame(width: max(vm.closedNotchSize.width, 260))
                           .foregroundStyle(.gray)
                           .padding(.vertical, 10)
+                      } else if showsCompactLyrics {
+                          compactLyricsLine()
                       }
     }
 
@@ -906,17 +897,23 @@ struct ContentView: View {
                 return min(max(progressed, 0), musicManager.songDuration)
             }()
             let line = musicManager.lyricLine(at: currentElapsed)
-            GeometryReader { geometry in
-                MarqueeText(
-                    .constant(line),
-                    font: .caption2,
-                    nsFont: .caption2,
-                    textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray,
-                    minDuration: 1,
-                    frameWidth: geometry.size.width
-                )
+            HStack(alignment: .center) {
+                Image(systemName: "quote.bubble")
+                    .font(.caption2)
+                GeometryReader { geometry in
+                    MarqueeText(
+                        .constant(line),
+                        font: .caption,
+                        nsFont: .caption1,
+                        textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray,
+                        minDuration: 1,
+                        frameWidth: geometry.size.width
+                    )
+                }
             }
-            .frame(width: compactLyricsHalfWidth - 10)
+            .frame(width: max(vm.closedNotchSize.width, 260))
+            .foregroundStyle(.gray)
+            .padding(.vertical, 10)
         }
     }
 
@@ -1018,10 +1015,6 @@ struct ContentView: View {
         let compactMediaSize = max(0, vm.effectiveClosedNotchHeight - 12)
 
         HStack(spacing: 4) {
-            if showsCompactLyrics {
-                Color.clear.frame(width: compactLyricsHalfWidth)
-            }
-
             closedAlbumArt(size: compactMediaSize, rotation: 0)
 
             Rectangle()
@@ -1092,12 +1085,7 @@ struct ContentView: View {
                 height: compactMediaSize,
                 alignment: .center
             )
-            .padding(.trailing, showsCompactLyrics ? 4 : 10)
-
-            if showsCompactLyrics {
-                compactLyricsLine()
-                    .padding(.trailing, 10)
-            }
+            .padding(.trailing, 10)
         }
         .frame(
             height: vm.effectiveClosedNotchHeight,
