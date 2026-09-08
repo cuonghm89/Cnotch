@@ -1346,6 +1346,12 @@ struct Media: View {
                         settingsBadge(text: "Beta")
                     }
                 }
+                Defaults.Toggle(key: .showCompactLyrics) {
+                    HStack {
+                        Text("Show lyrics in the compact notch")
+                        settingsBadge(text: "Beta")
+                    }
+                }
             } header: {
                 Text("Media controls")
             }  footer: {

@@ -76,19 +76,20 @@ let cornerRadiusInsets: (opened: (top: CGFloat, bottom: CGFloat), closed: (top: 
 @MainActor
 func trailingIconsWingWidth() -> CGFloat {
     var itemWidths: [CGFloat] = []
-    if Defaults[.weatherEnabled] { itemWidths.append(52) }
-    if Defaults[.systemStatsEnabled] { itemWidths.append(90) }
+    if Defaults[.weatherEnabled] { itemWidths.append(48) }
+    if Defaults[.systemStatsEnabled] { itemWidths.append(76) }
     if Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled] {
-        itemWidths.append(30)
+        itemWidths.append(26)
     }
-    if Defaults[.settingsIconInNotch] { itemWidths.append(30) }
-    if Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] { itemWidths.append(52) }
+    if Defaults[.settingsIconInNotch] { itemWidths.append(26) }
+    if Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] { itemWidths.append(48) }
     guard !itemWidths.isEmpty else { return 0 }
     let interItemSpacing = CGFloat(itemWidths.count - 1) * 4
-    // Extra safety margin -- these per-item widths are rough estimates of
-    // rendered SF-font content, not exact metrics, so pad generously rather
-    // than clip a digit off the last item again.
-    let safetyMargin: CGFloat = 24
+    // Small safety margin -- these per-item widths are rough estimates of
+    // rendered SF-font content, not exact metrics. The previous, more
+    // generous estimates fixed clipping but left a visibly empty gap around
+    // the physical notch cutout; trimmed down while keeping some slack.
+    let safetyMargin: CGFloat = 12
     return itemWidths.reduce(0, +) + interItemSpacing + 10 + safetyMargin
 }
 

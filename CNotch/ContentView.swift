@@ -274,6 +274,17 @@ struct ContentView: View {
             && Defaults[.sneakPeekStyles] == .standard
     }
 
+    /// Persistent (not just the few-seconds-after-a-change sneak peek)
+    /// current-lyric-line marquee in the closed/compact pill, reusing the
+    /// same "under the notch" slot and sizing as the sneak peek.
+    private var showsCompactLyrics: Bool {
+        Defaults[.showCompactLyrics]
+            && showsCompactMusicActivity
+            && !showsMusicSneakPeek
+            && musicManager.isPlaying
+            && !musicManager.syncedLyrics.isEmpty
+    }
+
     private var showsCompactMusicActivity: Bool {
         if showsMusicSneakPeek {
             return true
@@ -307,7 +318,7 @@ struct ContentView: View {
             return .init(width: baseSize.width * 1.26, height: 120)
         }
 
-        if showsMusicSneakPeek {
+        if showsMusicSneakPeek || showsCompactLyrics {
             return .init(width: max(baseSize.width, 260), height: baseSize.height + 40)
         }
 
@@ -868,6 +879,24 @@ struct ContentView: View {
                           .frame(width: max(vm.closedNotchSize.width, 260))
                           .foregroundStyle(.gray)
                           .padding(.vertical, 10)
+                      } else if showsCompactLyrics {
+                          TimelineView(.animation(minimumInterval: 0.1, paused: !musicManager.isPlaying)) { timeline in
+                              let currentElapsed: Double = {
+                                  let delta = timeline.date.timeIntervalSince(musicManager.timestampDate)
+                                  let progressed = musicManager.elapsedTime + (delta * musicManager.playbackRate)
+                                  return min(max(progressed, 0), musicManager.songDuration)
+                              }()
+                              let line = musicManager.lyricLine(at: currentElapsed)
+                              HStack(alignment: .center) {
+                                  Image(systemName: "quote.bubble")
+                                  GeometryReader { geometry in
+                                      MarqueeText(.constant(line), textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray, minDuration: 1, frameWidth: geometry.size.width)
+                                  }
+                              }
+                              .frame(width: max(vm.closedNotchSize.width, 260))
+                              .foregroundStyle(.gray)
+                              .padding(.vertical, 10)
+                          }
                       }
     }
 
