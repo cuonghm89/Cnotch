@@ -689,6 +689,15 @@ struct ContentView: View {
         .onChange(of: coordinator.sneakPeek.type) { _, _ in
             updateClosedNotchViewport()
         }
+        .onChange(of: coordinator.expandingView.show) { _, _ in
+            updateClosedNotchViewport()
+        }
+        .onChange(of: coordinator.expandingView.type) { _, _ in
+            updateClosedNotchViewport()
+        }
+        .onChange(of: clipboardHistory.hudEntry) { _, _ in
+            updateClosedNotchViewport()
+        }
         .onReceive(musicManager.$isPlaying.combineLatest(musicManager.$isPlayerIdle)) { _, _ in
             updateClosedNotchViewport()
         }

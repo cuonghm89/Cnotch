@@ -97,14 +97,23 @@ class CNotchXPCHelper: NSObject, CNotchXPCHelperProtocol {
     }
 
     @objc func setKeyboardBrightness(_ value: Float, with reply: @escaping (Bool) -> Void) {
-        reply(Self.keyboardClient.setBrightness(value))
+        reply(Self.keyboardClient.setBrightness(max(0, min(1, value))))
     }
     // MARK: - Screen Brightness (moved from client app into helper)
 
     @objc func isScreenBrightnessAvailable(with reply: @escaping (Bool) -> Void) {
         let displayID = screenBrightnessDisplayID()
         var b: Float = 0
-        reply(displayServicesGetBrightness(displayID: displayID, out: &b) || ioServiceFor(displayID: displayID) != nil)
+        if displayServicesGetBrightness(displayID: displayID, out: &b) {
+            reply(true)
+            return
+        }
+        if let io = ioServiceFor(displayID: displayID) {
+            IOObjectRelease(io)
+            reply(true)
+            return
+        }
+        reply(false)
     }
 
     @objc func currentScreenBrightness(with reply: @escaping (NSNumber?) -> Void) {
