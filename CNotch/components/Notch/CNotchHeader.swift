@@ -67,11 +67,14 @@ struct CNotchHeader: View {
                             .font(.system(size: 12, weight: .medium))
                         }
                         if Defaults[.systemStatsEnabled] {
+                            // Single icon + combined "cpu%¡mem%" text -- two icons and
+                            // two separate numbers was one of the widest items in this
+                            // row and, combined with everything else, could overflow
+                            // past the notch's rounded edge (see minimumScaleFactor
+                            // below for the general fix).
                             HStack(spacing: 3) {
                                 Image(systemName: "cpu")
-                                Text("\(Int((systemStats.cpuUsage * 100).rounded()))%")
-                                Image(systemName: "memorychip")
-                                Text("\(Int((systemStats.memoryUsage * 100).rounded()))%")
+                                Text("\(Int((systemStats.cpuUsage * 100).rounded()))%·\(Int((systemStats.memoryUsage * 100).rounded()))%")
                             }
                             .font(.system(size: 11, weight: .medium))
                         }
@@ -103,6 +106,8 @@ struct CNotchHeader: View {
                     }
                 }
                 .font(.system(.headline, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
                 .padding(.trailing, 10)
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .notchHeaderVisibility(vm.notchState != .closed)
