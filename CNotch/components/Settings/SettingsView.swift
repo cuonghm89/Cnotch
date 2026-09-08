@@ -1352,6 +1352,9 @@ struct Media: View {
                         settingsBadge(text: "Beta")
                     }
                 }
+                Defaults.Toggle(key: .showCompactTrackInfo) {
+                    Text("Show track title, artist and elapsed time in the compact notch")
+                }
             } header: {
                 Text("Media controls")
             }  footer: {
@@ -2585,6 +2588,14 @@ struct Advanced: View {
                 }
             } header: {
                 Text("System Stats")
+            }
+
+            Section {
+                Defaults.Toggle(key: .showCompactSystemInfo) {
+                    Text("Show weather and system stats in the compact notch")
+                }
+            } footer: {
+                Text("Requires Weather and/or System Stats above to be enabled. Shown below the notch when nothing else (lyrics, track info) is using that space.")
             }
         }
         .accentColor(.effectiveAccent)

@@ -187,6 +187,8 @@ extension Defaults.Keys {
     static let showShuffleAndRepeat = Key<Bool>("showShuffleAndRepeat", default: false)
     static let enableLyrics = Key<Bool>("enableLyrics", default: false)
     static let showCompactLyrics = Key<Bool>("showCompactLyrics", default: false)
+    static let showCompactTrackInfo = Key<Bool>("showCompactTrackInfo", default: true)
+    static let showCompactSystemInfo = Key<Bool>("showCompactSystemInfo", default: true)
     static let musicControlSlots = Key<[MusicControlButton]>(
         "musicControlSlots",
         default: MusicControlButton.defaultLayout

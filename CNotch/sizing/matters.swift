@@ -18,6 +18,10 @@ let moduleTabWidth: CGFloat = 40
 let moduleTabLeadingPadding: CGFloat = 6
 let moduleTabNotchGap: CGFloat = 10
 let notchOuterHorizontalPadding: CGFloat = 19 + 12
+/// Gap between the open header's tab strip and its trailing icons when there's
+/// no real notch to clear -- just enough breathing room, not the full
+/// (fake, cosmetic-only) notch width.
+let collapsedMiddleGapWidth: CGFloat = 24
 let openNotchHeaderHeight: CGFloat = 30
 let minimumExpandedContentInset: CGFloat = 16
 let calendarContentSize: CGSize = .init(width: 504, height: 160)
@@ -99,8 +103,10 @@ func tabHeaderMinimumOpenWidth(screenUUID: String? = nil) -> CGFloat {
     let tabStripWidth = tabCount * moduleTabWidth
     let leftWingWidth = moduleTabLeadingPadding + tabStripWidth + moduleTabNotchGap
     let requiredInnerWingWidth = max(leftWingWidth, trailingIconsWingWidth())
-    let physicalWidth = getClosedNotchSize(screenUUID: screenUUID).width
-    let dynamicWidth = physicalWidth + (requiredInnerWingWidth * 2) + (notchOuterHorizontalPadding * 2)
+    let middleGapWidth = hasPhysicalNotch(screenUUID: screenUUID)
+        ? getClosedNotchSize(screenUUID: screenUUID).width
+        : collapsedMiddleGapWidth
+    let dynamicWidth = middleGapWidth + (requiredInnerWingWidth * 2) + (notchOuterHorizontalPadding * 2)
     return max(tabBarMinimumOpenWidth, dynamicWidth)
 }
 
@@ -210,6 +216,16 @@ enum MusicPlayerImageSizes {
     }
     
     return nil
+}
+
+/// Whether this screen has a real hardware notch cutout, as opposed to a
+/// display (external monitor, or a Mac whose camera sits in the bezel) where
+/// the app only draws a notch-shaped pill for visual consistency. Content
+/// only needs to avoid the middle strip on the former -- there's nothing
+/// physically hidden there on the latter.
+@MainActor func hasPhysicalNotch(screenUUID: String? = nil) -> Bool {
+    let screen = screenUUID.flatMap { NSScreen.screen(withUUID: $0) } ?? NSScreen.main
+    return (screen?.safeAreaInsets.top ?? 0) > 0
 }
 
 @MainActor func getClosedNotchSize(screenUUID: String? = nil) -> CGSize {

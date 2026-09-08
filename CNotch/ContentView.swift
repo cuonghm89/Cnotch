@@ -32,6 +32,8 @@ struct ContentView: View {
     @ObservedObject private var modules = FeatureModuleRegistry.shared
     @ObservedObject private var voiceMemo = VoiceMemoRecorder.shared
     @ObservedObject private var pomodoro = PomodoroManager.shared
+    @ObservedObject private var weatherManager = WeatherManager.shared
+    @ObservedObject private var systemStatsManager = SystemStatsManager.shared
     @State private var hoverTask: Task<Void, Never>?
     @State private var closingShellTask: Task<Void, Never>?
     @State private var closingTransitionID: UUID?
@@ -85,6 +87,14 @@ struct ContentView: View {
 
     private var physicalNotchWidth: CGFloat {
         max(0, vm.closedNotchSize.width - cornerRadiusInsets.closed.top)
+    }
+
+    /// Width of each side wing in the single-row lyrics/track-info/system-info
+    /// display -- enough for a short marquee, without ballooning sideways.
+    private let compactInfoWingWidth: CGFloat = 120
+
+    private var screenHasPhysicalNotch: Bool {
+        hasPhysicalNotch(screenUUID: vm.screenUUID)
     }
 
     private var physicalNotchReservation: some View {
@@ -285,6 +295,30 @@ struct ContentView: View {
             && !musicManager.syncedLyrics.isEmpty
     }
 
+    /// Track title / artist / elapsed time, replacing the plain sneak-peek
+    /// row for everyday playback (not just the few-seconds notifications).
+    private var showsCompactTrackInfo: Bool {
+        Defaults[.showCompactTrackInfo]
+            && showsCompactMusicActivity
+            && !showsMusicSneakPeek
+            && !showsCompactLyrics
+            && musicManager.isPlaying
+    }
+
+    /// Weather + CPU/RAM glimpse in the closed/compact pill, reusing the same
+    /// "under the notch" row as lyrics/track info. Only takes the slot when
+    /// nothing music-related is already using it.
+    private var showsCompactSystemInfo: Bool {
+        Defaults[.showCompactSystemInfo]
+            && (Defaults[.weatherEnabled] || Defaults[.systemStatsEnabled])
+            && vm.notchState == .closed
+            && !vm.hideOnClosed
+            && !coordinator.helloAnimationRunning
+            && !showsMusicSneakPeek
+            && !showsCompactLyrics
+            && !showsCompactTrackInfo
+    }
+
     private var showsCompactMusicActivity: Bool {
         if showsMusicSneakPeek {
             return true
@@ -318,12 +352,17 @@ struct ContentView: View {
             return .init(width: baseSize.width * 1.26, height: 120)
         }
 
-        // Same slot/sizing as the sneak peek row below -- widening the main
-        // row instead would need a matching blank spacer on the other side
-        // to keep the physical-notch reservation centered, which left barely
-        // any usable room for the actual lyric text.
-        if showsMusicSneakPeek || showsCompactLyrics {
+        if showsMusicSneakPeek {
             return .init(width: max(baseSize.width, 260), height: baseSize.height + 40)
+        }
+
+        // Lyrics / track info / system stats: widen sideways only, height
+        // stays the base pill height. A second, taller row used to carry
+        // this, but growing the notch's height made it bleed into whatever
+        // sits right below it on screen (e.g. a maximized browser's tab
+        // strip) -- width-only growth only pushes menu bar icons aside.
+        if showsCompactLyrics || showsCompactTrackInfo || showsCompactSystemInfo {
+            return .init(width: physicalNotchWidth + compactInfoWingWidth * 2, height: baseSize.height)
         }
 
         if let entry = clipboardHistory.hudEntry {
@@ -857,11 +896,17 @@ struct ContentView: View {
                           .frame(height: closedNotchContentSize.height, alignment: .center)
                           .transition(motion.hudTransition)
                           .animation(motion.hudAnimation, value: showsClosedSystemHUD)
+                      } else if showsCompactLyrics {
+                          compactLyricsRow()
+                      } else if showsCompactTrackInfo {
+                          compactTrackInfoRow()
+                      } else if showsCompactSystemInfo {
+                          compactSystemInfoRow()
                       } else if showsCompactMusicActivity {
                           musicLiveActivity()
                               .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
                               .background {
-                                  if showsMusicSneakPeek || showsCompactLyrics {
+                                  if showsMusicSneakPeek {
                                       physicalNotchReservation
                                   }
                               }
@@ -883,38 +928,127 @@ struct ContentView: View {
                           .frame(width: max(vm.closedNotchSize.width, 260))
                           .foregroundStyle(.gray)
                           .padding(.vertical, 10)
-                      } else if showsCompactLyrics {
-                          compactLyricsLine()
                       }
     }
 
+    /// Single-row layout shared by lyrics/track-info/system-info. On a
+    /// display with a real notch cutout, a wing sits on each side of it so
+    /// nothing renders where it'd be physically hidden. On a display without
+    /// one, that gap serves no purpose, so content flows across the full
+    /// width instead. Width-only growth, no extra height -- see the comment
+    /// on `closedNotchContentSize`.
     @ViewBuilder
-    private func compactLyricsLine() -> some View {
-        TimelineView(.animation(minimumInterval: 0.1, paused: !musicManager.isPlaying)) { timeline in
-            let currentElapsed: Double = {
-                let delta = timeline.date.timeIntervalSince(musicManager.timestampDate)
-                let progressed = musicManager.elapsedTime + (delta * musicManager.playbackRate)
-                return min(max(progressed, 0), musicManager.songDuration)
-            }()
-            let line = musicManager.lyricLine(at: currentElapsed)
-            HStack(alignment: .center) {
-                Image(systemName: "quote.bubble")
-                    .font(.caption2)
-                GeometryReader { geometry in
-                    MarqueeText(
-                        .constant(line),
-                        font: .caption,
-                        nsFont: .caption1,
-                        textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray,
-                        minDuration: 1,
-                        frameWidth: geometry.size.width
-                    )
-                }
+    private func compactSplitRow<Leading: View, Trailing: View>(
+        @ViewBuilder leading: () -> Leading,
+        @ViewBuilder trailing: () -> Trailing
+    ) -> some View {
+        if screenHasPhysicalNotch {
+            HStack(spacing: 0) {
+                leading()
+                    .padding(.leading, 14)
+                    .frame(width: compactInfoWingWidth, alignment: .leading)
+                Rectangle()
+                    .fill(.black)
+                    .frame(width: physicalNotchWidth)
+                trailing()
+                    .padding(.trailing, 14)
+                    .frame(width: compactInfoWingWidth, alignment: .trailing)
             }
-            .padding(.horizontal, cornerRadiusInsets.closed.bottom + 2)
-            .frame(width: max(vm.closedNotchSize.width, 260))
+            .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
             .foregroundStyle(.gray)
-            .padding(.vertical, 10)
+        } else {
+            HStack(spacing: 8) {
+                leading()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                trailing()
+            }
+            .padding(.horizontal, 14)
+            .frame(width: physicalNotchWidth + compactInfoWingWidth * 2, height: vm.effectiveClosedNotchHeight, alignment: .center)
+            .foregroundStyle(.gray)
+        }
+    }
+
+    @ViewBuilder
+    private func compactLyricsRow() -> some View {
+        TimelineView(.animation(minimumInterval: 0.1, paused: !musicManager.isPlaying)) { timeline in
+            let elapsed = musicManager.estimatedPlaybackPosition(at: timeline.date)
+            let line = musicManager.lyricLine(at: elapsed)
+            compactSplitRow {
+                HStack(spacing: 4) {
+                    Image(systemName: "quote.bubble")
+                        .font(.caption2)
+                    GeometryReader { geometry in
+                        MarqueeText(
+                            .constant(line),
+                            font: .caption,
+                            nsFont: .caption1,
+                            textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray,
+                            minDuration: 1,
+                            frameWidth: geometry.size.width
+                        )
+                    }
+                }
+            } trailing: {
+                Text("\(compactTimeString(elapsed))/\(compactTimeString(musicManager.songDuration))")
+                    .font(.caption2)
+                    .monospacedDigit()
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func compactTrackInfoRow() -> some View {
+        TimelineView(.animation(minimumInterval: 0.5, paused: !musicManager.isPlaying)) { timeline in
+            let elapsed = musicManager.estimatedPlaybackPosition(at: timeline.date)
+            compactSplitRow {
+                HStack(spacing: 4) {
+                    Image(systemName: "music.note")
+                        .font(.caption2)
+                    GeometryReader { geometry in
+                        MarqueeText(
+                            .constant("\(musicManager.songTitle) — \(musicManager.artistName)"),
+                            font: .caption,
+                            nsFont: .caption1,
+                            textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray,
+                            minDuration: 1,
+                            frameWidth: geometry.size.width
+                        )
+                    }
+                }
+            } trailing: {
+                Text("\(compactTimeString(elapsed))/\(compactTimeString(musicManager.songDuration))")
+                    .font(.caption2)
+                    .monospacedDigit()
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private func compactTimeString(_ seconds: Double) -> String {
+        let total = max(0, Int(seconds.rounded()))
+        return String(format: "%d:%02d", total / 60, total % 60)
+    }
+
+    @ViewBuilder
+    private func compactSystemInfoRow() -> some View {
+        compactSplitRow {
+            if Defaults[.weatherEnabled], let celsius = weatherManager.temperatureCelsius {
+                HStack(spacing: 3) {
+                    Image(systemName: weatherManager.symbolName)
+                    Text("\(Int(celsius.rounded()))°")
+                }
+                .font(.caption)
+            }
+        } trailing: {
+            if Defaults[.systemStatsEnabled] {
+                HStack(spacing: 3) {
+                    Image(systemName: "cpu")
+                    Text("\(Int((systemStatsManager.cpuUsage * 100).rounded()))%·\(Int((systemStatsManager.memoryUsage * 100).rounded()))%")
+                }
+                .font(.caption)
+                .lineLimit(1)
+            }
         }
     }
 

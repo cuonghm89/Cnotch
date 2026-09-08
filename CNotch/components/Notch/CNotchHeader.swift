@@ -29,7 +29,7 @@ struct CNotchHeader: View {
         ZStack {
             Rectangle()
                 .fill(notchBackgroundColor)
-                .frame(width: vm.closedNotchSize.width)
+                .frame(width: middleGapWidth)
                 .frame(maxHeight: .infinity, alignment: .top)
 
             HStack(spacing: 0) {
@@ -40,7 +40,7 @@ struct CNotchHeader: View {
                     .notchHeaderVisibility(vm.notchState != .closed)
 
                 Color.clear
-                    .frame(width: vm.closedNotchSize.width)
+                    .frame(width: middleGapWidth)
 
                 HStack(spacing: 4) {
                 if vm.notchState == .open {
@@ -118,9 +118,20 @@ struct CNotchHeader: View {
         .environmentObject(vm)
     }
 
+    private var screenHasPhysicalNotch: Bool {
+        hasPhysicalNotch(screenUUID: coordinator.selectedScreenUUID)
+    }
+
     private var notchBackgroundColor: Color {
-        NSScreen.screen(withUUID: coordinator.selectedScreenUUID)?.safeAreaInsets.top ?? 0 > 0
-            ? .black : .clear
+        screenHasPhysicalNotch ? .black : .clear
+    }
+
+    /// Width of the gap between the tab strip and the weather/stats/settings
+    /// icons. On a real notch it must match the physical cutout so the two
+    /// sides line up with the closed pill beneath; without one, there's
+    /// nothing to clear -- just a little breathing room.
+    private var middleGapWidth: CGFloat {
+        screenHasPhysicalNotch ? vm.closedNotchSize.width : collapsedMiddleGapWidth
     }
 
     func isHUDType(_ type: SneakContentType) -> Bool {
