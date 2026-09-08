@@ -336,6 +336,11 @@ class MusicManager: ObservableObject {
 
     // MARK: - Lyrics
     private func fetchLyricsIfAvailable(bundleIdentifier: String?, title: String, artist: String) {
+        // Invalidate the previous track's synced lyrics immediately -- not just
+        // currentLyrics -- so there's no window where a stale line from the
+        // last song could be matched against the new song's playback position.
+        self.syncedLyrics = []
+
         guard Defaults[.enableLyrics], !title.isEmpty else {
             DispatchQueue.main.async {
                 self.isFetchingLyrics = false
