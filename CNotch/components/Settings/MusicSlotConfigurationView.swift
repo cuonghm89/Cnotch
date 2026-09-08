@@ -68,7 +68,7 @@ struct MusicSlotConfigurationView: View {
                         .frame(width: 32, height: 32)
                         .background(Color(NSColor.controlBackgroundColor))
                         .clipShape(RoundedRectangle(cornerRadius: 6))
-                        .help(control.label)
+                        .help(LocalizedStringKey(control.label))
                         .onDrag {
                             NSItemProvider(object: NSString(string: "control:\(control.rawValue)"))
                         }
@@ -84,7 +84,18 @@ struct MusicSlotConfigurationView: View {
                 .frame(width: 44, height: 44)
                 .background(Color(NSColor.controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-            Text(locked ? "\(control.label) • Locked" : control.label)
+            Group {
+                // control.label is a runtime String (not a string literal),
+                // so Text(_:) picks the non-localizing overload -- wrapping
+                // it, and building the "locked" suffix as a separate Text
+                // instead of interpolating it into one combined string,
+                // lets each half look itself up in the catalog correctly.
+                if locked {
+                    Text(LocalizedStringKey(control.label)) + Text(" • ") + Text("Locked")
+                } else {
+                    Text(LocalizedStringKey(control.label))
+                }
+            }
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)

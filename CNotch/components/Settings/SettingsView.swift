@@ -108,7 +108,7 @@ private struct LiquidGlassSegmentedPicker<Item: Hashable>: View {
                     Image(systemName: iconName)
                         .font(.system(size: 10, weight: .semibold))
                 }
-                Text(label(item))
+                Text(LocalizedStringKey(label(item)))
                     .lineLimit(1)
             }
             .font(.system(size: 11.5, weight: .medium))
@@ -278,9 +278,9 @@ struct SettingsView: View {
         } detail: {
             VStack(alignment: .leading, spacing: 0) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(selectedTab.rawValue)
+                    Text(LocalizedStringKey(selectedTab.rawValue))
                         .font(.system(size: 26, weight: .semibold))
-                    Text(selectedTab.summary)
+                    Text(LocalizedStringKey(selectedTab.summary))
                         .font(.body)
                         .foregroundStyle(.secondary)
                 }
@@ -383,7 +383,12 @@ private struct SettingsSidebarRow: View {
                 Image(systemName: page.icon)
                     .font(.system(size: 16, weight: .medium))
                     .frame(width: 18, height: 18)
-                Text(page.rawValue)
+                // Text(String) uses the non-localizing overload -- it shows
+                // the raw value verbatim with no catalog lookup at all,
+                // which is why the sidebar stayed in English regardless of
+                // the app's language setting while surrounding section
+                // headers (real Text("literal") calls) translated fine.
+                Text(LocalizedStringKey(page.rawValue))
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                 Spacer(minLength: 0)
             }
@@ -423,8 +428,8 @@ private struct ModulesSettings: View {
                         Image(systemName: module.icon)
                             .frame(width: 20)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(module.title)
-                            Text(modules.isInstalled(module.id) ? "Installed" : "Not installed")
+                            Text(LocalizedStringKey(module.title))
+                            Text(LocalizedStringKey(modules.isInstalled(module.id) ? "Installed" : "Not installed"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -597,7 +602,7 @@ private struct CameraSettings: View {
 
             Section("Camera permission") {
                 HStack {
-                    Text(isAuthorized ? "Allowed" : "Not allowed")
+                    Text(LocalizedStringKey(isAuthorized ? "Allowed" : "Not allowed"))
                         .foregroundStyle(isAuthorized ? .green : .secondary)
                     Spacer()
                     Button(isAuthorized ? "Manage" : "Grant") {
@@ -681,7 +686,16 @@ struct GeneralSettings: View {
                     Text("Show menu bar icon")
                 }
                 .tint(.effectiveAccent)
-                LaunchAtLogin.Toggle("Launch at login")
+                // LaunchAtLogin.Toggle("...") builds its Text() inside the
+                // package's own module, which resolves the string catalog
+                // lookup against that package's bundle (no catalog at all)
+                // instead of ours -- so our translation never applied. The
+                // label-closure initializer builds Text() in our own code
+                // instead, exactly as the package's own docs recommend for
+                // localization.
+                LaunchAtLogin.Toggle {
+                    Text("Launch at login")
+                }
                 Defaults.Toggle(key: .showOnAllDisplays) {
                     Text("Show on all displays")
                 }
@@ -968,7 +982,7 @@ struct BluetoothDeviceNotifications: View {
 
             Section("Bluetooth permission") {
                 HStack {
-                    Text(bluetoothAuthorized ? "Allowed" : "Not allowed")
+                    Text(LocalizedStringKey(bluetoothAuthorized ? "Allowed" : "Not allowed"))
                         .foregroundStyle(bluetoothAuthorized ? .green : .secondary)
                     Spacer()
                     Button(bluetoothAuthorized ? "Manage" : "Grant") {
@@ -1114,7 +1128,7 @@ struct HUD: View {
 
             Section("Accessibility permission") {
                 HStack {
-                    Text(accessibilityAuthorized ? "Allowed" : "Not allowed")
+                    Text(LocalizedStringKey(accessibilityAuthorized ? "Allowed" : "Not allowed"))
                         .foregroundStyle(accessibilityAuthorized ? .green : .secondary)
                     Spacer()
                     Button(accessibilityAuthorized ? "Manage" : "Grant") {
@@ -1414,7 +1428,7 @@ struct CalendarSettings: View {
                 HStack {
                     Text("Calendars")
                     Spacer()
-                    Text(calendarManager.calendarAuthorizationStatus == .fullAccess ? "Allowed" : "Not allowed")
+                    Text(LocalizedStringKey(calendarManager.calendarAuthorizationStatus == .fullAccess ? "Allowed" : "Not allowed"))
                         .foregroundStyle(calendarManager.calendarAuthorizationStatus == .fullAccess ? .green : .secondary)
                     Button(calendarManager.calendarAuthorizationStatus == .fullAccess ? "Manage" : "Grant") {
                         if calendarManager.calendarAuthorizationStatus == .notDetermined {
@@ -1428,7 +1442,7 @@ struct CalendarSettings: View {
                 HStack {
                     Text("Reminders")
                     Spacer()
-                    Text(calendarManager.reminderAuthorizationStatus == .fullAccess ? "Allowed" : "Not allowed")
+                    Text(LocalizedStringKey(calendarManager.reminderAuthorizationStatus == .fullAccess ? "Allowed" : "Not allowed"))
                         .foregroundStyle(calendarManager.reminderAuthorizationStatus == .fullAccess ? .green : .secondary)
                     Button(calendarManager.reminderAuthorizationStatus == .fullAccess ? "Manage" : "Grant") {
                         if calendarManager.reminderAuthorizationStatus == .notDetermined {
@@ -1592,7 +1606,7 @@ struct About: View {
             Section("Application") {
                 LabeledContent("Version") {
                     HStack(spacing: 4) {
-                        Text(Bundle.main.releaseVersionNumber ?? "Unknown")
+                        Text(LocalizedStringKey(Bundle.main.releaseVersionNumber ?? "Unknown"))
                         if showBuildNumber {
                             Text("(\(Bundle.main.buildVersionNumber ?? ""))")
                         }
