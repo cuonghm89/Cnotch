@@ -196,8 +196,14 @@ final class MicrophoneManager: NSObject, ObservableObject {
             mElement: kAudioObjectPropertyElementMain
         )
         guard AudioObjectHasProperty(deviceID, &muteAddr) else { return }
+        // CoreAudio invokes this block on an arbitrary HAL thread, not
+        // necessarily main -- unlike setupDefaultDeviceListener's block just
+        // above, this one called refresh() (which writes @Published isMuted
+        // directly) without hopping first.
         let listener: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
-            self?.refresh()
+            DispatchQueue.main.async {
+                self?.refresh()
+            }
         }
         guard AudioObjectAddPropertyListenerBlock(deviceID, &muteAddr, nil, listener) == noErr else { return }
         deviceListeners.append((deviceID, muteAddr, listener))
