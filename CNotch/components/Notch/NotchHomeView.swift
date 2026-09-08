@@ -156,39 +156,58 @@ struct MusicControlsView: View {
                 }
             }
             if Defaults[.enableLyrics] {
-                TimelineView(.animation(minimumInterval: 0.25, paused: !isExpandedAndVisible || !musicManager.isPlaying)) { timeline in
+                // Faster than the old 0.25s cadence so fast-paced passages
+                // (rap verses with a new line every second or so) hand off
+                // between lines promptly instead of looking like it's lagging.
+                TimelineView(.animation(minimumInterval: 0.1, paused: !isExpandedAndVisible || !musicManager.isPlaying)) { timeline in
                     let currentElapsed: Double = {
                         guard musicManager.isPlaying else { return musicManager.elapsedTime }
                         let delta = timeline.date.timeIntervalSince(musicManager.timestampDate)
                         let progressed = musicManager.elapsedTime + (delta * musicManager.playbackRate)
                         return min(max(progressed, 0), musicManager.songDuration)
                     }()
-                    let line: String = {
-                        if musicManager.isFetchingLyrics { return "Loading lyrics…" }
-                        if !musicManager.syncedLyrics.isEmpty {
-                            return musicManager.lyricLine(at: currentElapsed)
+
+                    if musicManager.isFetchingLyrics {
+                        lyricLineView(text: "Loading lyrics…", font: .subheadline, color: .gray.opacity(0.7))
+                    } else if !musicManager.syncedLyrics.isEmpty {
+                        let lines = musicManager.currentAndNextLyricLines(at: currentElapsed)
+                        // Showing the line right after the current one gives the eye
+                        // somewhere to jump to ahead of time during fast passages,
+                        // instead of only ever seeing one line swapped out with no warning.
+                        VStack(alignment: .leading, spacing: 1) {
+                            lyricLineView(text: lines.current, font: .subheadline, color: .gray)
+                            if !lines.next.isEmpty {
+                                lyricLineView(text: lines.next, font: .caption, color: .gray.opacity(0.5))
+                            }
                         }
+                        .opacity(musicManager.isPlaying ? 1 : 0)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    } else {
                         let trimmed = musicManager.currentLyrics.trimmingCharacters(in: .whitespacesAndNewlines)
-                        return trimmed.isEmpty ? "No lyrics found" : trimmed.replacingOccurrences(of: "\n", with: " ")
-                    }()
-                    let isPersian = line.unicodeScalars.contains { scalar in
-                        let v = scalar.value
-                        return v >= 0x0600 && v <= 0x06FF
+                        let fallback = trimmed.isEmpty ? "No lyrics found" : trimmed.replacingOccurrences(of: "\n", with: " ")
+                        lyricLineView(text: fallback, font: .subheadline, color: .gray)
+                            .opacity(musicManager.isPlaying ? 1 : 0)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                     }
-                    MarqueeText(
-                        .constant(line),
-                        font: .subheadline,
-                        nsFont: .subheadline,
-                        textColor: musicManager.isFetchingLyrics ? .gray.opacity(0.7) : .gray,
-                        frameWidth: 400
-                    )
-                    .font(isPersian ? .custom("Vazirmatn-Regular", size: NSFont.preferredFont(forTextStyle: .subheadline).pointSize) : .subheadline)
-                    .lineLimit(1)
-                    .opacity(musicManager.isPlaying ? 1 : 0)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
         }
+    }
+
+    private func lyricLineView(text: String, font: Font, color: Color) -> some View {
+        let isPersian = text.unicodeScalars.contains { scalar in
+            let v = scalar.value
+            return v >= 0x0600 && v <= 0x06FF
+        }
+        return MarqueeText(
+            .constant(text),
+            font: font,
+            nsFont: font == .caption ? .caption1 : .subheadline,
+            textColor: color,
+            frameWidth: 400
+        )
+        .font(isPersian ? .custom("Vazirmatn-Regular", size: NSFont.preferredFont(forTextStyle: .subheadline).pointSize) : font)
+        .lineLimit(1)
     }
 
     private var musicSlider: some View {
@@ -220,7 +239,7 @@ struct MusicControlsView: View {
                     .frame(maxWidth: .infinity)
             }
         }
-        .frame(height: 52)
+        .frame(height: 44)
     }
 
     private var activeSlots: [MusicControlButton] {
@@ -479,12 +498,12 @@ private struct DynamicIslandMusicButton: View {
                         .scaledToFit()
                 } else {
                     Image(systemName: icon)
-                        .font(.system(size: isPrimary ? 32 : 22, weight: .bold))
+                        .font(.system(size: isPrimary ? 26 : 18, weight: .bold))
                         .contentTransition(.symbolEffect)
                         .foregroundStyle(tint.opacity(isHovering ? 1 : isPrimary ? 1 : 0.82))
                 }
             }
-            .frame(width: isPrimary ? 52 : 40, height: isPrimary ? 52 : 40)
+            .frame(width: isPrimary ? 44 : 34, height: isPrimary ? 44 : 34)
             .contentShape(Circle())
             .scaleEffect(!reduceMotion && isHovering ? 1.08 : 1)
         }

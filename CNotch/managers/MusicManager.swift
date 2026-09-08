@@ -529,7 +529,14 @@ class MusicManager: ObservableObject {
     }
 
     func lyricLine(at elapsed: Double) -> String {
-        guard !syncedLyrics.isEmpty else { return currentLyrics }
+        currentAndNextLyricLines(at: elapsed).current
+    }
+
+    /// Returns the current line and the one right after it, so fast-paced
+    /// passages (rap verses with a new line every second or so) can be shown
+    /// with a line of lookahead instead of just swapping text with no warning.
+    func currentAndNextLyricLines(at elapsed: Double) -> (current: String, next: String) {
+        guard !syncedLyrics.isEmpty else { return (currentLyrics, "") }
         // Binary search for last line with time <= elapsed.
         // idx stays -1 (no line yet) during an instrumental intro that
         // precedes the first timestamped lyric -- otherwise this would
@@ -546,7 +553,9 @@ class MusicManager: ObservableObject {
                 high = mid - 1
             }
         }
-        return idx >= 0 ? syncedLyrics[idx].text : ""
+        let current = idx >= 0 ? syncedLyrics[idx].text : ""
+        let next = (idx + 1) < syncedLyrics.count ? syncedLyrics[idx + 1].text : ""
+        return (current, next)
     }
 
     private func triggerFlipAnimation() {
