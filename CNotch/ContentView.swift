@@ -911,10 +911,10 @@ struct ContentView: View {
                     )
                 }
             }
+            .padding(.horizontal, cornerRadiusInsets.closed.bottom + 2)
             .frame(width: max(vm.closedNotchSize.width, 260))
             .foregroundStyle(.gray)
             .padding(.vertical, 10)
-            .padding(.horizontal, 12)
         }
     }
 
