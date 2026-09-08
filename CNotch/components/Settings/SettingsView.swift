@@ -745,7 +745,7 @@ struct GeneralSettings: View {
                         name: Notification.Name.notchHeightChanged, object: nil)
                 }
                 if notchHeightMode == .custom {
-                    Slider(value: $notchHeight, in: 15...45, step: 1) {
+                    Slider(value: $notchHeight, in: 21...45, step: 1) {
                         Text("Custom notch size - \(notchHeight, specifier: "%.0f")")
                     }
                     .onChange(of: notchHeight) {
@@ -781,7 +781,7 @@ struct GeneralSettings: View {
                         name: Notification.Name.notchHeightChanged, object: nil)
                 }
                 if nonNotchHeightMode == .custom {
-                    Slider(value: $nonNotchHeight, in: 0...40, step: 1) {
+                    Slider(value: $nonNotchHeight, in: 21...40, step: 1) {
                         Text("Custom notch size - \(nonNotchHeight, specifier: "%.0f")")
                     }
                     .onChange(of: nonNotchHeight) {

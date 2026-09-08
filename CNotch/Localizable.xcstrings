@@ -7155,8 +7155,8 @@
         },
         "pt-BR" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Descrição"
+            "state" : "translated",
+            "value" : "Tamanho personalizado do notch - %.0f"
           }
         },
         "ru" : {

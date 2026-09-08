@@ -266,6 +266,13 @@ enum MusicPlayerImageSizes {
         }
     }
 
-    return .init(width: notchWidth, height: notchHeight - 0.2)
+    // The closed pill's corner radii (cornerRadiusInsets.closed) are fixed
+    // regardless of this height -- a custom height slider let a user pick
+    // a value at or below their sum (20), which flips the direction of the
+    // path segment between the two corners in NotchShape and renders a
+    // self-intersecting shape for as long as the notch is closed (i.e.
+    // almost always). Floor it just above that sum.
+    let minimumHeight = cornerRadiusInsets.closed.top + cornerRadiusInsets.closed.bottom + 1
+    return .init(width: notchWidth, height: max(notchHeight, minimumHeight) - 0.2)
 }
 let musicContentSize: CGSize = .init(width: 504, height: 120)
