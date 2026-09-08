@@ -914,6 +914,7 @@ struct ContentView: View {
             .frame(width: max(vm.closedNotchSize.width, 260))
             .foregroundStyle(.gray)
             .padding(.vertical, 10)
+            .padding(.horizontal, 12)
         }
     }
 

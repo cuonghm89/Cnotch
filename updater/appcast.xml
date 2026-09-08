@@ -5,6 +5,16 @@
         <link>https://github.com/cuonghm89/Cnotch/releases</link>
         <description>CNotch updates</description>
         <item>
+            <title>1.0.1</title>
+            <pubDate>Tue, 08 Sep 2026 13:56:00 +0000</pubDate>
+            <link>https://github.com/cuonghm89/Cnotch/releases</link>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<p>Test release for Sparkle auto-update: lyrics improvements (2-line lookahead, compact-notch lyrics row), CPU/RAM + Weather header chips, mic mute, Pomodoro/Voice Memo/Quick Note utilities menu, Vietnamese localization, and various notch-header/sizing fixes.</p>]]></description>
+            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.1/CNotch-1.0.1.dmg" length="10344715" type="application/octet-stream" sparkle:edSignature="gFY6N/nA3QM5SPQIJNkWWLr8iEywFhj5HuzW4tArDApMlozHFE8e5MHUgg4rJWZH+/woGkyoM0j6+J1yHZOvBw=="/>
+        </item>
+        <item>
             <title>1.0.0</title>
             <pubDate>Mon, 07 Sep 2026 18:08:00 +0000</pubDate>
             <link>https://github.com/cuonghm89/Cnotch/releases</link>
