@@ -66,11 +66,34 @@ func clipboardOpenNotchSize(screenUUID: String? = nil) -> CGSize {
 }
 let cornerRadiusInsets: (opened: (top: CGFloat, bottom: CGFloat), closed: (top: CGFloat, bottom: CGFloat)) = (opened: (top: 19, bottom: 24), closed: (top: 6, bottom: 14))
 
+/// Rough width budget for the optional icons on the right side of the open
+/// header (weather, system stats, the quick-note/pomodoro/voice-memo menu,
+/// settings, battery). The window width was only ever sized off the tab
+/// count on the left, so enabling several of these at once had nowhere to
+/// go and got truncated -- both wings need to fit within the same width to
+/// keep the physical notch cutout centered, so this is folded into
+/// `tabHeaderMinimumOpenWidth` as the other candidate for that shared width.
+@MainActor
+func trailingIconsWingWidth() -> CGFloat {
+    var itemWidths: [CGFloat] = []
+    if Defaults[.weatherEnabled] { itemWidths.append(40) }
+    if Defaults[.systemStatsEnabled] { itemWidths.append(65) }
+    if Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled] {
+        itemWidths.append(24)
+    }
+    if Defaults[.settingsIconInNotch] { itemWidths.append(24) }
+    if Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] { itemWidths.append(44) }
+    guard !itemWidths.isEmpty else { return 0 }
+    let interItemSpacing = CGFloat(itemWidths.count - 1) * 4
+    return itemWidths.reduce(0, +) + interItemSpacing + 10 // trailing padding
+}
+
 @MainActor
 func tabHeaderMinimumOpenWidth(screenUUID: String? = nil) -> CGFloat {
     let tabCount = CGFloat(FeatureModuleRegistry.shared.installedModules.count)
     let tabStripWidth = tabCount * moduleTabWidth
-    let requiredInnerWingWidth = moduleTabLeadingPadding + tabStripWidth + moduleTabNotchGap
+    let leftWingWidth = moduleTabLeadingPadding + tabStripWidth + moduleTabNotchGap
+    let requiredInnerWingWidth = max(leftWingWidth, trailingIconsWingWidth())
     let physicalWidth = getClosedNotchSize(screenUUID: screenUUID).width
     let dynamicWidth = physicalWidth + (requiredInnerWingWidth * 2) + (notchOuterHorizontalPadding * 2)
     return max(tabBarMinimumOpenWidth, dynamicWidth)
