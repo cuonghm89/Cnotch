@@ -80,6 +80,23 @@ enum SoftwareUpdateChannel: String, CaseIterable, Identifiable, Defaults.Seriali
     var id: String { rawValue }
 }
 
+enum AppLanguage: String, CaseIterable, Identifiable, Defaults.Serializable {
+    case system = "System"
+    case en = "English"
+    case vi = "Tiếng Việt"
+
+    var id: String { rawValue }
+
+    /// `nil` for `.system` means "don't override" -- fall back to macOS's own language.
+    var locale: Locale? {
+        switch self {
+        case .system: return nil
+        case .en: return Locale(identifier: "en")
+        case .vi: return Locale(identifier: "vi")
+        }
+    }
+}
+
 // Action to perform when Option (⌥) is held while pressing media keys
 enum OptionKeyAction: String, CaseIterable, Identifiable, Defaults.Serializable {
     case openSettings = "Open System Settings"
@@ -264,4 +281,7 @@ extension Defaults.Keys {
 
     // MARK: System Stats
     static let systemStatsEnabled = Key<Bool>("systemStatsEnabled", default: false)
+
+    // MARK: Language
+    static let appLanguage = Key<AppLanguage>("appLanguage", default: .system)
 }

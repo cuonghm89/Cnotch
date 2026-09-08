@@ -198,11 +198,24 @@
             "state" : "needs_review",
             "value" : " – %lld"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " – %lld"
+          }
         }
       }
     },
     "-%@" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%@"
+          }
+        }
+      }
     },
     "'Now Playing' was the only option on previous versions and works with all media apps." : {
       "localizations" : {
@@ -300,6 +313,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "“当前播放”是历史版本中的唯一选项。该选项可兼容所有媒体应用。"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Now Playing\" là tùy chọn duy nhất ở phiên bản trước và hoạt động với mọi ứng dụng media."
           }
         }
       }
@@ -399,6 +418,12 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "needs_review",
+            "value" : "(%@)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "(%@)"
           }
         }
@@ -501,11 +526,24 @@
             "state" : "needs_review",
             "value" : "%.0f 秒"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.0f giây"
+          }
         }
       }
     },
     "%.1f seconds" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f giây"
+          }
+        }
+      }
     },
     "%.1fs" : {
       "localizations" : {
@@ -602,6 +640,12 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "needs_review",
+            "value" : "%.1fs"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%.1fs"
           }
         }
@@ -704,6 +748,12 @@
             "state" : "needs_review",
             "value" : "%@"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
         }
       }
     },
@@ -802,6 +852,12 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "needs_review",
+            "value" : "%d%%"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%d%%"
           }
         }
@@ -904,6 +960,12 @@
             "state" : "needs_review",
             "value" : "%lld"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
         }
       }
     },
@@ -1002,6 +1064,12 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "needs_review",
+            "value" : "%lld%%"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%lld%%"
           }
         }
@@ -1104,6 +1172,12 @@
             "state" : "needs_review",
             "value" : "• Bug 修复"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• Sửa lỗi"
+          }
         }
       }
     },
@@ -1204,6 +1278,12 @@
             "state" : "needs_review",
             "value" : "• 提升性能"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• Cải thiện hiệu năng"
+          }
         }
       }
     },
@@ -1303,6 +1383,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "• 新功能1"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• Tính năng mới 1"
           }
         }
       }
@@ -1405,6 +1491,12 @@
             "state" : "needs_review",
             "value" : "关于"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giới thiệu"
+          }
         }
       }
     },
@@ -1505,6 +1597,12 @@
             "state" : "needs_review",
             "value" : "首选颜色"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Màu nhấn"
+          }
         }
       }
     },
@@ -1604,6 +1702,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "访问被拒绝"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Truy cập bị từ chối"
           }
         }
       }
@@ -1706,11 +1810,24 @@
             "state" : "needs_review",
             "value" : "Accessibility access is required to replace the system HUD."
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền Accessibility để thay thế HUD hệ thống."
+          }
         }
       }
     },
     "Accessibility permission" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quyền Accessibility"
+          }
+        }
+      }
     },
     "Add" : {
       "localizations" : {
@@ -1808,6 +1925,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "添加"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thêm"
           }
         }
       }
@@ -1910,6 +2033,12 @@
             "state" : "needs_review",
             "value" : "手动添加"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thêm thủ công"
+          }
         }
       }
     },
@@ -2010,6 +2139,12 @@
             "state" : "needs_review",
             "value" : "添加新的可视化器"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thêm hiệu ứng hình ảnh mới"
+          }
         }
       }
     },
@@ -2109,6 +2244,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "其他功能"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tính năng bổ sung"
           }
         }
       }
@@ -2211,6 +2352,12 @@
             "state" : "needs_review",
             "value" : "Advanced"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nâng cao"
+          }
         }
       }
     },
@@ -2310,6 +2457,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "全天"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cả ngày"
           }
         }
       }
@@ -2411,11 +2564,24 @@
             "state" : "needs_review",
             "value" : "允许访问"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cho phép truy cập"
+          }
         }
       }
     },
     "Allowed" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã cho phép"
+          }
+        }
+      }
     },
     "Always show full event titles" : {
       "localizations" : {
@@ -2513,6 +2679,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Always show full event titles"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luôn hiện đầy đủ tiêu đề sự kiện"
           }
         }
       }
@@ -2614,115 +2786,44 @@
             "state" : "needs_review",
             "value" : "总是显示标签页"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Luôn hiện các tab"
+          }
         }
       }
     },
     "Another Dynamic Island for macOS" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dynamic Island khác cho macOS"
+          }
+        }
+      }
     },
     "CNotch" : {
-      "extractionState" : "stale",
       "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "en" : {
+        "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CNotch"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CNotch"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "needs_review",
             "value" : "CNotch"
           }
         }
       }
     },
     "CNotch app for macOS" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ứng dụng CNotch cho macOS"
+          }
+        }
+      }
     },
     "Cnotch" : {
       "extractionState" : "stale",
@@ -2822,11 +2923,14 @@
             "state" : "needs_review",
             "value" : "Cnotch"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CNotch"
+          }
         }
       }
-    },
-    "CNotch" : {
-
     },
     "App icon" : {
       "localizations" : {
@@ -2924,6 +3028,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "应用图标"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biểu tượng ứng dụng"
           }
         }
       }
@@ -3026,11 +3136,24 @@
             "state" : "needs_review",
             "value" : "外观"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giao diện"
+          }
         }
       }
     },
     "Application" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ứng dụng"
+          }
+        }
+      }
     },
     "Auto-scroll to next event" : {
       "localizations" : {
@@ -3128,6 +3251,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Auto-scroll to next event"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tự động cuộn tới sự kiện tiếp theo"
           }
         }
       }
@@ -3229,6 +3358,12 @@
             "state" : "needs_review",
             "value" : "自动检查更新"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tự động kiểm tra cập nhật"
+          }
         }
       }
     },
@@ -3329,6 +3464,12 @@
             "state" : "needs_review",
             "value" : "自动下载更新"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tự động tải bản cập nhật"
+          }
         }
       }
     },
@@ -3428,6 +3569,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "自动切换显示器"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tự động chuyển màn hình"
           }
         }
       }
@@ -3530,11 +3677,24 @@
             "state" : "needs_review",
             "value" : "电池"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin"
+          }
         }
       }
     },
     "Battery %lld percent" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin %lld phần trăm"
+          }
+        }
+      }
     },
     "Battery Information" : {
       "localizations" : {
@@ -3632,6 +3792,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "电池信息"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thông tin pin"
           }
         }
       }
@@ -3733,6 +3899,12 @@
             "state" : "needs_review",
             "value" : "电池设置"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cài đặt pin"
+          }
         }
       }
     },
@@ -3833,11 +4005,24 @@
             "state" : "needs_review",
             "value" : "电池状态"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trạng thái pin"
+          }
         }
       }
     },
     "Bluetooth Device Notifications" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thông báo thiết bị Bluetooth"
+          }
+        }
+      }
     },
     "Boost your productivity with Clipboard Manager" : {
       "localizations" : {
@@ -3936,11 +4121,24 @@
             "state" : "needs_review",
             "value" : "使用剪贴板管理器提升你的效率"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tăng năng suất với Trình quản lý Khay nhớ tạm"
+          }
         }
       }
     },
     "Bottom corner radius" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bán kính góc dưới"
+          }
+        }
+      }
     },
     "Calendar" : {
       "extractionState" : "stale",
@@ -4039,6 +4237,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "日历"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lịch"
           }
         }
       }
@@ -4141,11 +4345,24 @@
             "state" : "needs_review",
             "value" : "日历访问被拒绝。请在系统设置中启用它。"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quyền truy cập Lịch đã bị từ chối. Vui lòng bật trong System Settings."
+          }
         }
       }
     },
     "Calendar access is required to show events." : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập Lịch để hiển thị sự kiện."
+          }
+        }
+      }
     },
     "Calendars" : {
       "localizations" : {
@@ -4244,14 +4461,34 @@
             "state" : "needs_review",
             "value" : "日历"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Các lịch"
+          }
         }
       }
     },
     "Camera access allowed" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã cho phép truy cập Camera"
+          }
+        }
+      }
     },
     "Camera access needed" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập Camera"
+          }
+        }
+      }
     },
     "Cancel" : {
       "localizations" : {
@@ -4350,14 +4587,34 @@
             "state" : "needs_review",
             "value" : "取消"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hủy"
+          }
         }
       }
     },
     "Capture" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp"
+          }
+        }
+      }
     },
     "Center black coverage" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vùng phủ đen trung tâm"
+          }
+        }
+      }
     },
     "Change media with horizontal gestures" : {
       "localizations" : {
@@ -4455,6 +4712,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Change media with horizontal gestures"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đổi bài bằng cử chỉ vuốt ngang"
           }
         }
       }
@@ -4556,6 +4819,12 @@
             "state" : "needs_review",
             "value" : "充电中"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang sạc"
+          }
         }
       }
     },
@@ -4655,6 +4924,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "暂停充电：桌面模式"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tạm dừng sạc: Chế độ Desktop"
           }
         }
       }
@@ -4756,6 +5031,12 @@
             "state" : "needs_review",
             "value" : "检查更新…"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kiểm tra cập nhật…"
+          }
         }
       }
     },
@@ -4855,6 +5136,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "选择音乐来源"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn nguồn nhạc"
           }
         }
       }
@@ -4956,6 +5243,12 @@
             "state" : "needs_review",
             "value" : "Choose any color"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn màu bất kỳ"
+          }
         }
       }
     },
@@ -5055,6 +5348,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : ""
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn giữa màu nhấn hệ thống hoặc tự tùy chỉnh theo ý bạn."
           }
         }
       }
@@ -5156,6 +5455,12 @@
             "state" : "needs_review",
             "value" : "Choose which service to use when sharing files from the shelf. Click the shelf button to select files, or drag files onto it to share immediately."
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn dịch vụ dùng khi chia sẻ file từ Kệ tạm. Bấm nút Kệ tạm để chọn file, hoặc kéo file vào đó để chia sẻ ngay."
+          }
         }
       }
     },
@@ -5256,14 +5561,34 @@
             "state" : "needs_review",
             "value" : "圆形"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hình tròn"
+          }
         }
       }
     },
     "Clear" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa"
+          }
+        }
+      }
     },
     "Clear History" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa lịch sử"
+          }
+        }
+      }
     },
     "Clear slot" : {
       "extractionState" : "stale",
@@ -5363,11 +5688,24 @@
             "state" : "needs_review",
             "value" : "Clear slot"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa ô"
+          }
         }
       }
     },
     "Clipboard is empty" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khay nhớ tạm đang trống"
+          }
+        }
+      }
     },
     "Close" : {
       "localizations" : {
@@ -5465,6 +5803,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "关闭"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đóng"
           }
         }
       }
@@ -5566,6 +5910,12 @@
             "state" : "needs_review",
             "value" : "关闭手势"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cử chỉ đóng"
+          }
         }
       }
     },
@@ -5665,6 +6015,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Closed Notch"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notch thu gọn"
           }
         }
       }
@@ -5766,6 +6122,12 @@
             "state" : "needs_review",
             "value" : "Color Presets"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bảng màu có sẵn"
+          }
         }
       }
     },
@@ -5865,6 +6227,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Colored spectrogram"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phổ tần có màu"
           }
         }
       }
@@ -5966,6 +6334,12 @@
             "state" : "needs_review",
             "value" : "即将上线"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sắp ra mắt"
+          }
         }
       }
     },
@@ -6065,6 +6439,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "继续"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiếp tục"
           }
         }
       }
@@ -6166,6 +6546,12 @@
             "state" : "needs_review",
             "value" : "Copy items on drag"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sao chép khi kéo"
+          }
         }
       }
     },
@@ -6265,6 +6651,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "圆角半径"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tỉ lệ bán kính góc"
           }
         }
       }
@@ -6366,6 +6758,12 @@
             "state" : "needs_review",
             "value" : "Currently selected: %@"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang chọn: %@"
+          }
         }
       }
     },
@@ -6465,6 +6863,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Custom"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tùy chỉnh"
           }
         }
       }
@@ -6566,6 +6970,12 @@
             "state" : "needs_review",
             "value" : "自定义高度"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiều cao tùy chỉnh"
+          }
         }
       }
     },
@@ -6665,6 +7075,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "自定义音乐实时动画"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoạt ảnh Live Activity nhạc tùy chỉnh"
           }
         }
       }
@@ -6766,6 +7182,12 @@
             "state" : "needs_review",
             "value" : "自定义Notch大小 - %.0f"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kích thước notch tùy chỉnh - %.0f"
+          }
         }
       }
     },
@@ -6866,11 +7288,24 @@
             "state" : "needs_review",
             "value" : "自定义可视化器（Lottie）"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiệu ứng hình ảnh tùy chỉnh (Lottie)"
+          }
         }
       }
     },
     "Customize controls and reorder them in the expanded music player." : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tùy chỉnh và sắp xếp lại các nút điều khiển trong trình phát nhạc mở rộng."
+          }
+        }
+      }
     },
     "Customize in Settings" : {
       "localizations" : {
@@ -6968,6 +7403,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "在设置中自定义"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tùy chỉnh trong Cài đặt"
           }
         }
       }
@@ -7070,6 +7511,12 @@
             "state" : "needs_review",
             "value" : "Customize which controls appear in the music player. Volume expands when active."
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tùy chỉnh nút nào hiện trong trình phát nhạc. Âm lượng sẽ mở rộng khi đang dùng."
+          }
         }
       }
     },
@@ -7170,11 +7617,24 @@
             "state" : "needs_review",
             "value" : "默认"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mặc định"
+          }
         }
       }
     },
     "Delete clipboard entry" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa mục trong khay nhớ tạm"
+          }
+        }
+      }
     },
     "Description" : {
       "extractionState" : "stale",
@@ -7273,6 +7733,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "描述"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mô tả"
           }
         }
       }
@@ -7375,6 +7841,12 @@
             "state" : "needs_review",
             "value" : "禁用"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tắt"
+          }
         }
       }
     },
@@ -7476,11 +7948,24 @@
             "state" : "needs_review",
             "value" : "已禁用"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã tắt"
+          }
         }
       }
     },
     "Donate via VietQR" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ủng hộ qua VietQR"
+          }
+        }
+      }
     },
     "Download" : {
       "localizations" : {
@@ -7578,6 +8063,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "下载"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tải xuống"
           }
         }
       }
@@ -7680,6 +8171,12 @@
             "state" : "needs_review",
             "value" : "下载"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thư mục Downloads"
+          }
         }
       }
     },
@@ -7781,11 +8278,24 @@
             "state" : "needs_review",
             "value" : "Drag a control onto a slot"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kéo một nút điều khiển vào ô"
+          }
         }
       }
     },
     "Drag a control onto an unlocked button" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kéo một nút điều khiển vào nút chưa khóa"
+          }
+        }
+      }
     },
     "Drag items in the preview to reorder or drop from the palette" : {
       "extractionState" : "stale",
@@ -7884,6 +8394,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Drag items in the preview to reorder or drop from the palette"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kéo mục trong khung xem trước để sắp xếp lại, hoặc thả từ bảng chọn"
           }
         }
       }
@@ -7985,6 +8501,12 @@
             "state" : "needs_review",
             "value" : "拖放文件到这里"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thả file vào đây"
+          }
         }
       }
     },
@@ -8084,6 +8606,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "轻松复制、存储和管理您最常用的内容。升级后可解锁高级功能，如多项目存储和快速访问！"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dễ dàng sao chép, lưu trữ và quản lý nội dung hay dùng nhất. Nâng cấp ngay để có tính năng nâng cao như lưu nhiều mục và truy cập nhanh!"
           }
         }
       }
@@ -8185,6 +8713,12 @@
             "state" : "needs_review",
             "value" : "编辑布局"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉnh sửa bố cục"
+          }
         }
       }
     },
@@ -8284,6 +8818,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "启用专辑封面的模糊效果"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật hiệu ứng mờ phía sau ảnh album"
           }
         }
       }
@@ -8385,11 +8925,24 @@
             "state" : "needs_review",
             "value" : "启用虚拟镜像"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật gương camera"
+          }
         }
       }
     },
     "Enable clipboard history" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật lịch sử khay nhớ tạm"
+          }
+        }
+      }
     },
     "Enable colored spectrograms" : {
       "extractionState" : "stale",
@@ -8488,6 +9041,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "启用彩色谱图"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật phổ tần có màu"
           }
         }
       }
@@ -8589,6 +9148,12 @@
             "state" : "needs_review",
             "value" : "启用手势"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật cử chỉ"
+          }
         }
       }
     },
@@ -8688,6 +9253,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "启用发光效果"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật hiệu ứng phát sáng"
           }
         }
       }
@@ -8789,6 +9360,12 @@
             "state" : "needs_review",
             "value" : "Enable haptic feedback"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật phản hồi rung (haptic)"
+          }
         }
       }
     },
@@ -8888,6 +9465,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "启用暂存区"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật Kệ tạm"
           }
         }
       }
@@ -8989,6 +9572,12 @@
             "state" : "needs_review",
             "value" : "启用窗口阴影"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật bóng đổ cửa sổ"
+          }
         }
       }
     },
@@ -9088,6 +9677,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "用 HUD 提升您的体验"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nâng cao trải nghiệm với HUD"
           }
         }
       }
@@ -9189,6 +9784,12 @@
             "state" : "needs_review",
             "value" : "享受您的闲暇时光！"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tận hưởng thời gian rảnh của bạn!"
+          }
         }
       }
     },
@@ -9289,6 +9890,12 @@
             "state" : "needs_review",
             "value" : "Expanded drag detection area"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vùng nhận kéo-thả mở rộng"
+          }
         }
       }
     },
@@ -9388,6 +9995,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "扩展悬停区域"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở rộng vùng rê chuột"
           }
         }
       }
@@ -9490,14 +10103,34 @@
             "state" : "needs_review",
             "value" : "扩展"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiện ích mở rộng"
+          }
         }
       }
     },
     "Extract text from images (OCR)" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trích xuất văn bản từ ảnh (OCR)"
+          }
+        }
+      }
     },
     "Features" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tính năng"
+          }
+        }
+      }
     },
     "Files dropped on the shelf will be shared via this service" : {
       "localizations" : {
@@ -9595,6 +10228,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Files dropped on the shelf will be shared via this service"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File thả vào Kệ tạm sẽ được chia sẻ qua dịch vụ này"
           }
         }
       }
@@ -9696,6 +10335,12 @@
             "state" : "needs_review",
             "value" : "完成"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoàn tất"
+          }
         }
       }
     },
@@ -9795,6 +10440,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Full screen behavior"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hành vi khi toàn màn hình"
           }
         }
       }
@@ -9896,6 +10547,12 @@
             "state" : "needs_review",
             "value" : "通用"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chung"
+          }
         }
       }
     },
@@ -9995,6 +10652,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "手势控制"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Điều khiển bằng cử chỉ"
           }
         }
       }
@@ -10096,6 +10759,12 @@
             "state" : "needs_review",
             "value" : "手势灵敏度"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Độ nhạy cử chỉ"
+          }
         }
       }
     },
@@ -10195,6 +10864,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "开始使用"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bắt đầu"
           }
         }
       }
@@ -10297,14 +10972,34 @@
             "state" : "needs_review",
             "value" : "GitHub"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub"
+          }
         }
       }
     },
     "GitHub Sponsors" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhà tài trợ trên GitHub"
+          }
+        }
+      }
     },
     "Glass edge opacity" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Độ mờ viền kính (glass)"
+          }
+        }
+      }
     },
     "Got it!" : {
       "localizations" : {
@@ -10402,6 +11097,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "明白了！"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã hiểu!"
           }
         }
       }
@@ -10503,17 +11204,44 @@
             "state" : "needs_review",
             "value" : "渐变"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chuyển sắc (Gradient)"
+          }
         }
       }
     },
     "Grant" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cấp quyền"
+          }
+        }
+      }
     },
     "Grant Calendar Access" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cấp quyền truy cập Lịch"
+          }
+        }
+      }
     },
     "Grant Reminder Access" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cấp quyền truy cập Nhắc nhở"
+          }
+        }
+      }
     },
     "Hide all-day events" : {
       "localizations" : {
@@ -10611,6 +11339,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Hide all-day events"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ẩn sự kiện cả ngày"
           }
         }
       }
@@ -10712,6 +11446,12 @@
             "state" : "needs_review",
             "value" : "隐藏已完成提醒"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ẩn nhắc nhở đã hoàn thành"
+          }
         }
       }
     },
@@ -10811,6 +11551,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Hide for all apps"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ẩn với mọi ứng dụng"
           }
         }
       }
@@ -10912,6 +11658,12 @@
             "state" : "needs_review",
             "value" : "Hide for media app only"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉ ẩn với ứng dụng media"
+          }
         }
       }
     },
@@ -11011,6 +11763,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Hide from screen recording"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ẩn khỏi ghi màn hình"
           }
         }
       }
@@ -11112,6 +11870,12 @@
             "state" : "needs_review",
             "value" : "Hide title bar"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ẩn thanh tiêu đề"
+          }
         }
       }
     },
@@ -11211,6 +11975,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "分级"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phân cấp"
           }
         }
       }
@@ -11312,11 +12082,24 @@
             "state" : "needs_review",
             "value" : "高"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cao"
+          }
         }
       }
     },
     "History limit: %lld" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giới hạn lịch sử: %lld"
+          }
+        }
+      }
     },
     "Hover delay" : {
       "localizations" : {
@@ -11414,6 +12197,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Hover delay"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Độ trễ khi rê chuột"
           }
         }
       }
@@ -11515,11 +12304,24 @@
             "state" : "needs_review",
             "value" : "https://github.com/pear-devs/pear-desktop"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://github.com/pear-devs/pear-desktop"
+          }
         }
       }
     },
     "HUD rows" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Số dòng HUD"
+          }
+        }
+      }
     },
     "HUD style" : {
       "extractionState" : "stale",
@@ -11618,6 +12420,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "HUD 样式"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kiểu HUD"
           }
         }
       }
@@ -11720,14 +12528,34 @@
             "state" : "needs_review",
             "value" : "HUD"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HUD"
+          }
         }
       }
     },
     "Image" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hình ảnh"
+          }
+        }
+      }
     },
     "Image limit: %lld MB" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giới hạn ảnh: %lld MB"
+          }
+        }
+      }
     },
     "In progress" : {
       "localizations" : {
@@ -11826,11 +12654,24 @@
             "state" : "needs_review",
             "value" : "进行中"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang xử lý"
+          }
         }
       }
     },
     "Indicator Layout" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bố cục chỉ báo"
+          }
+        }
+      }
     },
     "Inline" : {
       "extractionState" : "stale",
@@ -11929,6 +12770,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "内嵌"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trên cùng một dòng"
           }
         }
       }
@@ -12031,6 +12878,12 @@
             "state" : "needs_review",
             "value" : "已安装扩展"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiện ích đã cài"
+          }
         }
       }
     },
@@ -12130,6 +12983,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Layout Preview"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xem trước bố cục"
           }
         }
       }
@@ -12231,6 +13090,12 @@
             "state" : "needs_review",
             "value" : "Lottie JSON 链接"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL JSON Lottie"
+          }
         }
       }
     },
@@ -12330,6 +13195,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "低"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thấp"
           }
         }
       }
@@ -12431,11 +13302,24 @@
             "state" : "needs_review",
             "value" : "低电量模式"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chế độ tiết kiệm pin"
+          }
         }
       }
     },
     "Maccy by p0deje" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maccy của p0deje"
+          }
+        }
+      }
     },
     "Made with 🫶🏻 by Cnotch" : {
       "extractionState" : "stale",
@@ -12535,11 +13419,24 @@
             "state" : "needs_review",
             "value" : "不那么无趣的 not.people 团队 用🫶🏻出品"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Được thực hiện với 🫶🏻 bởi CNotch"
+          }
         }
       }
     },
     "Manage" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quản lý"
+          }
+        }
+      }
     },
     "Mark as complete" : {
       "localizations" : {
@@ -12637,6 +13534,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "标记为已完成"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đánh dấu hoàn thành"
           }
         }
       }
@@ -12738,6 +13641,12 @@
             "state" : "needs_review",
             "value" : "标记为未完成"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đánh dấu chưa hoàn thành"
+          }
         }
       }
     },
@@ -12837,6 +13746,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Match menu bar height"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khớp chiều cao thanh menu"
           }
         }
       }
@@ -12938,6 +13853,12 @@
             "state" : "needs_review",
             "value" : "匹配菜单栏高度"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khớp chiều cao thanh menu"
+          }
         }
       }
     },
@@ -13037,6 +13958,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Match real notch height"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khớp chiều cao notch thật"
           }
         }
       }
@@ -13138,6 +14065,12 @@
             "state" : "needs_review",
             "value" : "最大容量：%lld%%"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dung lượng tối đa: %lld%%"
+          }
         }
       }
     },
@@ -13237,6 +14170,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "媒体"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Media"
           }
         }
       }
@@ -13338,6 +14277,12 @@
             "state" : "needs_review",
             "value" : "媒体控制"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Điều khiển media"
+          }
         }
       }
     },
@@ -13437,6 +14382,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "媒体非活动超时"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thời gian chờ khi media không hoạt động"
           }
         }
       }
@@ -13538,6 +14489,12 @@
             "state" : "needs_review",
             "value" : "媒体播放实时动态"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activity phát media"
+          }
         }
       }
     },
@@ -13638,6 +14595,12 @@
             "state" : "needs_review",
             "value" : "媒体来源"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nguồn media"
+          }
         }
       }
     },
@@ -13737,6 +14700,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "中"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trung bình"
           }
         }
       }
@@ -13839,6 +14808,12 @@
             "state" : "needs_review",
             "value" : "麦克风 %@"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mic %@"
+          }
         }
       }
     },
@@ -13938,6 +14913,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "镜子"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gương"
           }
         }
       }
@@ -14039,6 +15020,12 @@
             "state" : "needs_review",
             "value" : "镜子大小"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hình dạng gương"
+          }
         }
       }
     },
@@ -14138,6 +15125,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "更多"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thêm"
           }
         }
       }
@@ -14239,6 +15232,12 @@
             "state" : "needs_review",
             "value" : "音乐源"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nguồn nhạc"
+          }
         }
       }
     },
@@ -14338,6 +15337,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "已静音"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "đã tắt tiếng"
           }
         }
       }
@@ -14439,6 +15444,12 @@
             "state" : "needs_review",
             "value" : "Muted"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã tắt tiếng"
+          }
         }
       }
     },
@@ -14538,6 +15549,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "名称"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên"
           }
         }
       }
@@ -14639,6 +15656,12 @@
             "state" : "needs_review",
             "value" : "永不隐藏"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không bao giờ ẩn"
+          }
         }
       }
     },
@@ -14738,6 +15761,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "没有可用的自定义动画"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không có hoạt ảnh tùy chỉnh nào"
           }
         }
       }
@@ -14839,6 +15868,12 @@
             "state" : "needs_review",
             "value" : "没有自定义可视化器"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không có hiệu ứng hình ảnh tùy chỉnh"
+          }
         }
       }
     },
@@ -14939,6 +15974,12 @@
             "state" : "needs_review",
             "value" : "No events"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không có sự kiện"
+          }
         }
       }
     },
@@ -15038,6 +16079,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "今天无日程"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hôm nay không có sự kiện"
           }
         }
       }
@@ -15140,11 +16187,24 @@
             "state" : "needs_review",
             "value" : "未安装扩展"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chưa cài tiện ích nào"
+          }
         }
       }
     },
     "Not allowed" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không được phép"
+          }
+        }
+      }
     },
     "Not Now" : {
       "localizations" : {
@@ -15243,11 +16303,24 @@
             "state" : "needs_review",
             "value" : "不是现在"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Để sau"
+          }
         }
       }
     },
     "Notch appearance" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giao diện notch"
+          }
+        }
+      }
     },
     "Notch behavior" : {
       "localizations" : {
@@ -15345,6 +16418,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Notch行为"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hành vi notch"
           }
         }
       }
@@ -15446,6 +16525,12 @@
             "state" : "needs_review",
             "value" : "Notch height on non-notch displays"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiều cao notch trên màn hình không có notch"
+          }
         }
       }
     },
@@ -15545,6 +16630,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Notch height on notch displays"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiều cao notch trên màn hình có notch"
           }
         }
       }
@@ -15646,6 +16737,12 @@
             "state" : "needs_review",
             "value" : "Notch sizing"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kích thước notch"
+          }
         }
       }
     },
@@ -15745,6 +16842,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "打开日历设置"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở Cài đặt Lịch"
           }
         }
       }
@@ -15846,6 +16949,12 @@
             "state" : "needs_review",
             "value" : "Open Notch"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở notch"
+          }
         }
       }
     },
@@ -15945,6 +17054,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "悬停时打开Notch"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở notch khi rê chuột"
           }
         }
       }
@@ -16046,6 +17161,12 @@
             "state" : "needs_review",
             "value" : "打开提醒事项设置"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở Cài đặt Nhắc nhở"
+          }
         }
       }
     },
@@ -16145,6 +17266,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "当项目存在时默认打开暂存器"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tự mở Kệ tạm nếu có sẵn mục trong đó"
           }
         }
       }
@@ -16246,6 +17373,12 @@
             "state" : "needs_review",
             "value" : "Option key behaviour"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hành vi phím Option"
+          }
         }
       }
     },
@@ -16345,6 +17478,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Pick a Color"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn màu"
           }
         }
       }
@@ -16446,11 +17585,24 @@
             "state" : "needs_review",
             "value" : "已插入"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang cắm sạc"
+          }
         }
       }
     },
     "Preferences" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tùy chọn"
+          }
+        }
+      }
     },
     "Preferred display" : {
       "localizations" : {
@@ -16548,6 +17700,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Preferred display"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Màn hình ưu tiên"
           }
         }
       }
@@ -16649,6 +17807,12 @@
             "state" : "needs_review",
             "value" : "Progress bar style"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kiểu thanh tiến trình"
+          }
         }
       }
     },
@@ -16748,6 +17912,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Quick Share"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chia sẻ nhanh"
           }
         }
       }
@@ -16849,6 +18019,12 @@
             "state" : "needs_review",
             "value" : "Quick Share Service"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dịch vụ Chia sẻ nhanh"
+          }
         }
       }
     },
@@ -16949,11 +18125,24 @@
             "state" : "needs_review",
             "value" : "退出"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thoát"
+          }
         }
       }
     },
     "Quit CNotch" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thoát CNotch"
+          }
+        }
+      }
     },
     "Quit app" : {
       "extractionState" : "stale",
@@ -17052,6 +18241,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "退出应用"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thoát ứng dụng"
           }
         }
       }
@@ -17154,6 +18349,12 @@
             "state" : "needs_review",
             "value" : "版本名称"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tên bản phát hành"
+          }
         }
       }
     },
@@ -17253,6 +18454,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "记住上一个标签页"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhớ tab cuối cùng"
           }
         }
       }
@@ -17355,11 +18562,24 @@
             "state" : "needs_review",
             "value" : "提醒事项访问被拒绝。请在系统设置中启用它。"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quyền truy cập Nhắc nhở đã bị từ chối. Vui lòng bật trong System Settings."
+          }
         }
       }
     },
     "Reminder access is required to show reminders." : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập Nhắc nhở để hiển thị nhắc nhở."
+          }
+        }
+      }
     },
     "Reminders" : {
       "localizations" : {
@@ -17457,6 +18677,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "提醒事项"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhắc nhở"
           }
         }
       }
@@ -17558,6 +18784,12 @@
             "state" : "needs_review",
             "value" : "Remove from shelf after dragging"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xóa khỏi Kệ tạm sau khi kéo đi"
+          }
         }
       }
     },
@@ -17658,6 +18890,12 @@
             "state" : "needs_review",
             "value" : "Replace system HUD"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thay thế HUD hệ thống"
+          }
         }
       }
     },
@@ -17757,6 +18995,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Replaces the standard macOS volume, display brightness, and keyboard brightness HUDs with a custom design."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thay thế HUD âm lượng, độ sáng màn hình và độ sáng bàn phím mặc định của macOS bằng thiết kế tùy chỉnh."
           }
         }
       }
@@ -17859,6 +19103,12 @@
             "state" : "needs_review",
             "value" : "Request Accessibility"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yêu cầu quyền Accessibility"
+          }
         }
       }
     },
@@ -17958,6 +19208,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Reset to Defaults"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đặt lại mặc định"
           }
         }
       }
@@ -18060,118 +19316,44 @@
             "state" : "needs_review",
             "value" : "重启"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khởi động lại"
+          }
         }
       }
     },
     "Restart CNotch" : {
-      "extractionState" : "stale",
       "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Restart CNotch"
-          }
-        },
-        "cs" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Restartovat CNotch"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch neu starten"
-          }
-        },
-        "en" : {
+        "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restart CNotch"
-          }
-        },
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restart CNotch"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Reiniciar CNotch"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Redémarrer CNotch"
-          }
-        },
-        "hu" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Restart CNotch"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Riavvia CNotch"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch 재시작"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Uruchom ponownie CNotch"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Restart CNotch"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Restart CNotch"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "CNotch'u yeniden başlat"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Restart CNotch"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "重启 CNotch"
+            "value" : "Khởi động lại CNotch"
           }
         }
       }
-    },
-    "Restart CNotch" : {
-
     },
     "Rotate album artwork during playback" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xoay ảnh album khi đang phát"
+          }
+        }
+      }
     },
     "Rows" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Số dòng"
+          }
+        }
+      }
     },
     "Running" : {
       "extractionState" : "stale",
@@ -18270,6 +19452,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "运行中"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang chạy"
           }
         }
       }
@@ -18371,6 +19559,12 @@
             "state" : "needs_review",
             "value" : "选择您想要使用的音乐源。您可以稍后在应用设置中更改此项。"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn nguồn nhạc bạn muốn dùng. Bạn có thể đổi lại sau trong Cài đặt."
+          }
         }
       }
     },
@@ -18470,6 +19664,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "已选择"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "đã chọn"
           }
         }
       }
@@ -18571,6 +19771,12 @@
             "state" : "needs_review",
             "value" : "所选动画"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoạt ảnh đã chọn"
+          }
         }
       }
     },
@@ -18670,6 +19876,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "设置"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cài đặt"
           }
         }
       }
@@ -18772,6 +19984,12 @@
             "state" : "needs_review",
             "value" : "暂存器"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kệ tạm"
+          }
         }
       }
     },
@@ -18873,6 +20091,12 @@
             "state" : "needs_review",
             "value" : "快捷方式"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phím tắt"
+          }
         }
       }
     },
@@ -18972,6 +20196,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "显示电量"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện chỉ báo pin"
           }
         }
       }
@@ -19073,11 +20303,24 @@
             "state" : "needs_review",
             "value" : "显示电量百分比"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện phần trăm pin"
+          }
         }
       }
     },
     "Show Bluetooth device connection indicator" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện chỉ báo kết nối thiết bị Bluetooth"
+          }
+        }
+      }
     },
     "Show calendar" : {
       "localizations" : {
@@ -19175,6 +20418,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "显示日历"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện lịch"
           }
         }
       }
@@ -19276,11 +20525,24 @@
             "state" : "needs_review",
             "value" : "Show cool face animation while inactive"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện hoạt ảnh khuôn mặt khi không hoạt động"
+          }
         }
       }
     },
     "Show device name" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện tên thiết bị"
+          }
+        }
+      }
     },
     "Show HUD in open notch" : {
       "localizations" : {
@@ -19378,6 +20640,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Show HUD in open notch"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện HUD khi notch đang mở"
           }
         }
       }
@@ -19479,6 +20747,12 @@
             "state" : "needs_review",
             "value" : "Show lyrics below artist name"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện lời bài hát dưới tên nghệ sĩ"
+          }
         }
       }
     },
@@ -19578,6 +20852,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Show menu bar icon"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện biểu tượng trên thanh menu"
           }
         }
       }
@@ -19679,6 +20959,12 @@
             "state" : "needs_review",
             "value" : "Show music live activity"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện Live Activity nhạc"
+          }
         }
       }
     },
@@ -19778,6 +21064,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Show notch on lock screen"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện notch trên màn hình khóa"
           }
         }
       }
@@ -19879,6 +21171,12 @@
             "state" : "needs_review",
             "value" : "在所有显示器上显示"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện trên mọi màn hình"
+          }
         }
       }
     },
@@ -19978,6 +21276,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Show percentage"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện phần trăm"
           }
         }
       }
@@ -20079,6 +21383,12 @@
             "state" : "needs_review",
             "value" : "显示电源状态图标"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện biểu tượng trạng thái nguồn"
+          }
         }
       }
     },
@@ -20178,6 +21488,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "显示电源状态通知"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện thông báo trạng thái nguồn"
           }
         }
       }
@@ -20279,6 +21595,12 @@
             "state" : "needs_review",
             "value" : "Show settings icon in notch"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện biểu tượng Cài đặt trong notch"
+          }
         }
       }
     },
@@ -20378,6 +21700,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Show sneak peek on playback changes"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện Sneak Peek khi đổi bài"
           }
         }
       }
@@ -20479,11 +21807,24 @@
             "state" : "needs_review",
             "value" : "滑块颜色"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Màu thanh trượt"
+          }
         }
       }
     },
     "Sneak Peek Duration" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thời gian hiện Sneak Peek"
+          }
+        }
+      }
     },
     "Sneak Peek shows the media title and artist under the notch for a few seconds." : {
       "localizations" : {
@@ -20581,6 +21922,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Sneak Peek 在 Notch 下显示媒体标题和艺术家几秒钟。"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sneak Peek hiện tên bài hát và nghệ sĩ dưới notch trong vài giây."
           }
         }
       }
@@ -20682,6 +22029,12 @@
             "state" : "needs_review",
             "value" : "Sneak Peek 样式"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kiểu hiển thị Sneak Peek"
+          }
         }
       }
     },
@@ -20781,6 +22134,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "软件更新"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cập nhật phần mềm"
           }
         }
       }
@@ -20882,6 +22241,12 @@
             "state" : "needs_review",
             "value" : "速度"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tốc độ"
+          }
         }
       }
     },
@@ -20981,6 +22346,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "方形"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hình vuông"
           }
         }
       }
@@ -21083,11 +22454,24 @@
             "state" : "needs_review",
             "value" : "已停止"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã dừng"
+          }
         }
       }
     },
     "Support & Donate" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ủng hộ & Đóng góp"
+          }
+        }
+      }
     },
     "Support Us" : {
       "extractionState" : "stale",
@@ -21186,6 +22570,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "支持我们"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ủng hộ chúng tôi"
           }
         }
       }
@@ -21287,6 +22677,12 @@
             "state" : "needs_review",
             "value" : "System"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hệ thống"
+          }
         }
       }
     },
@@ -21387,17 +22783,44 @@
             "state" : "needs_review",
             "value" : "系统功能"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tính năng hệ thống"
+          }
         }
       }
     },
     "Text" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Văn bản"
+          }
+        }
+      }
     },
     "Text Recognition" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhận dạng văn bản"
+          }
+        }
+      }
     },
     "Thanks" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cảm ơn"
+          }
+        }
+      }
     },
     "Time to Full Charge: %lld min" : {
       "localizations" : {
@@ -21495,6 +22918,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "充电时间：%lld 分钟"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thời gian sạc đầy: %lld phút"
           }
         }
       }
@@ -21596,6 +23025,12 @@
             "state" : "needs_review",
             "value" : "Tint progress bar with accent color"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tô màu thanh tiến trình theo màu nhấn"
+          }
         }
       }
     },
@@ -21695,6 +23130,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "切换Notch："
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật/tắt mở notch:"
           }
         }
       }
@@ -21796,6 +23237,12 @@
             "state" : "needs_review",
             "value" : "触发 Sneak Peek："
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật/tắt Sneak Peek:"
+          }
         }
       }
     },
@@ -21895,6 +23342,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "在Notch里双指向上滑动以关闭。当**悬停在Notch时打开**选项禁用时，双指向下滑动即可打开"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuốt 2 ngón lên trên notch để đóng, vuốt 2 ngón xuống để mở, khi tùy chọn **Mở notch khi rê chuột** đang tắt"
           }
         }
       }
@@ -21997,6 +23450,12 @@
             "state" : "needs_review",
             "value" : "卸载"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gỡ cài đặt"
+          }
         }
       }
     },
@@ -22096,6 +23555,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "解锁高级功能并提升您的体验。现在升级以获取更多自定义功能！"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở khóa tính năng nâng cao và cải thiện trải nghiệm. Nâng cấp ngay để tùy chỉnh nhiều hơn!"
           }
         }
       }
@@ -22197,6 +23662,12 @@
             "state" : "needs_review",
             "value" : "已取消静音"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "đã bật tiếng"
+          }
         }
       }
     },
@@ -22296,6 +23767,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Unmuted"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã bật tiếng"
           }
         }
       }
@@ -22397,11 +23874,24 @@
             "state" : "needs_review",
             "value" : "升级至 Pro"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nâng cấp lên Pro"
+          }
         }
       }
     },
     "URL" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL"
+          }
+        }
+      }
     },
     "Use music visualizer spectrogram" : {
       "localizations" : {
@@ -22499,6 +23989,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "使用音乐可视化器谱图"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng phổ tần cho hiệu ứng hình ảnh nhạc"
           }
         }
       }
@@ -22600,11 +24096,24 @@
             "state" : "needs_review",
             "value" : "Use your macOS system accent color"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng màu nhấn hệ thống macOS"
+          }
         }
       }
     },
     "Uses on-device Vision to recognize text in copied images." : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng Vision trên máy để nhận dạng văn bản trong ảnh đã sao chép."
+          }
+        }
+      }
     },
     "Using System Accent" : {
       "localizations" : {
@@ -22702,6 +24211,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Using System Accent"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang dùng màu nhấn hệ thống"
           }
         }
       }
@@ -22802,6 +24317,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "版本"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phiên bản"
           }
         }
       }
@@ -22904,14 +24425,34 @@
             "state" : "needs_review",
             "value" : "版本信息"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thông tin phiên bản"
+          }
         }
       }
     },
     "VietQR / Bank Transfer" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VietQR / Chuyển khoản"
+          }
+        }
+      }
     },
     "View on GitHub" : {
-
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xem trên GitHub"
+          }
+        }
+      }
     },
     "View on GitHub: pear-devs/pear-desktop" : {
       "localizations" : {
@@ -23009,6 +24550,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "View on GitHub: pear-devs/pear-desktop"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xem trên GitHub: pear-devs/pear-desktop"
           }
         }
       }
@@ -23111,6 +24658,12 @@
             "state" : "needs_review",
             "value" : "欢迎"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chào mừng"
+          }
         }
       }
     },
@@ -23210,6 +24763,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "更新内容"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Có gì mới"
           }
         }
       }
@@ -23311,6 +24870,12 @@
             "state" : "needs_review",
             "value" : "Window Appearance"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giao diện cửa sổ"
+          }
         }
       }
     },
@@ -23410,6 +24975,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Window Behavior"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hành vi cửa sổ"
           }
         }
       }
@@ -23511,6 +25082,12 @@
             "state" : "needs_review",
             "value" : "如果您想进一步调整内容，您可以随时访问设置。"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giờ bạn có thể tận hưởng ứng dụng. Nếu muốn tinh chỉnh thêm, bạn luôn có thể vào Cài đặt."
+          }
         }
       }
     },
@@ -23610,6 +25187,12 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "一切都准备好了！"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vậy là xong!"
           }
         }
       }
@@ -23711,6 +25294,12 @@
             "state" : "needs_review",
             "value" : "Your macOS system accent color"
           }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Màu nhấn hệ thống macOS của bạn"
+          }
         }
       }
     },
@@ -23810,6 +25399,46 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "YouTube 音乐需要安装此第三方应用程序： "
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube Music cần cài ứng dụng bên thứ ba này: "
+          }
+        }
+      }
+    },
+    "Language" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ngôn ngữ"
+          }
+        }
+      }
+    },
+    "Applies instantly, no restart needed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applies instantly, no restart needed."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Áp dụng ngay lập tức, không cần khởi động lại."
           }
         }
       }

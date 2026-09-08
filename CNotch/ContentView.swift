@@ -672,6 +672,7 @@ struct ContentView: View {
             tabTransitionTask?.cancel()
             anyDropDebounceTask?.cancel()
         }
+        .applyAppLanguage()
     }
 
     @ViewBuilder

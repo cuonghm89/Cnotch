@@ -155,6 +155,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     case shelf = "Shelf"
     case camera = "Camera"
     case advanced = "Advanced"
+    case help = "Help"
     case about = "About"
 
     var id: String { rawValue }
@@ -173,6 +174,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .shelf: "books.vertical"
         case .camera: "web.camera"
         case .advanced: "gearshape.2"
+        case .help: "questionmark.circle"
         case .about: "info.circle"
         }
     }
@@ -191,6 +193,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .shelf: "Drag, drop, and saved Shelf items."
         case .camera: "Camera mirror appearance and access."
         case .advanced: "Accent color, window behavior, and privacy."
+        case .help: "How to use every feature, in English or Vietnamese."
         case .about: "Version, updates, and project information."
         }
     }
@@ -263,6 +266,7 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    sidebarRow(.help)
                     sidebarRow(.about)
                 }
             }
@@ -321,6 +325,8 @@ struct SettingsView: View {
                     }
                     case .advanced:
                     Advanced()
+                    case .help:
+                    HelpGuideView()
                     case .about:
                     if let controller = updaterController {
                         About(updaterController: controller)
@@ -347,6 +353,7 @@ struct SettingsView: View {
         .frame(minWidth: 740, minHeight: 520)
         .modifier(SettingsWindowBackground())
         .tint(.effectiveAccent)
+        .applyAppLanguage()
         .id(accentColorUpdateTrigger)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccentColorChanged"))) { _ in
             accentColorUpdateTrigger = UUID()
@@ -646,10 +653,27 @@ struct GeneralSettings: View {
     @Default(.automaticallySwitchDisplay) var automaticallySwitchDisplay
     @Default(.enableGestures) var enableGestures
     @Default(.openNotchOnHover) var openNotchOnHover
-    
+    @Default(.appLanguage) var appLanguage
+
 
     var body: some View {
         Form {
+            Section {
+                LiquidGlassSegmentedPicker(
+                    "Language",
+                    selection: $appLanguage,
+                    items: AppLanguage.allCases
+                ) { language in
+                    switch language {
+                    case .system: appLanguage == .vi ? "Hệ thống" : "System"
+                    case .en: "English"
+                    case .vi: "Tiếng Việt"
+                    }
+                }
+            } footer: {
+                Text("Applies instantly, no restart needed.")
+            }
+
             Section {
                 Toggle(isOn: Binding(
                     get: { Defaults[.menubarIcon] },
