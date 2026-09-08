@@ -404,9 +404,44 @@ class MusicManager: ObservableObject {
             .replacingOccurrences(of: "\u{FFFD}", with: "")
     }
 
+    /// Strips "(feat. X)"/"(ft. X)"/"(with X)" style suffixes that hurt
+    /// matching against lyrics databases, which store the bare track title.
+    private func stripFeaturing(_ title: String) -> String {
+        let pattern = #"[\(\[]\s*(feat\.?|ft\.?|with)\s+[^\)\]]*[\)\]]"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) else { return title }
+        let range = NSRange(title.startIndex..., in: title)
+        let stripped = regex.stringByReplacingMatches(in: title, range: range, withTemplate: "")
+        return stripped.trimmingCharacters(in: .whitespaces)
+    }
+
+    /// A search result only counts as a match if its normalized track name
+    /// and artist name are close to what we asked for -- LRCLIB's /search is
+    /// a fuzzy full-text search, and blindly taking the first hit for an
+    /// obscure or oddly-formatted title can return a completely different
+    /// song's lyrics.
+    private func isPlausibleMatch(candidateTrack: String, candidateArtist: String, queryTitle: String, queryArtist: String) -> Bool {
+        func normalize(_ s: String) -> String {
+            normalizedQuery(s).lowercased().trimmingCharacters(in: .whitespaces)
+        }
+        let candidateTrackN = normalize(candidateTrack)
+        let queryTitleN = normalize(queryTitle)
+        guard !candidateTrackN.isEmpty, !queryTitleN.isEmpty else { return false }
+        let trackMatches = candidateTrackN == queryTitleN
+            || candidateTrackN.contains(queryTitleN)
+            || queryTitleN.contains(candidateTrackN)
+        guard trackMatches else { return false }
+
+        guard !queryArtist.isEmpty else { return true }
+        let candidateArtistN = normalize(candidateArtist)
+        let queryArtistN = normalize(queryArtist)
+        guard !candidateArtistN.isEmpty, !queryArtistN.isEmpty else { return true }
+        return candidateArtistN.contains(queryArtistN) || queryArtistN.contains(candidateArtistN)
+    }
+
     @MainActor
     private func fetchLyricsFromWeb(title: String, artist: String) async {
-        let cleanTitle = normalizedQuery(title)
+        let searchTitle = stripFeaturing(title)
+        let cleanTitle = normalizedQuery(searchTitle)
         let cleanArtist = normalizedQuery(artist)
         guard let encodedTitle = cleanTitle.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let encodedArtist = cleanArtist.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
@@ -429,24 +464,30 @@ class MusicManager: ObservableObject {
                 self.isFetchingLyrics = false
                 return
             }
-            if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-               let first = jsonArray.first {
-                // Prefer plain lyrics (syncedLyrics may also be present)
-                let plain = (first["plainLyrics"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                let synced = (first["syncedLyrics"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                let resolved = plain.isEmpty ? synced : plain
-                self.currentLyrics = resolved
-                self.isFetchingLyrics = false
-                if !synced.isEmpty {
-                    self.syncedLyrics = self.parseLRC(synced)
-                } else {
-                    self.syncedLyrics = []
-                }
-            } else {
+            guard let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+                  let match = jsonArray.first(where: { entry in
+                      isPlausibleMatch(
+                          candidateTrack: entry["trackName"] as? String ?? "",
+                          candidateArtist: entry["artistName"] as? String ?? "",
+                          queryTitle: searchTitle,
+                          queryArtist: artist
+                      )
+                  })
+            else {
+                // No confidently-matching result -- showing nothing beats showing the wrong song's lyrics.
                 self.currentLyrics = ""
                 self.isFetchingLyrics = false
                 self.syncedLyrics = []
+                return
             }
+
+            // Prefer plain lyrics (syncedLyrics may also be present)
+            let plain = (match["plainLyrics"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let synced = (match["syncedLyrics"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let resolved = plain.isEmpty ? synced : plain
+            self.currentLyrics = resolved
+            self.isFetchingLyrics = false
+            self.syncedLyrics = synced.isEmpty ? [] : self.parseLRC(synced)
         } catch {
             self.currentLyrics = ""
             self.isFetchingLyrics = false
@@ -484,10 +525,13 @@ class MusicManager: ObservableObject {
 
     func lyricLine(at elapsed: Double) -> String {
         guard !syncedLyrics.isEmpty else { return currentLyrics }
-        // Binary search for last line with time <= elapsed
+        // Binary search for last line with time <= elapsed.
+        // idx stays -1 (no line yet) during an instrumental intro that
+        // precedes the first timestamped lyric -- otherwise this would
+        // default to line 0 and show the first lyric before it's actually sung.
         var low = 0
         var high = syncedLyrics.count - 1
-        var idx = 0
+        var idx = -1
         while low <= high {
             let mid = (low + high) / 2
             if syncedLyrics[mid].time <= elapsed {
@@ -497,7 +541,7 @@ class MusicManager: ObservableObject {
                 high = mid - 1
             }
         }
-        return syncedLyrics[idx].text
+        return idx >= 0 ? syncedLyrics[idx].text : ""
     }
 
     private func triggerFlipAnimation() {
