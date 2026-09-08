@@ -306,7 +306,15 @@ struct ContentView: View {
         .easeInOut(duration: reduceMotion ? 0.12 : 0.24)
     }
 
-    private let compactLyricsExtraWidth: CGFloat = 240
+    // The physical-notch reservation rectangle inside musicLiveActivity() has
+    // to stay centered within the pill for it to line up with the real
+    // hardware notch. Adding width only on the trailing (lyrics) side pushes
+    // it off-center, so half of this budget goes to a blank leading spacer
+    // that exists purely to keep things balanced -- there's no way around
+    // that trade-off without changing how the whole notch window is
+    // positioned, which is a much bigger change than this feature warrants.
+    private let compactLyricsExtraWidth: CGFloat = 160
+    private var compactLyricsHalfWidth: CGFloat { compactLyricsExtraWidth / 2 }
 
     private var isScrollableTab: Bool {
         modules.supportsScrolling(coordinator.currentView)
@@ -908,7 +916,7 @@ struct ContentView: View {
                     frameWidth: geometry.size.width
                 )
             }
-            .frame(width: compactLyricsExtraWidth - 10)
+            .frame(width: compactLyricsHalfWidth - 10)
         }
     }
 
@@ -1010,6 +1018,10 @@ struct ContentView: View {
         let compactMediaSize = max(0, vm.effectiveClosedNotchHeight - 12)
 
         HStack(spacing: 4) {
+            if showsCompactLyrics {
+                Color.clear.frame(width: compactLyricsHalfWidth)
+            }
+
             closedAlbumArt(size: compactMediaSize, rotation: 0)
 
             Rectangle()
