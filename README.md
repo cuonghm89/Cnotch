@@ -15,12 +15,6 @@
 
 > **Upstream attribution:** CNotch is a modified version of [TheBoredTeam’s original Boring Notch](https://github.com/TheBoredTeam/boring.notch). Original copyright and GPL-3.0 notices are retained. Last materially modified on August 23, 2026.
 
-<p align="center">
-  <a href="assets/another-notch-demo.mp4">
-    <img src="assets/another-notch-demo.gif" alt="CNotch cropped feature demo" />
-  </a>
-</p>
-
 ---
 ## Installation
 
@@ -69,18 +63,6 @@ Homebrew support is coming soon. Until then, install manually using the release 
 - Open the Clipboard tab to search and reuse recent clipboard entries.
 - Open Settings to customize the notch.
 
-## Follow the Project
-
-### Star History
-
-<a href="https://star-history.com/#cuonghm89/Cnotch&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cuonghm89/Cnotch&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=cuonghm89/Cnotch&type=Date" />
-   <img alt="CNotch GitHub star history" src="https://api.star-history.com/svg?repos=cuonghm89/Cnotch&type=Date" />
- </picture>
-</a>
-
 ### 📋 Roadmap
 
 - [x] Playback live activity
@@ -102,6 +84,15 @@ Homebrew support is coming soon. Until then, install manually using the release 
 - [x] System HUD replacements (volume, brightness, backlight)
 - [x] Bluetooth device live activity
 - [x] Searchable clipboard manager
+- [x] Synced lyrics, in the expanded player and the compact notch
+- [x] Weather chip and CPU/RAM stats, in the header and the compact notch
+- [x] Microphone mute toggle
+- [x] Quick Note button, saves straight to Notes.app
+- [x] Screenshot quick actions (Copy, Reveal, Delete)
+- [x] Pomodoro timer
+- [x] Voice memo recording, saved to the Shelf
+- [x] Third-party live activities via distributed notifications
+- [x] Vietnamese localization and a bilingual (EN/VI) in-app help guide
 - [ ] Fan controls
 - [ ] Lock screen widgets
 - [ ] Extension system
