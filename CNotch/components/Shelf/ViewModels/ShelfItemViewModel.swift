@@ -144,25 +144,29 @@ final class ShelfItemViewModel: ObservableObject {
                 }
             }
             
-            guard !itemsToShare.isEmpty else { return }
-             
+            // Bail out before starting security-scoped access or marking the
+            // lifecycle delegate began -- picker.show() needs a real view,
+            // and markPickerBegan() has no timeout fallback (unlike
+            // markServiceBegan()), so with no view to actually show the
+            // picker, nothing would ever call back to release the access or
+            // clear preventNotchClose for the rest of the session.
+            guard !itemsToShare.isEmpty, let view else { return }
+
             stopSharingAccessingURLs()
             // Start security-scoped access for all file URLs and keep it active during sharing
             sharingAccessingURLs = fileURLs.filter { $0.startAccessingSecurityScopedResource() }
-            
+
             // Create and retain lifecycle delegate for the entire share operation
             let lifecycle = SharingStateManager.shared.makeDelegate { [weak self] in
                 self?.sharingLifecycle = nil
                 self?.stopSharingAccessingURLs()
             }
             self.sharingLifecycle = lifecycle
-            
+
             let picker = NSSharingServicePicker(items: itemsToShare)
             picker.delegate = lifecycle
             lifecycle.markPickerBegan()
-            if let view {
-                picker.show(relativeTo: .zero, of: view, preferredEdge: .minY)
-            }
+            picker.show(relativeTo: .zero, of: view, preferredEdge: .minY)
         }
     }
     

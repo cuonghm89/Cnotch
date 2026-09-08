@@ -288,6 +288,13 @@ final class NowPlayingController: ObservableObject, MediaControllerProtocol {
             )
         } else if !diff {
             newPlaybackState.artwork = nil
+        } else {
+            // Unlike every other field here, this used to fall through to
+            // the struct's default (nil) on a diff update that didn't
+            // include artwork -- a track-change diff arriving before its
+            // artwork payload would flash the generic app icon until a
+            // later diff resent the real artwork.
+            newPlaybackState.artwork = self.playbackState.artwork
         }
 
         if let dateString = payload.timestamp,

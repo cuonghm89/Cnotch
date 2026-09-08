@@ -127,13 +127,18 @@ class QuickShareService: ObservableObject {
             delegate.markServiceBegan()
             svc.delegate = delegate
             svc.perform(withItems: items)
-        } else {
+        } else if let view {
             let picker = NSSharingServicePicker(items: items)
             picker.delegate = delegate
             delegate.markPickerBegan()
-            if let view {
-                picker.show(relativeTo: .zero, of: view, preferredEdge: .minY)
-            }
+            picker.show(relativeTo: .zero, of: view, preferredEdge: .minY)
+        } else {
+            // No view to anchor the picker to, and markPickerBegan() (unlike
+            // markServiceBegan()) has no timeout fallback -- back out of the
+            // access/delegate state already set up above instead of leaking
+            // it for the rest of the session with nothing left to release it.
+            lifecycleDelegate = nil
+            stopSharingAccessingURLs()
         }
     }
 

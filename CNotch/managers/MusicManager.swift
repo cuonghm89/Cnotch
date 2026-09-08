@@ -158,8 +158,20 @@ class MusicManager: ObservableObject {
 
         // Set new active controller
         activeController = controller
-        
+
         self.canFavoriteTrack = controller.supportsFavorite
+
+        // forceUpdate() below only *requests* the new controller's state
+        // asynchronously -- until that arrives (a moment or more for
+        // NowPlayingController, which spawns a subprocess), title/artist/
+        // artwork/etc. stay whatever the PREVIOUS controller last reported.
+        // Stopping playback-position extrapolation immediately (rather than
+        // waiting for the update) matters more than the title/artwork
+        // staying stale for that brief window: without this, elapsed-time
+        // and lyric-sync reads keep extrapolating from the old
+        // timestampDate/playbackRate against what's now a different app's
+        // song.
+        isPlaying = false
 
         // Get current state from active controller
         forceUpdate()
@@ -438,9 +450,17 @@ class MusicManager: ObservableObject {
         let candidateTrackN = normalize(candidateTrack)
         let queryTitleN = normalize(queryTitle)
         guard !candidateTrackN.isEmpty, !queryTitleN.isEmpty else { return false }
+        // Substring containment is a loose check to begin with, and gets
+        // looser once diacritic-folding has collapsed distinct words (many
+        // short Vietnamese titles differing only by tone marks all fold to
+        // the same ASCII string) -- for a short title, a false-positive
+        // substring match against an unrelated song is a real risk, so
+        // require an exact match instead below a length floor.
+        let shortTitleFloor = 6
         let trackMatches = candidateTrackN == queryTitleN
-            || candidateTrackN.contains(queryTitleN)
-            || queryTitleN.contains(candidateTrackN)
+            || (candidateTrackN.count >= shortTitleFloor
+                && queryTitleN.count >= shortTitleFloor
+                && (candidateTrackN.contains(queryTitleN) || queryTitleN.contains(candidateTrackN)))
         guard trackMatches else { return false }
 
         guard !queryArtist.isEmpty else { return true }

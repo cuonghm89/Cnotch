@@ -93,11 +93,15 @@ class CalendarService: CalendarServiceProviding {
             store.fetchReminders(matching: predicate) { reminders in
                 
                 let filteredReminders = (reminders ?? []).filter { reminder in
-                    // Check if reminder has a due date within our range
                     guard let dueDate = reminder.dueDateComponents?.date else {
-                        return false
+                        // An undated reminder has no day to be filtered
+                        // into -- surfacing it only on "today" (rather than
+                        // dropping it everywhere, which is what happened
+                        // before) matches how Reminders.app itself folds
+                        // undated items into Today.
+                        return Calendar.current.isDateInToday(start)
                     }
-                    
+
                     return dueDate >= start && dueDate <= end
                 }
                 
@@ -140,9 +144,15 @@ extension CalendarModel {
 extension EventModel {
     init?(from event: EKEvent) {
         guard let calendar = event.calendar else { return nil }
-        
+
         self.init(
-            id: event.calendarItemIdentifier,
+            // calendarItemIdentifier is shared by every occurrence of a
+            // recurring series (Apple's own docs say to pair it with a
+            // start date to identify one instance) -- using it alone as
+            // this Identifiable's id collided whenever a series repeated
+            // more than once within a single fetched day, corrupting
+            // SwiftUI's ForEach identity for those rows.
+            id: "\(event.calendarItemIdentifier)-\(event.startDate.timeIntervalSince1970)",
             start: event.startDate,
             end: event.endDate,
             title: event.title ?? "",
@@ -160,20 +170,25 @@ extension EventModel {
     }
     
     init?(from reminder: EKReminder) {
-        guard let calendar = reminder.calendar,
-              let dueDateComponents = reminder.dueDateComponents,
-              let date = Calendar.current.date(from: dueDateComponents)
-        else { return nil }
-        
+        guard let calendar = reminder.calendar else { return nil }
+
+        // An undated reminder has no dueDateComponents to derive a date
+        // from -- fall back to today (as an all-day item) instead of
+        // returning nil, which used to make undated reminders invisible
+        // everywhere in the app regardless of how they were queried.
+        let dueDateComponents = reminder.dueDateComponents
+        let date = dueDateComponents.flatMap { Calendar.current.date(from: $0) }
+            ?? Calendar.current.startOfDay(for: Date())
+
         self.init(
-            id: reminder.calendarItemIdentifier,
+            id: "\(reminder.calendarItemIdentifier)-\(date.timeIntervalSince1970)",
             start: date,
             end: Calendar.current.endOfDay(for: date),
             title: reminder.title ?? "",
             location: reminder.location,
             notes: reminder.notes,
             url: reminder.url,
-            isAllDay: dueDateComponents.hour == nil,
+            isAllDay: (dueDateComponents?.hour) == nil,
             type: .reminder(completed: reminder.isCompleted),
             calendar: .init(from: calendar),
             participants: [],
