@@ -265,7 +265,9 @@ extension Defaults.Keys {
     static let didClearLegacyURLCacheV1 = Key<Bool>("didClearLegacyURLCache_v1", default: false)
 
     // MARK: Third-Party Live Activities
-    static let externalLiveActivitiesEnabled = Key<Bool>("externalLiveActivitiesEnabled", default: true)
+    // Default off: distributed notifications can't be tied to a verified
+    // sender, so any local process can post a spoofed live activity.
+    static let externalLiveActivitiesEnabled = Key<Bool>("externalLiveActivitiesEnabled", default: false)
 
     // MARK: Weather
     static let weatherEnabled = Key<Bool>("weatherEnabled", default: false)

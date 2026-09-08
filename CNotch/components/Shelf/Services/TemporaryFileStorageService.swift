@@ -88,14 +88,27 @@ class TemporaryFileStorageService {
     }
     
     // MARK: - Private Implementation
-    
+
+    /// Reduces an untrusted suggested filename to a bare, traversal-free
+    /// component safe to append to a directory we control.
+    private static func sanitizedFilename(_ suggested: String?) -> String? {
+        guard let suggested, !suggested.isEmpty else { return nil }
+        let lastComponent = (suggested as NSString).lastPathComponent
+        guard !lastComponent.isEmpty, lastComponent != ".", lastComponent != ".." else { return nil }
+        return lastComponent
+    }
+
     private func createTempFile(for type: TempFileType) -> URL? {
         let tempDir = URL(fileURLWithPath: NSTemporaryDirectory())
         let uuid = UUID().uuidString
         
         switch type {
         case .data(let data, let suggestedName):
-            let filename = suggestedName ?? ".dat"
+            // suggestedName comes from the dragging item's own metadata --
+            // any process initiating a drag controls this string, so it
+            // could be "../../../../.zshrc" to escape this temp directory
+            // entirely. Strip it down to a bare filename first.
+            let filename = Self.sanitizedFilename(suggestedName) ?? "\(uuid).dat"
             let dirURL = tempDir.appendingPathComponent(uuid, isDirectory: true)
             let fileURL = dirURL.appendingPathComponent(filename)
             
