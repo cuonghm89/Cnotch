@@ -306,7 +306,7 @@ struct ContentView: View {
         .easeInOut(duration: reduceMotion ? 0.12 : 0.24)
     }
 
-    private let compactLyricsExtraWidth: CGFloat = 150
+    private let compactLyricsExtraWidth: CGFloat = 240
 
     private var isScrollableTab: Bool {
         modules.supportsScrolling(coordinator.currentView)
