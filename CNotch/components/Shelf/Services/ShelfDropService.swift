@@ -30,8 +30,11 @@ struct ShelfDropService {
         }
 
         if let temporaryFileURL = await provider.extractFileRepresentation() {
+            // Unlike extractFileURL() above, this path always goes through
+            // copyToShelfStorage() -- an app-owned copy, not the source's
+            // real location -- so it must be cleaned up when removed.
             if let bookmark = createBookmark(for: temporaryFileURL) {
-                return await ShelfItem(kind: .file(bookmark: bookmark), isTemporary: false)
+                return await ShelfItem(kind: .file(bookmark: bookmark), isTemporary: true)
             }
             return nil
         }

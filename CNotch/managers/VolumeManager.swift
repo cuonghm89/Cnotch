@@ -218,13 +218,17 @@ final class VolumeManager: NSObject, ObservableObject {
         let defaultDeviceID = systemOutputDeviceID()
         let previousKnown = knownBluetoothDeviceIDs
         var currentKnown: Set<AudioObjectID> = []
-        var newlyConnected: OutputDevice?
+        // Collect every device newly seen since the last refresh, not just
+        // the last one in the loop -- a single callback can see more than
+        // one Bluetooth device connect at once (e.g. two devices reconnect
+        // together), and only the last would otherwise get a popup.
+        var newlyConnected: [OutputDevice] = []
 
         for d in devices {
             if d.transportType == kAudioDeviceTransportTypeBluetooth || d.transportType == kAudioDeviceTransportTypeBluetoothLE {
                 currentKnown.insert(d.id)
                 if !isFirstDeviceDiscovery && !previousKnown.contains(d.id) {
-                    newlyConnected = d
+                    newlyConnected.append(d)
                 }
             }
         }
@@ -233,7 +237,24 @@ final class VolumeManager: NSObject, ObservableObject {
 
         DispatchQueue.main.async {
             self.currentOutputDevice = devices.first { $0.id == defaultDeviceID }
-            if let device = newlyConnected, Defaults[.showBluetoothDeviceConnectionIndicator], CBManager.authorization == .allowedAlways {
+            guard !newlyConnected.isEmpty,
+                  Defaults[.showBluetoothDeviceConnectionIndicator],
+                  CBManager.authorization == .allowedAlways
+            else { return }
+            self.announceBluetoothConnections(newlyConnected)
+        }
+    }
+
+    private var bluetoothAnnouncementTask: Task<Void, Never>?
+
+    /// Shows one "Connected" popup per device, in sequence -- the notch only
+    /// has a single popup slot, so simultaneous connections queue instead of
+    /// all but one being silently dropped.
+    private func announceBluetoothConnections(_ devices: [OutputDevice]) {
+        bluetoothAnnouncementTask?.cancel()
+        bluetoothAnnouncementTask = Task { @MainActor in
+            for device in devices {
+                guard !Task.isCancelled else { return }
                 CNotchViewCoordinator.shared.toggleExpandingView(
                     status: true,
                     type: .bluetoothDevice,
@@ -242,6 +263,7 @@ final class VolumeManager: NSObject, ObservableObject {
                     subtitle: device.name,
                     icon: device.icon
                 )
+                try? await Task.sleep(nanoseconds: 3_500_000_000)
             }
         }
     }

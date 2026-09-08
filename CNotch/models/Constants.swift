@@ -280,6 +280,10 @@ extension Defaults.Keys {
 
     // MARK: Pomodoro Timer
     static let pomodoroButtonEnabled = Key<Bool>("pomodoroButtonEnabled", default: true)
+    // Wall-clock deadline for a running Pomodoro session, so it survives
+    // sleep (no drift) and an app relaunch (no silent state loss).
+    static let pomodoroDeadline = Key<Date?>("pomodoroDeadline", default: nil)
+    static let pomodoroTotalSeconds = Key<Int>("pomodoroTotalSeconds", default: 0)
 
     // MARK: Voice Memo
     static let voiceMemoButtonEnabled = Key<Bool>("voiceMemoButtonEnabled", default: true)

@@ -36,8 +36,6 @@ class QuickShareService: ObservableObject {
     
     @MainActor
     func discoverAvailableProviders() async {
-        let finder = ShareServiceFinder()
-
         // Use simple test items without creating actual temp files
         // This avoids issues with the Share Sheet retaining references to deleted files
         let testItems: [Any] = [
@@ -45,7 +43,7 @@ class QuickShareService: ObservableObject {
             "Test Text" as NSString
         ]
 
-        let services = await finder.findApplicableServices(for: testItems)
+        let services = ShareServiceFinder.findApplicableServices(for: testItems)
 
         var providers: [QuickShareProvider] = []
 

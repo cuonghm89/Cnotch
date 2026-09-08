@@ -17,6 +17,8 @@ final class ScreenshotWatcher {
     private var watchedDescriptor: Int32 = -1
     private var isRunning = false
     private var startedAt = Date()
+    private var announcedPaths: Set<String> = []
+    private var announcementTask: Task<Void, Never>?
 
     private static let imageExtensions: Set<String> = ["png", "jpg", "jpeg", "tiff", "heic"]
 
@@ -60,6 +62,8 @@ final class ScreenshotWatcher {
         isRunning = false
         source?.cancel()
         source = nil
+        announcementTask?.cancel()
+        announcedPaths.removeAll()
     }
 
     private func checkForNewScreenshot(in directory: URL) {
@@ -70,28 +74,44 @@ final class ScreenshotWatcher {
         ) else { return }
 
         let recentCutoff = Date().addingTimeInterval(-3)
-        let candidate = contents
+        // Collect every recent, not-yet-announced screenshot instead of just
+        // the single newest one -- two screenshots taken within a few
+        // seconds of each other (a selection capture right after a window
+        // capture, say) would otherwise silently lose the popup for
+        // whichever one isn't the latest by modification date.
+        let candidates = contents
             .filter { Self.imageExtensions.contains($0.pathExtension.lowercased()) }
             .compactMap { url -> (URL, Date)? in
                 guard let date = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
                 else { return nil }
                 return (url, date)
             }
-            .filter { $0.1 > max(recentCutoff, startedAt) }
-            .max { $0.1 < $1.1 }
+            .filter { $0.1 > max(recentCutoff, startedAt) && !announcedPaths.contains($0.0.path) }
+            .sorted { $0.1 < $1.1 }
 
-        guard let (url, _) = candidate else { return }
+        guard !candidates.isEmpty else { return }
+        for (url, _) in candidates { announcedPaths.insert(url.path) }
+        announce(candidates.map(\.0))
+    }
 
-        Task { @MainActor in
-            guard Defaults[.screenshotQuickActionsEnabled], !CNotchViewCoordinator.shared.isScreenLocked else { return }
-            CNotchViewCoordinator.shared.toggleExpandingView(
-                status: true,
-                type: .screenshot,
-                title: "Screenshot",
-                subtitle: url.lastPathComponent,
-                icon: "camera.viewfinder",
-                url: url
-            )
+    /// Shows one Screenshot Quick Actions popup per screenshot, in sequence
+    /// -- the notch only has a single popup slot.
+    private func announce(_ urls: [URL]) {
+        announcementTask?.cancel()
+        announcementTask = Task { @MainActor in
+            for url in urls {
+                guard !Task.isCancelled else { return }
+                guard Defaults[.screenshotQuickActionsEnabled], !CNotchViewCoordinator.shared.isScreenLocked else { continue }
+                CNotchViewCoordinator.shared.toggleExpandingView(
+                    status: true,
+                    type: .screenshot,
+                    title: "Screenshot",
+                    subtitle: url.lastPathComponent,
+                    icon: "camera.viewfinder",
+                    url: url
+                )
+                try? await Task.sleep(nanoseconds: 6_500_000_000)
+            }
         }
     }
 }

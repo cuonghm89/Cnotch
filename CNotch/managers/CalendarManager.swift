@@ -62,6 +62,22 @@ class CalendarManager: ObservableObject {
         self.reminderLists = all.filter { $0.isReminder }
         self.allCalendars = all // for legacy compatibility, can be removed if not needed
         updateSelectedCalendars()
+
+        // .EKEventStoreChanged fires on an authorization change, not just a
+        // data edit -- if the user revokes access in System Settings while
+        // events/reminders from it are already on screen, drop them instead
+        // of leaving stale, no-longer-authorized data showing indefinitely.
+        let eventStatus = EKEventStore.authorizationStatus(for: .event)
+        let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
+        calendarAuthorizationStatus = eventStatus
+        reminderAuthorizationStatus = reminderStatus
+
+        if eventStatus != .fullAccess {
+            events.removeAll { $0.type.isEvent || $0.type.isBirthday }
+        }
+        if reminderStatus != .fullAccess {
+            events.removeAll { $0.type.isReminder }
+        }
     }
 
     func checkCalendarAuthorization() async {

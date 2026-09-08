@@ -7,53 +7,17 @@
 
 import Cocoa
 
-class ShareServiceFinder: NSObject, NSSharingServicePickerDelegate {
-
-    @MainActor
-    private var onServicesCaptured: (([NSSharingService]) -> Void)?
-
-    /// Returns share services asynchronously without blocking the UI
-    @MainActor
-    func findApplicableServices(for items: [Any], timeout: TimeInterval = 2.0) async -> [NSSharingService] {
-
-        let dummyView = NSView(frame: .zero)
-        let picker = NSSharingServicePicker(items: items)
-        picker.delegate = self
-
-        return await withCheckedContinuation { continuation in
-            var didResume = false
-
-            // Capture services callback
-            Task { @MainActor in
-                self.onServicesCaptured = { services in
-                    guard !didResume else { return }
-                    didResume = true
-                    continuation.resume(returning: services)
-                }
-            }
-
-            picker.show(relativeTo: dummyView.bounds, of: dummyView, preferredEdge: .minY)
-
-
-            // Timeout task
-            Task { @MainActor in
-                try? await Task.sleep(for: .seconds(timeout))
-                guard !didResume else { return }
-                didResume = true
-                print("Warning: timed out waiting for sharing services")
-                continuation.resume(returning: [])
-            }
-        }
-    }
-
-    // MARK: NSSharingServicePickerDelegate
-
-    func sharingServicePicker(_ picker: NSSharingServicePicker,
-                              sharingServicesForItems items: [Any],
-                              proposedSharingServices proposed: [NSSharingService]) -> [NSSharingService] {
-        Task { @MainActor in
-            self.onServicesCaptured?(proposed)
-        }
-        return proposed
+/// Looks up which sharing services (AirDrop, Messages, Mail, etc.) can
+/// handle a set of items.
+///
+/// This used to go through NSSharingServicePicker, anchored to an NSView
+/// that was never added to any window -- the picker needs a real window to
+/// present in, so it silently never called back into its delegate and this
+/// always fell through to a 2-second timeout returning an empty list.
+/// NSSharingService.sharingServices(forItems:) queries the same information
+/// directly, synchronously, with no picker UI involved at all.
+enum ShareServiceFinder {
+    static func findApplicableServices(for items: [Any]) -> [NSSharingService] {
+        NSSharingService.sharingServices(forItems: items)
     }
 }

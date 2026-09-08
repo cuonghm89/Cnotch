@@ -28,11 +28,22 @@ class TemporaryFileStorageService {
         }
     }
     
+    /// `Application Support/<bundle-id>/Shelf` -- where `copyToShelfStorage`
+    /// puts its app-owned copies. Shared with `removeTemporaryFileIfNeeded`
+    /// so a Shelf item pointing here can actually be cleaned up on removal
+    /// instead of leaking forever (this directory used to be recognized
+    /// nowhere near the temp-directory-only deletion check below).
+    private var shelfStorageDirectory: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(Bundle.main.bundleIdentifier ?? "CNotch", isDirectory: true)
+            .appendingPathComponent("Shelf", isDirectory: true)
+    }
+
     func removeTemporaryFileIfNeeded(at url: URL) {
         let tempDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
 
-        guard url.path.hasPrefix(tempDirectory.path) else {
-            print("Attempted to remove temporary file outside temp directory: \(url.path)")
+        guard url.path.hasPrefix(tempDirectory.path) || url.path.hasPrefix(shelfStorageDirectory.path) else {
+            print("Attempted to remove temporary file outside a directory this app owns: \(url.path)")
             return
         }
 
@@ -71,10 +82,7 @@ class TemporaryFileStorageService {
     }
 
     func copyToShelfStorage(from source: URL) -> URL? {
-        let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent(Bundle.main.bundleIdentifier ?? "CNotch", isDirectory: true)
-            .appendingPathComponent("Shelf", isDirectory: true)
-            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let directory = shelfStorageDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let destination = directory.appendingPathComponent(source.lastPathComponent)
 
         do {

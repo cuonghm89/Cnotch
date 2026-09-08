@@ -18,6 +18,7 @@ final class VoiceMemoRecorder: NSObject, ObservableObject, AVAudioRecorderDelega
     private var recorder: AVAudioRecorder?
     private var timer: Timer?
     private var recordingURL: URL?
+    private var recordingFailed = false
 
     func toggle() {
         if isRecording {
@@ -58,6 +59,7 @@ final class VoiceMemoRecorder: NSObject, ObservableObject, AVAudioRecorderDelega
 
         self.recorder = recorder
         recordingURL = url
+        recordingFailed = false
         isRecording = true
         elapsedSeconds = 0
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -74,6 +76,19 @@ final class VoiceMemoRecorder: NSObject, ObservableObject, AVAudioRecorderDelega
 
         guard let tempURL = recordingURL else { return }
         recordingURL = nil
+
+        // A mid-recording mic loss (unplugged, access revoked, seized by
+        // another app) doesn't stop the countdown or flip isRecording on its
+        // own -- only the delegate callbacks below notice it. Skip saving a
+        // failed or empty (zero/near-zero byte) recording instead of adding
+        // a silently-corrupt item to the Shelf.
+        let attributes = try? FileManager.default.attributesOfItem(atPath: tempURL.path)
+        let fileSize = attributes?[.size] as? Int
+        guard !recordingFailed, let fileSize, fileSize > 0 else {
+            try? FileManager.default.removeItem(at: tempURL)
+            return
+        }
+
         saveToShelf(tempURL)
     }
 
@@ -87,7 +102,24 @@ final class VoiceMemoRecorder: NSObject, ObservableObject, AVAudioRecorderDelega
         try? FileManager.default.removeItem(at: sourceURL)
 
         guard let bookmark = try? Bookmark(url: shelfURL) else { return }
-        ShelfStateViewModel.shared.add([ShelfItem(kind: .file(bookmark: bookmark.data))])
+        ShelfStateViewModel.shared.add([ShelfItem(kind: .file(bookmark: bookmark.data), isTemporary: true)])
+    }
+
+    // MARK: - AVAudioRecorderDelegate
+
+    nonisolated func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        guard !flag else { return }
+        Task { @MainActor in self.recordingFailed = true }
+    }
+
+    nonisolated func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        Task { @MainActor in
+            self.recordingFailed = true
+            // The recorder just told us it can no longer encode -- stop
+            // immediately rather than let the countdown keep running against
+            // a recording that's already dead.
+            if self.isRecording { self.stop() }
+        }
     }
 
     private static let timestampFormatter: DateFormatter = {
