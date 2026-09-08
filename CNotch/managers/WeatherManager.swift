@@ -7,6 +7,7 @@
 //  it in Settings, since it needs Location access.
 //
 
+import AppKit
 import CoreLocation
 import Foundation
 
@@ -19,11 +20,24 @@ final class WeatherManager: NSObject, ObservableObject, CLLocationManagerDelegat
     private let locationManager = CLLocationManager()
     private var refreshTimer: Timer?
     private var isRunning = false
+    private var wakeObserver: Any?
 
     private override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
+
+        // The 30-minute timer keeps firing fine across sleep, but after a
+        // long sleep (e.g. overnight) it can otherwise take up to 30 minutes
+        // after waking to stop showing yesterday's weather.
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self, self.isRunning else { return }
+            self.locationManager.requestLocation()
+        }
     }
 
     func start() {

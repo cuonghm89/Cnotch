@@ -29,8 +29,25 @@ final class MediaKeyInterceptor {
     private var runLoopSource: CFRunLoopSource?
     private let step: Float = 1.0 / 16.0
     private var audioPlayer: AVAudioPlayer?
-    
-    private init() {}
+    private var wakeObserver: Any?
+
+    private init() {
+        // A sleep/wake cycle can leave the tap's underlying mach port dead
+        // rather than merely disabled, so the self-heal in handleEvent(_:)
+        // (which just re-enables the existing tap) doesn't always bring it
+        // back -- recreate it from scratch after waking.
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self, self.eventTap != nil else { return }
+            Task { @MainActor in
+                self.stop()
+                await self.start(promptIfNeeded: false)
+            }
+        }
+    }
     
     // MARK: - Accessibility (via XPC)
     

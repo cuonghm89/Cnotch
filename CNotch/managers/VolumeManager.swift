@@ -98,6 +98,7 @@ final class VolumeManager: NSObject, ObservableObject {
     private var softwareMuted: Bool = false
     private var deviceVolumeListeners: [(AudioObjectID, AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)] = []
     private var systemListeners: [(AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)] = []
+    private var wakeObserver: Any?
 
     private override init() {
         super.init()
@@ -105,6 +106,21 @@ final class VolumeManager: NSObject, ObservableObject {
         refreshOutputDevices()
         setupAudioListener()
         fetchCurrentVolume()
+
+        // CoreAudio's HAL property listeners can go silent across a sleep
+        // cycle (the HAL daemon's IPC connection to this process can drop
+        // without redelivering), with no "listener disabled" signal to
+        // self-heal from -- unlike a CGEventTap, so re-register proactively.
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.setupSystemListeners()
+            self?.refreshOutputDevices()
+            self?.setupAudioListener()
+            self?.fetchCurrentVolume()
+        }
     }
 
     var shouldShowOverlay: Bool { Date().timeIntervalSince(lastChangeAt) < visibleDuration }
@@ -348,8 +364,19 @@ final class VolumeManager: NSObject, ObservableObject {
     }
 
     private func setupSystemListeners() {
+        removeSystemListeners()
         addSystemListener(kAudioHardwarePropertyDefaultOutputDevice)
         addSystemListener(kAudioHardwarePropertyDevices)
+    }
+
+    private func removeSystemListeners() {
+        for (storedAddress, listener) in systemListeners {
+            var address = storedAddress
+            AudioObjectRemovePropertyListenerBlock(
+                AudioObjectID(kAudioObjectSystemObject), &address, nil, listener
+            )
+        }
+        systemListeners.removeAll()
     }
 
     private func addSystemListener(_ selector: AudioObjectPropertySelector) {

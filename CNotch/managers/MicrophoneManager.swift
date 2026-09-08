@@ -18,12 +18,26 @@ final class MicrophoneManager: NSObject, ObservableObject {
     private var softwareMuted = false
     private var deviceListeners: [(AudioObjectID, AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)] = []
     private var defaultDeviceListener: (AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)?
+    private var wakeObserver: Any?
 
     private override init() {
         super.init()
         setupDefaultDeviceListener()
         setupMuteListener()
         refresh()
+
+        // Mirrors VolumeManager: CoreAudio's HAL property listeners can go
+        // silent across a sleep cycle with no signal to self-heal from, so
+        // re-register proactively on wake.
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.setupDefaultDeviceListener()
+            self?.setupMuteListener()
+            self?.refresh()
+        }
     }
 
     func refresh() {
@@ -144,6 +158,7 @@ final class MicrophoneManager: NSObject, ObservableObject {
     // MARK: - Listeners (stay in sync with external changes, e.g. Control Center)
 
     private func setupDefaultDeviceListener() {
+        removeDefaultDeviceListener()
         var address = AudioObjectPropertyAddress(
             mSelector: kAudioHardwarePropertyDefaultInputDevice,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -159,6 +174,15 @@ final class MicrophoneManager: NSObject, ObservableObject {
             AudioObjectID(kAudioObjectSystemObject), &address, nil, listener
         ) == noErr else { return }
         defaultDeviceListener = (address, listener)
+    }
+
+    private func removeDefaultDeviceListener() {
+        guard let (storedAddress, listener) = defaultDeviceListener else { return }
+        var address = storedAddress
+        AudioObjectRemovePropertyListenerBlock(
+            AudioObjectID(kAudioObjectSystemObject), &address, nil, listener
+        )
+        defaultDeviceListener = nil
     }
 
     private func setupMuteListener() {
