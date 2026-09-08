@@ -306,6 +306,8 @@ struct ContentView: View {
         .easeInOut(duration: reduceMotion ? 0.12 : 0.24)
     }
 
+    private let compactLyricsExtraWidth: CGFloat = 150
+
     private var isScrollableTab: Bool {
         modules.supportsScrolling(coordinator.currentView)
     }
@@ -318,8 +320,13 @@ struct ContentView: View {
             return .init(width: baseSize.width * 1.26, height: 120)
         }
 
-        if showsMusicSneakPeek || showsCompactLyrics {
+        if showsMusicSneakPeek {
             return .init(width: max(baseSize.width, 260), height: baseSize.height + 40)
+        }
+
+        if showsCompactLyrics {
+            // Stays a single row -- widen instead of adding a second line below.
+            return .init(width: baseSize.width + compactLyricsExtraWidth, height: baseSize.height)
         }
 
         if let entry = clipboardHistory.hudEntry {
@@ -879,25 +886,30 @@ struct ContentView: View {
                           .frame(width: max(vm.closedNotchSize.width, 260))
                           .foregroundStyle(.gray)
                           .padding(.vertical, 10)
-                      } else if showsCompactLyrics {
-                          TimelineView(.animation(minimumInterval: 0.1, paused: !musicManager.isPlaying)) { timeline in
-                              let currentElapsed: Double = {
-                                  let delta = timeline.date.timeIntervalSince(musicManager.timestampDate)
-                                  let progressed = musicManager.elapsedTime + (delta * musicManager.playbackRate)
-                                  return min(max(progressed, 0), musicManager.songDuration)
-                              }()
-                              let line = musicManager.lyricLine(at: currentElapsed)
-                              HStack(alignment: .center) {
-                                  Image(systemName: "quote.bubble")
-                                  GeometryReader { geometry in
-                                      MarqueeText(.constant(line), textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray, minDuration: 1, frameWidth: geometry.size.width)
-                                  }
-                              }
-                              .frame(width: max(vm.closedNotchSize.width, 260))
-                              .foregroundStyle(.gray)
-                              .padding(.vertical, 10)
-                          }
                       }
+    }
+
+    @ViewBuilder
+    private func compactLyricsLine() -> some View {
+        TimelineView(.animation(minimumInterval: 0.1, paused: !musicManager.isPlaying)) { timeline in
+            let currentElapsed: Double = {
+                let delta = timeline.date.timeIntervalSince(musicManager.timestampDate)
+                let progressed = musicManager.elapsedTime + (delta * musicManager.playbackRate)
+                return min(max(progressed, 0), musicManager.songDuration)
+            }()
+            let line = musicManager.lyricLine(at: currentElapsed)
+            GeometryReader { geometry in
+                MarqueeText(
+                    .constant(line),
+                    font: .caption2,
+                    nsFont: .caption2,
+                    textColor: Defaults[.playerColorTinting] ? Color(nsColor: musicManager.avgColor).ensureMinimumBrightness(factor: 0.6) : .gray,
+                    minDuration: 1,
+                    frameWidth: geometry.size.width
+                )
+            }
+            .frame(width: compactLyricsExtraWidth - 10)
+        }
     }
 
     @ViewBuilder
@@ -1068,7 +1080,12 @@ struct ContentView: View {
                 height: compactMediaSize,
                 alignment: .center
             )
-            .padding(.trailing, 10)
+            .padding(.trailing, showsCompactLyrics ? 4 : 10)
+
+            if showsCompactLyrics {
+                compactLyricsLine()
+                    .padding(.trailing, 10)
+            }
         }
         .frame(
             height: vm.effectiveClosedNotchHeight,
