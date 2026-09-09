@@ -49,7 +49,7 @@ jobs:
       head_ref: refs/tags/${{ needs.validate_tag.outputs.tag }}
       version: ${{ needs.validate_tag.outputs.version }}
       build_number: ${{ github.run_number }}
-      code_sign_identity: "Apple Development: quocthao23061998.tg@icloud.com (XW87KZT6AP)"
+      code_sign_identity: "Apple Development: cuonghm89@icloud.com (2T89JWSAX8)"
       persist_version_changes: false
     secrets:
       BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
