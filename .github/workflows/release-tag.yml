@@ -26,6 +26,7 @@ jobs:
       tag: ${{ steps.validate.outputs.tag }}
       version: ${{ steps.validate.outputs.version }}
       is_prerelease: ${{ steps.validate.outputs.is_prerelease }}
+      build_number: ${{ steps.next_build.outputs.build_number }}
     steps:
       - id: validate
         env:
@@ -39,6 +40,24 @@ jobs:
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
           echo "is_prerelease=$([[ "$TAG" == *-* ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
+      # github.run_number is scoped to *this* workflow file, not to actual
+      # published versions -- it collided with an already-used Sparkle build
+      # number the first time this path ran, which made Sparkle think the
+      # "new" release was older than what was already installed. Derive the
+      # next build number from the appcast's own history instead, so it's
+      # correct regardless of which workflow or how many runs produced it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            updater/appcast.xml
+          sparse-checkout-cone-mode: false
+      - id: next_build
+        run: |
+          set -euo pipefail
+          HIGHEST=$(grep -oE '<sparkle:version>[0-9]+</sparkle:version>' updater/appcast.xml \
+            | grep -oE '[0-9]+' | sort -n | tail -1)
+          echo "build_number=$((HIGHEST + 1))" >> "$GITHUB_OUTPUT"
+
   build:
     name: Build release
     needs: validate_tag
@@ -48,7 +67,7 @@ jobs:
     with:
       head_ref: refs/tags/${{ needs.validate_tag.outputs.tag }}
       version: ${{ needs.validate_tag.outputs.version }}
-      build_number: ${{ github.run_number }}
+      build_number: ${{ needs.validate_tag.outputs.build_number }}
       code_sign_identity: "Apple Development: cuonghm89@icloud.com (2T89JWSAX8)"
       persist_version_changes: false
     secrets:
@@ -160,7 +179,7 @@ jobs:
       - name: Generate signed appcast
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ needs.validate_tag.outputs.tag }}
           IS_PRERELEASE: ${{ needs.validate_tag.outputs.is_prerelease }}
         run: |
           set -euo pipefail
