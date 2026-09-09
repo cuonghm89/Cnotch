@@ -18,6 +18,7 @@ struct CNotchHeader: View {
     @ObservedObject private var systemStats = SystemStatsManager.shared
     @ObservedObject private var volumeManager = VolumeManager.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var showConnectedBluetoothDevices = false
 
     private var motion: NotchMotionPolicy {
         .init(reduceMotion: reduceMotion)
@@ -32,6 +33,16 @@ struct CNotchHeader: View {
                 .fill(notchBackgroundColor)
                 .frame(width: middleGapWidth)
                 .frame(maxHeight: .infinity, alignment: .top)
+
+            // An invisible full-width anchor so the popover centers on the
+            // notch as a whole -- the tab strip and the icon cluster aren't
+            // the same width, so the gap between them (and the trigger icon
+            // itself, off in the icon cluster) both sit off-center.
+            Color.clear
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .popover(isPresented: $showConnectedBluetoothDevices, attachmentAnchor: .point(.center), arrowEdge: .bottom) {
+                    ConnectedBluetoothDevicesList(devices: volumeManager.connectedBluetoothAccessories)
+                }
 
             HStack(spacing: 0) {
                 TabSelectionView(tabWidth: moduleTabWidth)
@@ -88,7 +99,7 @@ struct CNotchHeader: View {
                             && Defaults[.showConnectedBluetoothDevicesInNotch]
                             && !volumeManager.connectedBluetoothAccessories.isEmpty
                         {
-                            ConnectedBluetoothDevicesMenu()
+                            ConnectedBluetoothDevicesMenu(isPresented: $showConnectedBluetoothDevices)
                         }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(

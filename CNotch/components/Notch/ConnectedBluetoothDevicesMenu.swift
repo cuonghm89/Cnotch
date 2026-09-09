@@ -32,21 +32,18 @@ struct BluetoothGlyph: Shape {
     }
 }
 
-/// One header icon standing in for the whole connected-accessories list --
+/// Header icon standing in for the whole connected-accessories list --
 /// showing every device inline (like the compact weather/CPU chips) would
-/// grow without bound as more devices connect and overflow the header, which
-/// already has to fit weather, system stats, and other utility icons.
+/// grow without bound as more devices connect and overflow the header.
+/// Only toggles `isPresented`; the popover itself is anchored elsewhere
+/// (centered under the notch) so it doesn't open lopsided next to this
+/// icon, which sits off to the side among the other header icons.
 struct ConnectedBluetoothDevicesMenu: View {
-    @ObservedObject private var volumeManager = VolumeManager.shared
-    @State private var showDevices = false
-
-    private var devices: [VolumeManager.ConnectedBluetoothAccessory] {
-        volumeManager.connectedBluetoothAccessories
-    }
+    @Binding var isPresented: Bool
 
     var body: some View {
         Button {
-            showDevices.toggle()
+            isPresented.toggle()
         } label: {
             Rectangle()
                 .fill(.clear)
@@ -60,12 +57,13 @@ struct ConnectedBluetoothDevicesMenu: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Connected Bluetooth devices")
-        .popover(isPresented: $showDevices, arrowEdge: .bottom) {
-            devicesList
-        }
     }
+}
 
-    private var devicesList: some View {
+struct ConnectedBluetoothDevicesList: View {
+    let devices: [VolumeManager.ConnectedBluetoothAccessory]
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Connected Devices")
                 .font(.headline)
