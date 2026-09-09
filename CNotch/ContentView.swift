@@ -34,6 +34,7 @@ struct ContentView: View {
     @ObservedObject private var pomodoro = PomodoroManager.shared
     @ObservedObject private var weatherManager = WeatherManager.shared
     @ObservedObject private var systemStatsManager = SystemStatsManager.shared
+    @ObservedObject private var volumeManager = VolumeManager.shared
     @State private var hoverTask: Task<Void, Never>?
     @State private var closingShellTask: Task<Void, Never>?
     @State private var closingTransitionID: UUID?
@@ -310,7 +311,7 @@ struct ContentView: View {
     /// nothing music-related is already using it.
     private var showsCompactSystemInfo: Bool {
         Defaults[.showCompactSystemInfo]
-            && (Defaults[.weatherEnabled] || Defaults[.systemStatsEnabled])
+            && (Defaults[.weatherEnabled] || Defaults[.systemStatsEnabled] || compactBluetoothBatteryPercentage != nil)
             && vm.notchState == .closed
             && !vm.hideOnClosed
             && !coordinator.helloAnimationRunning
@@ -1039,16 +1040,47 @@ struct ContentView: View {
         return String(format: "%d:%02d", total / 60, total % 60)
     }
 
+    /// The active output device's battery, shown next to the weather chip --
+    /// only for Bluetooth audio devices that actually report one (AirPods,
+    /// most headsets); other accessories don't show here, just in the
+    /// expanded notch's device list.
+    private var compactBluetoothBatteryPercentage: Int? {
+        guard Defaults[.showBluetoothDeviceConnectionIndicator],
+              Defaults[.showCompactBluetoothBattery],
+              let device = volumeManager.currentOutputDevice,
+              device.isBluetooth
+        else { return nil }
+        return device.bluetoothBatteryPercentage
+    }
+
+    private func batterySymbolName(for percentage: Int) -> String {
+        switch percentage {
+        case ..<13: "battery.0"
+        case ..<38: "battery.25"
+        case ..<63: "battery.50"
+        case ..<88: "battery.75"
+        default: "battery.100"
+        }
+    }
+
     @ViewBuilder
     private func compactSystemInfoRow() -> some View {
         compactSplitRow {
-            if Defaults[.weatherEnabled], let celsius = weatherManager.temperatureCelsius {
-                HStack(spacing: 3) {
-                    Image(systemName: weatherManager.symbolName)
-                    Text("\(Int(celsius.rounded()))°")
+            HStack(spacing: 6) {
+                if Defaults[.weatherEnabled], let celsius = weatherManager.temperatureCelsius {
+                    HStack(spacing: 3) {
+                        Image(systemName: weatherManager.symbolName)
+                        Text("\(Int(celsius.rounded()))°")
+                    }
                 }
-                .font(.caption)
+                if let battery = compactBluetoothBatteryPercentage {
+                    HStack(spacing: 3) {
+                        Image(systemName: batterySymbolName(for: battery))
+                        Text("\(battery)%")
+                    }
+                }
             }
+            .font(.caption)
         } trailing: {
             if Defaults[.systemStatsEnabled] {
                 HStack(spacing: 3) {

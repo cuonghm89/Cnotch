@@ -1,5 +1,3 @@
-import IOBluetooth
-import CoreBluetooth
 //
 //  VolumeManager.swift
 //  CNotch
@@ -10,12 +8,21 @@ import CoreBluetooth
 import AppKit
 import Combine
 import CoreAudio
+import CoreBluetooth
 import Defaults
 import Foundation
+import IOBluetooth
 import ObjectiveC
 
 final class VolumeManager: NSObject, ObservableObject {
     static let shared = VolumeManager()
+
+    struct ConnectedBluetoothAccessory: Identifiable, Equatable {
+        let id: String
+        let name: String
+        let icon: String
+        let batteryPercentage: Int?
+    }
 
     struct OutputDevice: Identifiable, Equatable {
         let id: AudioObjectID
@@ -92,6 +99,14 @@ final class VolumeManager: NSObject, ObservableObject {
     private var isFirstDeviceDiscovery: Bool = true
     private var bluetoothConnectNotification: IOBluetoothUserNotification?
 
+    /// Every currently-connected Bluetooth accessory (audio outputs from
+    /// CoreAudio, plus keyboards/mice/trackpads/controllers from IOBluetooth),
+    /// for the "connected devices" list in the expanded notch.
+    @Published private(set) var connectedBluetoothAccessories: [ConnectedBluetoothAccessory] = []
+    private var audioBluetoothAccessories: [ConnectedBluetoothAccessory] = []
+    private var genericBluetoothAccessories: [String: ConnectedBluetoothAccessory] = [:]
+    private var disconnectNotifications: [String: IOBluetoothUserNotification] = [:]
+
     let visibleDuration: TimeInterval = 1.2
 
     private var didInitialFetch = false
@@ -118,6 +133,14 @@ final class VolumeManager: NSObject, ObservableObject {
             forConnectNotifications: self,
             selector: #selector(handleBluetoothAccessoryConnected(_:device:))
         )
+        // The connect notification above only fires for future connections,
+        // so seed the list with accessories already connected at launch.
+        if Defaults[.showBluetoothDeviceConnectionIndicator], CBManager.authorization == .allowedAlways {
+            for device in BluetoothDeviceBridge.connectedDevices() {
+                trackGenericAccessory(device)
+            }
+        }
+        rebuildConnectedAccessoriesList()
 
         // CoreAudio's HAL property listeners can go silent across a sleep
         // cycle (the HAL daemon's IPC connection to this process can drop
@@ -231,6 +254,7 @@ final class VolumeManager: NSObject, ObservableObject {
         let previousKnown = knownBluetoothDeviceIDs
         var currentKnown: Set<AudioObjectID> = []
         var currentKnownAddresses: Set<String> = []
+        var currentAudioAccessories: [ConnectedBluetoothAccessory] = []
         // Collect every device newly seen since the last refresh, not just
         // the last one in the loop -- a single callback can see more than
         // one Bluetooth device connect at once (e.g. two devices reconnect
@@ -241,6 +265,9 @@ final class VolumeManager: NSObject, ObservableObject {
             if d.transportType == kAudioDeviceTransportTypeBluetooth || d.transportType == kAudioDeviceTransportTypeBluetoothLE {
                 currentKnown.insert(d.id)
                 currentKnownAddresses.insert(d.uid.filter(\.isHexDigit).lowercased())
+                currentAudioAccessories.append(
+                    ConnectedBluetoothAccessory(id: d.uid, name: d.name, icon: d.icon, batteryPercentage: d.bluetoothBatteryPercentage)
+                )
                 if !isFirstDeviceDiscovery && !previousKnown.contains(d.id) {
                     newlyConnected.append(d)
                 }
@@ -252,6 +279,9 @@ final class VolumeManager: NSObject, ObservableObject {
 
         DispatchQueue.main.async {
             self.currentOutputDevice = devices.first { $0.id == defaultDeviceID }
+            self.audioBluetoothAccessories = currentAudioAccessories
+            self.rebuildConnectedAccessoriesList()
+
             guard !newlyConnected.isEmpty,
                   Defaults[.showBluetoothDeviceConnectionIndicator],
                   CBManager.authorization == .allowedAlways
@@ -303,21 +333,61 @@ final class VolumeManager: NSObject, ObservableObject {
     @objc private func handleBluetoothAccessoryConnected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) {
         DispatchQueue.main.async {
             guard Defaults[.showBluetoothDeviceConnectionIndicator],
-                  CBManager.authorization == .allowedAlways
+                  CBManager.authorization == .allowedAlways,
+                  let accessory = self.trackGenericAccessory(device)
             else { return }
-
-            let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
-            // Audio devices are already announced via the CoreAudio path;
-            // skip them here so a headset connecting doesn't pop up twice.
-            guard !address.isEmpty, !self.knownBluetoothOutputAddresses.contains(address) else { return }
-
+            self.rebuildConnectedAccessoriesList()
             self.announceBluetoothConnections([
-                BluetoothAnnouncement(
-                    name: device.name ?? device.addressString ?? "Bluetooth Device",
-                    icon: "bluetooth",
-                    batteryPercentage: BluetoothDeviceBridge.batteryPercentage(of: device)
-                )
+                BluetoothAnnouncement(name: accessory.name, icon: accessory.icon, batteryPercentage: accessory.batteryPercentage)
             ])
+        }
+    }
+
+    @objc private func handleBluetoothAccessoryDisconnected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) {
+        DispatchQueue.main.async {
+            let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
+            guard !address.isEmpty else { return }
+            self.genericBluetoothAccessories.removeValue(forKey: address)
+            self.disconnectNotifications.removeValue(forKey: address)?.unregister()
+            self.rebuildConnectedAccessoriesList()
+        }
+    }
+
+    /// Records a non-audio accessory and registers for its disconnect so the
+    /// "connected devices" list can drop it again later. Skips devices
+    /// CoreAudio already tracks as an audio output, to avoid double-counting.
+    @discardableResult
+    private func trackGenericAccessory(_ device: IOBluetoothDevice) -> ConnectedBluetoothAccessory? {
+        let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
+        guard !address.isEmpty, !knownBluetoothOutputAddresses.contains(address) else { return nil }
+        let accessory = ConnectedBluetoothAccessory(
+            id: address,
+            name: device.name ?? device.addressString ?? "Bluetooth Device",
+            icon: Self.accessoryIcon(for: device),
+            batteryPercentage: BluetoothDeviceBridge.batteryPercentage(of: device)
+        )
+        genericBluetoothAccessories[address] = accessory
+        disconnectNotifications[address] = device.register(
+            forDisconnectNotification: self,
+            selector: #selector(handleBluetoothAccessoryDisconnected(_:device:))
+        )
+        return accessory
+    }
+
+    private func rebuildConnectedAccessoriesList() {
+        connectedBluetoothAccessories = audioBluetoothAccessories
+            + genericBluetoothAccessories.values.sorted { $0.name < $1.name }
+    }
+
+    /// Bluetooth's own class-of-device bits -- major 0x05 is "Peripheral",
+    /// and the minor field's top two bits split it into keyboard/pointing/
+    /// combo, with joystick/gamepad called out separately.
+    private static func accessoryIcon(for device: IOBluetoothDevice) -> String {
+        guard device.deviceClassMajor == 0x05 else { return "bluetooth" }
+        switch device.deviceClassMinor & 0x30 {
+        case 0x10, 0x30: return "keyboard"
+        case 0x20: return "computermouse"
+        default: return (device.deviceClassMinor & 0x0F) == 0x02 ? "gamecontroller" : "bluetooth"
         }
     }
 

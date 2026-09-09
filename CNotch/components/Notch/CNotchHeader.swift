@@ -16,6 +16,7 @@ struct CNotchHeader: View {
     @ObservedObject private var modules = FeatureModuleRegistry.shared
     @ObservedObject private var weather = WeatherManager.shared
     @ObservedObject private var systemStats = SystemStatsManager.shared
+    @ObservedObject private var volumeManager = VolumeManager.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var motion: NotchMotionPolicy {
@@ -82,6 +83,12 @@ struct CNotchHeader: View {
                             && (Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled])
                         {
                             NotchUtilitiesMenu()
+                        }
+                        if Defaults[.showBluetoothDeviceConnectionIndicator]
+                            && Defaults[.showConnectedBluetoothDevicesInNotch]
+                            && !volumeManager.connectedBluetoothAccessories.isEmpty
+                        {
+                            ConnectedBluetoothDevicesMenu()
                         }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(

@@ -166,6 +166,7 @@
 		C1A0B5013B0000010000001C /* LanguageOverride.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B5023B0000010000001D /* LanguageOverride.swift */; };
 		C1A0B5033B0000010000001E /* HelpGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B5043B0000010000001F /* HelpGuideView.swift */; };
 		C1A0B6013B0000010000002A /* NotchUtilitiesMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */; };
+		C1A0B6033B0000010000002C /* ConnectedBluetoothDevicesMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B6043B0000010000002D /* ConnectedBluetoothDevicesMenu.swift */; };
 		F00DBABE2EFC000000000001 /* Knock.caf in Resources */ = {isa = PBXBuildFile; fileRef = F00DBABE2EFC000000000002 /* Knock.caf */; };
 		F38DE6482D8243E7008B5C6D /* BatteryActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */; };
 /* End PBXBuildFile section */
@@ -354,6 +355,7 @@
 		C1A0B5023B0000010000001D /* LanguageOverride.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageOverride.swift; sourceTree = "<group>"; };
 		C1A0B5043B0000010000001F /* HelpGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpGuideView.swift; sourceTree = "<group>"; };
 		C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchUtilitiesMenu.swift; sourceTree = "<group>"; };
+		C1A0B6043B0000010000002D /* ConnectedBluetoothDevicesMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedBluetoothDevicesMenu.swift; sourceTree = "<group>"; };
 		F00DBABE2EFC000000000002 /* Knock.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Knock.caf; sourceTree = "<group>"; };
 		F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryActivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -797,6 +799,7 @@
 				C1A0B1043B00000100000001 /* BluetoothConnectionIndicator.swift */,
 				C1A0B1063B00000100000003 /* ExternalLiveActivityIndicator.swift */,
 				C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */,
+				C1A0B6043B0000010000002D /* ConnectedBluetoothDevicesMenu.swift */,
 				C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */,
 				C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */,
 				C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */,
@@ -1167,6 +1170,7 @@
 				C1A0B1033B00000100000001 /* BluetoothConnectionIndicator.swift in Sources */,
 				C1A0B1053B00000100000002 /* ExternalLiveActivityIndicator.swift in Sources */,
 				C1A0B6013B0000010000002A /* NotchUtilitiesMenu.swift in Sources */,
+				C1A0B6033B0000010000002C /* ConnectedBluetoothDevicesMenu.swift in Sources */,
 				C1A0B41D3B0000010000001A /* VoiceMemoIndicator.swift in Sources */,
 				C1A0B4193B00000100000016 /* PomodoroIndicator.swift in Sources */,
 				C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */,

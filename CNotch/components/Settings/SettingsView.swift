@@ -1006,6 +1006,16 @@ struct BluetoothDeviceNotifications: View {
                 }
             }
             .disabled(!bluetoothAuthorized || !showConnectionIndicator)
+
+            Section {
+                Defaults.Toggle(key: .showCompactBluetoothBattery) {
+                    Text("Show battery next to weather in the compact notch")
+                }
+                Defaults.Toggle(key: .showConnectedBluetoothDevicesInNotch) {
+                    Text("Show connected devices list in the expanded notch")
+                }
+            }
+            .disabled(!bluetoothAuthorized || !showConnectionIndicator)
         }
         .accentColor(.effectiveAccent)
         .onAppear {
