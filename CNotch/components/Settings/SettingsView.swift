@@ -1009,7 +1009,7 @@ struct BluetoothDeviceNotifications: View {
 
             Section {
                 Defaults.Toggle(key: .showCompactBluetoothBattery) {
-                    Text("Show battery next to weather in the compact notch")
+                    Text("Show a connected device next to weather in the compact notch")
                 }
                 Defaults.Toggle(key: .showConnectedBluetoothDevicesInNotch) {
                     Text("Show connected devices list in the expanded notch")

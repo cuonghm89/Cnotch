@@ -311,7 +311,7 @@ struct ContentView: View {
     /// nothing music-related is already using it.
     private var showsCompactSystemInfo: Bool {
         Defaults[.showCompactSystemInfo]
-            && (Defaults[.weatherEnabled] || Defaults[.systemStatsEnabled] || compactBluetoothBatteryPercentage != nil)
+            && (Defaults[.weatherEnabled] || Defaults[.systemStatsEnabled] || compactBluetoothIndicator != nil)
             && vm.notchState == .closed
             && !vm.hideOnClosed
             && !coordinator.helloAnimationRunning
@@ -1040,17 +1040,23 @@ struct ContentView: View {
         return String(format: "%d:%02d", total / 60, total % 60)
     }
 
-    /// The active output device's battery, shown next to the weather chip --
-    /// only for Bluetooth audio devices that actually report one (AirPods,
-    /// most headsets); other accessories don't show here, just in the
-    /// expanded notch's device list.
-    private var compactBluetoothBatteryPercentage: Int? {
+    /// Shown next to the weather chip: the active Bluetooth audio device's
+    /// battery when there is one (AirPods, most headsets), otherwise
+    /// whatever accessory connected first (keyboard, trackpad...) so the
+    /// badge isn't only ever visible with a Bluetooth headset in use.
+    private var compactBluetoothIndicator: (icon: String, label: String?)? {
         guard Defaults[.showBluetoothDeviceConnectionIndicator],
-              Defaults[.showCompactBluetoothBattery],
-              let device = volumeManager.currentOutputDevice,
-              device.isBluetooth
+              Defaults[.showCompactBluetoothBattery]
         else { return nil }
-        return device.bluetoothBatteryPercentage
+
+        if let device = volumeManager.currentOutputDevice,
+           device.isBluetooth,
+           let battery = device.bluetoothBatteryPercentage
+        {
+            return (batterySymbolName(for: battery), "\(battery)%")
+        }
+        guard let accessory = volumeManager.connectedBluetoothAccessories.first else { return nil }
+        return (accessory.icon, accessory.batteryPercentage.map { "\($0)%" })
     }
 
     private func batterySymbolName(for percentage: Int) -> String {
@@ -1073,10 +1079,12 @@ struct ContentView: View {
                         Text("\(Int(celsius.rounded()))°")
                     }
                 }
-                if let battery = compactBluetoothBatteryPercentage {
+                if let indicator = compactBluetoothIndicator {
                     HStack(spacing: 3) {
-                        Image(systemName: batterySymbolName(for: battery))
-                        Text("\(battery)%")
+                        Image(systemName: indicator.icon)
+                        if let label = indicator.label {
+                            Text(label)
+                        }
                     }
                 }
             }
