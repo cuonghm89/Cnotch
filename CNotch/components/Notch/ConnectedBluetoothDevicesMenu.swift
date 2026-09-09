@@ -15,7 +15,7 @@ struct ConnectedBluetoothDevicesMenu: View {
 
     var body: some View {
         HoverButton(
-            icon: "bluetooth",
+            icon: "cable.connector",
             iconColor: .white,
             showsHoverHighlight: false,
             accessibilityLabel: "Connected Bluetooth devices",

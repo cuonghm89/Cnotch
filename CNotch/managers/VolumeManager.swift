@@ -383,11 +383,14 @@ final class VolumeManager: NSObject, ObservableObject {
     /// and the minor field's top two bits split it into keyboard/pointing/
     /// combo, with joystick/gamepad called out separately.
     private static func accessoryIcon(for device: IOBluetoothDevice) -> String {
-        guard device.deviceClassMajor == 0x05 else { return "bluetooth" }
+        // "bluetooth" isn't an SF Symbol (Apple doesn't ship the trademarked
+        // logo as one) -- it silently renders nothing, so fall back to a
+        // generic accessory glyph instead.
+        guard device.deviceClassMajor == 0x05 else { return "cable.connector" }
         switch device.deviceClassMinor & 0x30 {
         case 0x10, 0x30: return "keyboard"
         case 0x20: return "computermouse"
-        default: return (device.deviceClassMinor & 0x0F) == 0x02 ? "gamecontroller" : "bluetooth"
+        default: return (device.deviceClassMinor & 0x0F) == 0x02 ? "gamecontroller" : "cable.connector"
         }
     }
 
