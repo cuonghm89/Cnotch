@@ -18,7 +18,6 @@ struct CNotchHeader: View {
     @ObservedObject private var systemStats = SystemStatsManager.shared
     @ObservedObject private var volumeManager = VolumeManager.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showConnectedBluetoothDevices = false
 
     private var motion: NotchMotionPolicy {
         .init(reduceMotion: reduceMotion)
@@ -33,16 +32,6 @@ struct CNotchHeader: View {
                 .fill(notchBackgroundColor)
                 .frame(width: middleGapWidth)
                 .frame(maxHeight: .infinity, alignment: .top)
-
-            // An invisible full-width anchor so the popover centers on the
-            // notch as a whole -- the tab strip and the icon cluster aren't
-            // the same width, so the gap between them (and the trigger icon
-            // itself, off in the icon cluster) both sit off-center.
-            Color.clear
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .popover(isPresented: $showConnectedBluetoothDevices, attachmentAnchor: .point(.center), arrowEdge: .bottom) {
-                    ConnectedBluetoothDevicesList(devices: volumeManager.connectedBluetoothAccessories)
-                }
 
             HStack(spacing: 0) {
                 TabSelectionView(tabWidth: moduleTabWidth)
@@ -90,16 +79,8 @@ struct CNotchHeader: View {
                             }
                             .font(.system(size: 11, weight: .medium))
                         }
-                        if !coordinator.isScreenLocked
-                            && (Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled])
-                        {
+                        if !coordinator.isScreenLocked && showsUtilitiesMenu {
                             NotchUtilitiesMenu()
-                        }
-                        if Defaults[.showBluetoothDeviceConnectionIndicator]
-                            && Defaults[.showConnectedBluetoothDevicesInNotch]
-                            && !volumeManager.connectedBluetoothAccessories.isEmpty
-                        {
-                            ConnectedBluetoothDevicesMenu(isPresented: $showConnectedBluetoothDevices)
                         }
                         if Defaults[.settingsIconInNotch] {
                             HoverButton(
@@ -144,6 +125,17 @@ struct CNotchHeader: View {
 
     private var notchBackgroundColor: Color {
         screenHasPhysicalNotch ? .black : .clear
+    }
+
+    /// Whether the consolidated utilities icon has anything to show -- kept
+    /// as one icon rather than one per feature, since the header is already
+    /// tight for space (weather, CPU/RAM, settings, and battery all compete
+    /// for the same row).
+    private var showsUtilitiesMenu: Bool {
+        Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled]
+            || (Defaults[.showBluetoothDeviceConnectionIndicator]
+                && Defaults[.showConnectedBluetoothDevicesInNotch]
+                && !volumeManager.connectedBluetoothAccessories.isEmpty)
     }
 
     /// Width of the gap between the tab strip and the weather/stats/settings
