@@ -1,3 +1,4 @@
+import IOBluetooth
 import CoreBluetooth
 //
 //  VolumeManager.swift
@@ -89,9 +90,7 @@ final class VolumeManager: NSObject, ObservableObject {
     private var knownBluetoothDeviceIDs: Set<AudioObjectID> = []
     private var knownBluetoothOutputAddresses: Set<String> = []
     private var isFirstDeviceDiscovery: Bool = true
-    private var knownGenericBluetoothAddresses: Set<String> = []
-    private var isFirstGenericBluetoothDiscovery: Bool = true
-    private var genericBluetoothPollTimer: Timer?
+    private var bluetoothConnectNotification: IOBluetoothUserNotification?
 
     let visibleDuration: TimeInterval = 1.2
 
@@ -113,12 +112,12 @@ final class VolumeManager: NSObject, ObservableObject {
 
         // Non-audio Bluetooth accessories (keyboards, mice, trackpads...)
         // never appear in CoreAudio's device list, so they can't be caught
-        // by the HAL property listener above -- IOBluetooth has no
-        // reflection-friendly push notification for this, so poll instead.
-        refreshGenericBluetoothAccessories()
-        genericBluetoothPollTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { [weak self] _ in
-            self?.refreshGenericBluetoothAccessories()
-        }
+        // by the HAL property listener above -- register separately for
+        // IOBluetooth's own connect notification, which fires for any device.
+        bluetoothConnectNotification = IOBluetoothDevice.register(
+            forConnectNotifications: self,
+            selector: #selector(handleBluetoothAccessoryConnected(_:device:))
+        )
 
         // CoreAudio's HAL property listeners can go silent across a sleep
         // cycle (the HAL daemon's IPC connection to this process can drop
@@ -298,35 +297,28 @@ final class VolumeManager: NSObject, ObservableObject {
         }
     }
 
-    /// Catches connections from Bluetooth accessories that CoreAudio never
-    /// sees (keyboards, mice, trackpads, controllers...) by diffing
-    /// IOBluetooth's connected-device list, mirroring the CoreAudio path above.
-    private func refreshGenericBluetoothAccessories() {
-        guard Defaults[.showBluetoothDeviceConnectionIndicator],
-              CBManager.authorization == .allowedAlways
-        else { return }
+    /// Fires for ANY Bluetooth device connection -- audio or not -- so this
+    /// is what actually catches keyboards, mice, trackpads, and controllers,
+    /// which never show up in CoreAudio's device list.
+    @objc private func handleBluetoothAccessoryConnected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) {
+        DispatchQueue.main.async {
+            guard Defaults[.showBluetoothDeviceConnectionIndicator],
+                  CBManager.authorization == .allowedAlways
+            else { return }
 
-        let devices = BluetoothDeviceBridge.connectedAccessories()
-        let previousKnown = knownGenericBluetoothAddresses
-        var currentKnown: Set<String> = []
-        var newlyConnected: [BluetoothAnnouncement] = []
-
-        for device in devices {
-            currentKnown.insert(device.address)
+            let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
             // Audio devices are already announced via the CoreAudio path;
             // skip them here so a headset connecting doesn't pop up twice.
-            guard !knownBluetoothOutputAddresses.contains(device.address) else { continue }
-            if !isFirstGenericBluetoothDiscovery && !previousKnown.contains(device.address) {
-                newlyConnected.append(
-                    BluetoothAnnouncement(name: device.name, icon: "bluetooth", batteryPercentage: device.batteryPercentage)
-                )
-            }
-        }
-        knownGenericBluetoothAddresses = currentKnown
-        isFirstGenericBluetoothDiscovery = false
+            guard !address.isEmpty, !self.knownBluetoothOutputAddresses.contains(address) else { return }
 
-        guard !newlyConnected.isEmpty else { return }
-        announceBluetoothConnections(newlyConnected)
+            self.announceBluetoothConnections([
+                BluetoothAnnouncement(
+                    name: device.name ?? device.addressString ?? "Bluetooth Device",
+                    icon: "bluetooth",
+                    batteryPercentage: BluetoothDeviceBridge.batteryPercentage(of: device)
+                )
+            ])
+        }
     }
 
     private func outputDevices() -> [OutputDevice] {
@@ -737,112 +729,50 @@ extension Array where Element == Float32 {
     fileprivate var average: Float32? { isEmpty ? nil : reduce(0, +) / Float32(count) }
 }
 
+/// IOBluetoothDevice's battery accessors aren't in the public header, so
+/// they still need selector-based reflection; everything else (the class
+/// itself, `name`, `addressString`, `connectedDevices()`) is real linked
+/// API now that IOBluetooth is imported directly.
 private enum BluetoothDeviceBridge {
-    private static let frameworkLoaded = Bundle(
-        path: "/System/Library/Frameworks/IOBluetooth.framework"
-    )?.load() ?? false
-
     static func batteryPercentage(outputUID: String, isBluetooth: Bool) -> Int? {
         guard UserDefaults.standard.bool(forKey: "onboardingCompleted"),
               Defaults[.showBluetoothDeviceConnectionIndicator],
               isBluetooth,
-              !outputUID.isEmpty
+              !outputUID.isEmpty,
+              let device = connectedDevices().first(where: { addressMatches(outputUID, $0) })
         else { return nil }
-        _ = frameworkLoaded
-        guard
-              let deviceClass = NSClassFromString("IOBluetoothDevice") as? NSObject.Type,
-              let devices = deviceClass.perform(NSSelectorFromString("connectedDevices"))?
-                .takeUnretainedValue() as? [NSObject]
-        else { return nil }
+        return batteryPercentage(of: device)
+    }
 
-        for device in devices where outputUIDMatchesDeviceAddress(outputUID, device: device) {
-            let battery = BatteryLevels(
-                single: batteryValue(device, selector: "batteryPercentSingle"),
-                left: batteryValue(device, selector: "batteryPercentLeft"),
-                right: batteryValue(device, selector: "batteryPercentRight"),
-                caseBattery: batteryValue(device, selector: "batteryPercentCase")
-            )
-            if let single = battery.single {
-                return single
-            }
-
-            let earbuds = [battery.left, battery.right].compactMap { $0 }
-            if let lowest = earbuds.min() {
-                return lowest
-            }
+    static func batteryPercentage(of device: IOBluetoothDevice) -> Int? {
+        if let single = batteryValue(device, selector: "batteryPercentSingle") {
+            return single
         }
-        return nil
+        let earbuds = [
+            batteryValue(device, selector: "batteryPercentLeft"),
+            batteryValue(device, selector: "batteryPercentRight")
+        ].compactMap { $0 }
+        return earbuds.min()
     }
 
-    struct ConnectedAccessory {
-        let address: String
-        let name: String
-        let batteryPercentage: Int?
+    static func connectedDevices() -> [IOBluetoothDevice] {
+        (IOBluetoothDevice.perform(NSSelectorFromString("connectedDevices"))?
+            .takeUnretainedValue() as? [IOBluetoothDevice]) ?? []
     }
 
-    /// Every currently-connected paired Bluetooth device (audio or not),
-    /// used to catch accessories -- keyboards, mice, trackpads, controllers
-    /// -- that never show up in CoreAudio's output device list.
-    static func connectedAccessories() -> [ConnectedAccessory] {
-        _ = frameworkLoaded
-        guard
-              let deviceClass = NSClassFromString("IOBluetoothDevice") as? NSObject.Type,
-              let devices = deviceClass.perform(NSSelectorFromString("connectedDevices"))?
-                .takeUnretainedValue() as? [NSObject]
-        else { return [] }
-
-        return devices.compactMap { device -> ConnectedAccessory? in
-            let addressSelector = NSSelectorFromString("addressString")
-            guard device.responds(to: addressSelector),
-                  let address = device.perform(addressSelector)?.takeUnretainedValue() as? String,
-                  address.filter(\.isHexDigit).count == 12
-            else { return nil }
-
-            let nameSelector = NSSelectorFromString("name")
-            let name = (device.responds(to: nameSelector)
-                ? device.perform(nameSelector)?.takeUnretainedValue() as? String
-                : nil) ?? address
-
-            let battery = BatteryLevels(
-                single: batteryValue(device, selector: "batteryPercentSingle"),
-                left: batteryValue(device, selector: "batteryPercentLeft"),
-                right: batteryValue(device, selector: "batteryPercentRight"),
-                caseBattery: batteryValue(device, selector: "batteryPercentCase")
-            )
-            let batteryPercentage = battery.single ?? [battery.left, battery.right].compactMap { $0 }.min()
-
-            return ConnectedAccessory(
-                address: address.filter(\.isHexDigit).lowercased(),
-                name: name,
-                batteryPercentage: batteryPercentage
-            )
-        }
-    }
-
-    private static func outputUIDMatchesDeviceAddress(_ outputUID: String, device: NSObject) -> Bool {
-        let selector = NSSelectorFromString("addressString")
-        guard device.responds(to: selector),
-              let address = device.perform(selector)?.takeUnretainedValue() as? String
-        else { return false }
-
+    private static func addressMatches(_ outputUID: String, _ device: IOBluetoothDevice) -> Bool {
+        guard let address = device.addressString else { return false }
         let normalizedAddress = address.filter(\.isHexDigit).lowercased()
         guard normalizedAddress.count == 12 else { return false }
         return outputUID.filter(\.isHexDigit).lowercased().contains(normalizedAddress)
     }
 
-    private static func batteryValue(_ device: NSObject, selector name: String) -> Int? {
+    private static func batteryValue(_ device: IOBluetoothDevice, selector name: String) -> Int? {
         let selector = NSSelectorFromString(name)
         guard device.responds(to: selector), let implementation = device.method(for: selector) else { return nil }
         typealias BatterySelector = @convention(c) (AnyObject, Selector) -> Int32
         let send = unsafeBitCast(implementation, to: BatterySelector.self)
         let percentage = send(device, selector)
         return (0...100).contains(percentage) ? Int(percentage) : nil
-    }
-
-    private struct BatteryLevels {
-        let single: Int?
-        let left: Int?
-        let right: Int?
-        let caseBattery: Int?
     }
 }
