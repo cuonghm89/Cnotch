@@ -13,9 +13,16 @@ struct ConnectedBluetoothDevicesMenu: View {
         volumeManager.connectedBluetoothAccessories
     }
 
+    /// There's no real Bluetooth SF Symbol to represent "some accessory is
+    /// connected" in the abstract, so show the actual icon of whichever
+    /// device is first in the list -- more recognizable than a generic glyph.
+    private var headerIcon: String {
+        devices.first?.icon ?? "cable.connector"
+    }
+
     var body: some View {
         HoverButton(
-            icon: "cable.connector",
+            icon: headerIcon,
             iconColor: .white,
             showsHoverHighlight: false,
             accessibilityLabel: "Connected Bluetooth devices",
