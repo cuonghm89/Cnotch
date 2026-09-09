@@ -19,10 +19,11 @@
             <pubDate>Tue, 08 Sep 2026 13:56:00 +0000</pubDate>
             <link>https://github.com/cuonghm89/Cnotch/releases</link>
             <sparkle:version>2</sparkle:version>
-            <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+            <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description><![CDATA[<p>Test release for Sparkle auto-update: lyrics improvements (2-line lookahead, compact-notch lyrics row), CPU/RAM + Weather header chips, mic mute, Pomodoro/Voice Memo/Quick Note utilities menu, Vietnamese localization, and various notch-header/sizing fixes.</p>]]></description>
-            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.1/CNotch-1.0.1.dmg" length="10344715" type="application/octet-stream" sparkle:edSignature="gFY6N/nA3QM5SPQIJNkWWLr8iEywFhj5HuzW4tArDApMlozHFE8e5MHUgg4rJWZH+/woGkyoM0j6+J1yHZOvBw=="/>
+            <description><![CDATA[<p><strong>Full Changelog</strong>: <a href="https://github.com/cuonghm89/Cnotch/compare/v1.0.2...v1.0.3">https://github.com/cuonghm89/Cnotch/compare/v1.0.2...v1.0.3</a></p>
+]]></description>
+            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/main/CNotch.dmg" length="10557608" type="application/octet-stream" sparkle:edSignature="6DHGxZl2SLnzENW48De46zEp56ulAud2UfYDcjVqv/jVSZUiW35xreLEaKNUVjf7JvpBc8qJvarlFD+h8srwDA=="/>
         </item>
         <item>
             <title>1.0.0</title>
