@@ -19,14 +19,29 @@ struct ClipboardEntry: Codable, Identifiable, Hashable {
     fileprivate let value: String?
     fileprivate let imageFileName: String?
     fileprivate var ocrText: String?
+    /// Best-effort source app, from whichever app was frontmost when the
+    /// copy happened -- there's no API that reports the actual pasteboard
+    /// writer, so this is the same heuristic other clipboard managers use.
+    /// Optional so entries persisted before this field existed still decode.
+    let sourceAppBundleID: String?
+    let sourceAppName: String?
 
-    init(kind: ClipboardEntryKind, value: String? = nil, imageFileName: String? = nil, ocrText: String? = nil) {
+    init(
+        kind: ClipboardEntryKind,
+        value: String? = nil,
+        imageFileName: String? = nil,
+        ocrText: String? = nil,
+        sourceAppBundleID: String? = nil,
+        sourceAppName: String? = nil
+    ) {
         id = UUID()
         timestamp = Date()
         self.kind = kind
         self.value = value
         self.imageFileName = imageFileName
         self.ocrText = ocrText
+        self.sourceAppBundleID = sourceAppBundleID
+        self.sourceAppName = sourceAppName
     }
 
     var preview: String {
@@ -233,7 +248,14 @@ final class ClipboardHistoryStore: ObservableObject {
     }
 
     private func append(kind: ClipboardEntryKind, value: String? = nil, imageFileName: String? = nil) {
-        let entry = ClipboardEntry(kind: kind, value: value, imageFileName: imageFileName)
+        let sourceApp = NSWorkspace.shared.frontmostApplication
+        let entry = ClipboardEntry(
+            kind: kind,
+            value: value,
+            imageFileName: imageFileName,
+            sourceAppBundleID: sourceApp?.bundleIdentifier,
+            sourceAppName: sourceApp?.localizedName
+        )
         guard fingerprint(for: entry) != entries.first.map({ fingerprint(for: $0) }) else {
             removeImageFile(for: entry)
             return
