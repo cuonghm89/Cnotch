@@ -5,6 +5,17 @@
         <link>https://github.com/cuonghm89/Cnotch/releases</link>
         <description>CNotch updates</description>
         <item>
+            <title>1.0.4</title>
+            <pubDate>Thu, 10 Sep 2026 16:49:00 +0000</pubDate>
+            <link>https://github.com/cuonghm89/Cnotch/releases</link>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<p><strong>Full Changelog</strong>: <a href="https://github.com/cuonghm89/Cnotch/compare/v1.0.3...v1.0.4">https://github.com/cuonghm89/Cnotch/compare/v1.0.3...v1.0.4</a></p>
+]]></description>
+            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.4/CNotch.dmg" length="10587661" type="application/octet-stream" sparkle:edSignature="v3lf5RFCX8NfWPRLibfTwHFDFQKJ/R1mZDpg0dWZ+s78yz7UlKoAdcReLqAhci52gp3tMnDE7W/kjuqVQFz8Cg=="/>
+        </item>
+        <item>
             <title>1.0.3</title>
             <pubDate>Wed, 09 Sep 2026 08:37:17 +0000</pubDate>
             <link>https://github.com/cuonghm89/Cnotch/releases</link>
@@ -24,26 +35,6 @@
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <description><![CDATA[<p>Fix: the compact-notch lyrics row icon was still clipped by the notch's rounded corner in 1.0.1 (padding was applied outside the fixed-width frame instead of insetting the content). The icon is now properly inset.</p>]]></description>
             <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.2/CNotch-1.0.2.dmg" length="15066784" type="application/octet-stream" sparkle:edSignature="ITbEdJUrgaPraMr/Gixi7ulHEHmesd50xlpoUWJ2Vh8GJ+kkXNo9RbOL4fmIsDjh19OtSOTA0wOwut9ZS0NcCQ=="/>
-        </item>
-        <item>
-            <title>1.0.1</title>
-            <pubDate>Tue, 08 Sep 2026 13:56:00 +0000</pubDate>
-            <link>https://github.com/cuonghm89/Cnotch/releases</link>
-            <sparkle:version>2</sparkle:version>
-            <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description><![CDATA[<p>Test release for Sparkle auto-update: lyrics improvements (2-line lookahead, compact-notch lyrics row), CPU/RAM + Weather header chips, mic mute, Pomodoro/Voice Memo/Quick Note utilities menu, Vietnamese localization, and various notch-header/sizing fixes.</p>]]></description>
-            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.1/CNotch-1.0.1.dmg" length="10344715" type="application/octet-stream" sparkle:edSignature="gFY6N/nA3QM5SPQIJNkWWLr8iEywFhj5HuzW4tArDApMlozHFE8e5MHUgg4rJWZH+/woGkyoM0j6+J1yHZOvBw=="/>
-        </item>
-        <item>
-            <title>1.0.0</title>
-            <pubDate>Mon, 07 Sep 2026 18:08:00 +0000</pubDate>
-            <link>https://github.com/cuonghm89/Cnotch/releases</link>
-            <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <description><![CDATA[<p>First release under the CNotch name (renamed from anotherNotch).</p>]]></description>
-            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.0/CNotch.dmg" length="8547037" type="application/octet-stream" sparkle:edSignature="xWy2Ymur4zfUC0NKobcTDgigxfE9uw+UwPl6iNBtXlaPgysdyU1xx2bJouHSmYf2+4WprV4t4cz48/m5U/k4DQ=="/>
         </item>
     </channel>
 </rss>
