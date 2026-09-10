@@ -445,6 +445,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         KeyboardShortcuts.onKeyDown(for: .toggleMicrophone) {
+            guard Defaults[.micMuteShortcutEnabled] else { return }
             Task { @MainActor in
                 MicrophoneManager.shared.toggleMute()
             }

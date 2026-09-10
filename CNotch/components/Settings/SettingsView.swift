@@ -2611,6 +2611,16 @@ struct Advanced: View {
             }
 
             Section {
+                Defaults.Toggle(key: .micMuteShortcutEnabled) {
+                    Text("Enable microphone mute shortcut (Fn+F5)")
+                }
+            } header: {
+                Text("Mic Mute Shortcut")
+            } footer: {
+                Text("Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident.")
+            }
+
+            Section {
                 Defaults.Toggle(key: .systemStatsEnabled) {
                     Text("Show CPU and memory usage")
                 }

@@ -13944,6 +13944,112 @@
         }
       }
     },
+    "Enable microphone mute shortcut (Fn+F5)" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật phím tắt tắt/mở mic (Fn+F5)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Enable microphone mute shortcut (Fn+F5)"
+          }
+        }
+      }
+    },
     "Enable shelf" : {
       "localizations" : {
         "ar" : {
@@ -21423,6 +21529,112 @@
         }
       }
     },
+    "Mic Mute Shortcut" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phím tắt tắt mic"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mic Mute Shortcut"
+          }
+        }
+      }
+    },
     "Minimal" : {
       "localizations" : {
         "ar" : {
@@ -22479,6 +22691,112 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Đã tắt tiếng"
+          }
+        }
+      }
+    },
+    "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tắt mic ở cấp toàn hệ thống, ảnh hưởng đến mọi app chứ không riêng CNotch. Tắt tính năng này nếu bạn hay vô tình bấm trúng."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mutes your microphone system-wide, affecting every app, not just CNotch. Turn this off if it gets triggered by accident."
           }
         }
       }
