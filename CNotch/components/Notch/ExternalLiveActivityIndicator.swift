@@ -17,12 +17,12 @@ struct ExternalLiveActivityIndicator: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(activity.title)
+                    Text(LocalizedStringKey(activity.title))
                         .font(.system(size: 11, weight: .medium))
                         .lineLimit(1)
                         .truncationMode(.tail)
                     if !activity.subtitle.isEmpty {
-                        Text(activity.subtitle)
+                        Text(LocalizedStringKey(activity.subtitle))
                             .font(.system(size: 9, weight: .regular))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)

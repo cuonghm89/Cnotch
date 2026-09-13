@@ -2611,6 +2611,19 @@ struct Advanced: View {
             }
 
             Section {
+                Defaults.Toggle(key: .networkDoctorEnabled) {
+                    Text("Show Network Diagnosis in the notch menu")
+                }
+                Defaults.Toggle(key: .networkDoctorOnWake) {
+                    Text("Check automatically after waking from sleep")
+                }
+            } header: {
+                Text("Network Diagnosis")
+            } footer: {
+                Text("Tests the network one layer at a time, so a failure can be pinned to the layer that broke. Useful when Wi-Fi looks connected but nothing loads — usually a content filter or VPN that didn't survive sleep.")
+            }
+
+            Section {
                 Defaults.Toggle(key: .micMuteShortcutEnabled) {
                     Text("Enable microphone mute shortcut (Fn+F5)")
                 }

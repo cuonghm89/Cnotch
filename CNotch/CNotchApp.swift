@@ -344,6 +344,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         _ = VolumeManager.shared
+        _ = NetworkDoctor.shared
         FeatureModuleRegistry.shared.startInstalledServices()
 
         let normalizedMusicControls = MusicControlButton.normalizedLayout(Defaults[.musicControlSlots])

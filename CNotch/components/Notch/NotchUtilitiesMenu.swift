@@ -57,6 +57,7 @@ struct NotchUtilitiesMenu: View {
     @ObservedObject private var recorder = VoiceMemoRecorder.shared
     @ObservedObject private var volumeManager = VolumeManager.shared
     @State private var showQuickNote = false
+    @State private var showNetworkDoctor = false
     @State private var noteText = ""
     @State private var isSavingNote = false
     @State private var noteSaveFailed = false
@@ -90,6 +91,11 @@ struct NotchUtilitiesMenu: View {
                     recorder.toggle()
                 }
             }
+            if Defaults[.networkDoctorEnabled] {
+                Button("Network Diagnosis", systemImage: "stethoscope") {
+                    showNetworkDoctor = true
+                }
+            }
             if Defaults[.showBluetoothDeviceConnectionIndicator]
                 && Defaults[.showConnectedBluetoothDevicesInNotch]
                 && !volumeManager.connectedBluetoothAccessories.isEmpty
@@ -117,6 +123,12 @@ struct NotchUtilitiesMenu: View {
         .fixedSize()
         .popover(isPresented: $showQuickNote, arrowEdge: .bottom) {
             quickNoteEditor
+        }
+        .popover(isPresented: $showNetworkDoctor, arrowEdge: .bottom) {
+            // Popover content is hosted in its own window and doesn't inherit
+            // the locale ContentView sets, so re-apply it here.
+            NetworkDoctorPanel()
+                .applyAppLanguage()
         }
     }
 

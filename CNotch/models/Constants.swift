@@ -288,6 +288,8 @@ extension Defaults.Keys {
     // MARK: Voice Memo
     static let voiceMemoButtonEnabled = Key<Bool>("voiceMemoButtonEnabled", default: true)
     static let micMuteShortcutEnabled = Key<Bool>("micMuteShortcutEnabled", default: true)
+    static let networkDoctorEnabled = Key<Bool>("networkDoctorEnabled", default: true)
+    static let networkDoctorOnWake = Key<Bool>("networkDoctorOnWake", default: true)
 
     // MARK: System Stats
     static let systemStatsEnabled = Key<Bool>("systemStatsEnabled", default: false)
