@@ -17,6 +17,28 @@ final class SoftwareUpdateDelegate: NSObject, SPUUpdaterDelegate {
     }
 }
 
+/// CNotch has no Dock icon, so Sparkle's update window opens behind whatever
+/// the user is actually looking at, with nothing to click in the Dock to find
+/// it again. Sparkle warns about exactly this ("Background app automatically
+/// schedules for update checks but does not implement gentle reminders"), and
+/// it's why updates were being found but never installed: the alert was shown
+/// and never seen.
+extension SoftwareUpdateDelegate: SPUStandardUserDriverDelegate {
+    var supportsGentleScheduledUpdateReminders: Bool { true }
+
+    func standardUserDriverWillHandleShowingUpdate(
+        _ handleShowingUpdate: Bool,
+        forUpdate update: SUAppcastItem,
+        state: SPUUserUpdateState
+    ) {
+        // A user-initiated check is already in focus. A scheduled one isn't,
+        // so pull the app forward -- otherwise the window is effectively
+        // invisible for a menu bar app.
+        guard handleShowingUpdate, !state.userInitiated else { return }
+        NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
 final class CheckForUpdatesViewModel: ObservableObject {
     @Published var canCheckForUpdates = false
 

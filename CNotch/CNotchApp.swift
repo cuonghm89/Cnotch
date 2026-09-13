@@ -21,8 +21,13 @@ struct DynamicNotchApp: App {
     let updaterController: SPUStandardUpdaterController
 
     init() {
+        // userDriverDelegate was nil, so Sparkle had no way to ask us to make
+        // its update window visible -- see SoftwareUpdateDelegate's
+        // SPUStandardUserDriverDelegate conformance.
         updaterController = SPUStandardUpdaterController(
-            startingUpdater: true, updaterDelegate: SoftwareUpdateDelegate.shared, userDriverDelegate: nil)
+            startingUpdater: true,
+            updaterDelegate: SoftwareUpdateDelegate.shared,
+            userDriverDelegate: SoftwareUpdateDelegate.shared)
 
         // Initialize the settings window controller with the updater controller
         SettingsWindowController.shared.setUpdaterController(updaterController)
