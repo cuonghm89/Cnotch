@@ -354,6 +354,7 @@ jobs:
             --link "${{ github.server_url }}/${{ github.repository }}/releases" \
             --download-url-prefix "${{ github.server_url }}/${{ github.repository }}/releases/download/v${VERSION}/" \
             --embed-release-notes \
+            --maximum-versions 0 \
             "${CHANNEL_ARGS[@]}" \
             -o updater/appcast.xml \
             Release/

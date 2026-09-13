@@ -183,11 +183,15 @@ jobs:
           IS_PRERELEASE: ${{ needs.validate_tag.outputs.is_prerelease }}
         run: |
           set -euo pipefail
+          # generate_appcast keeps only the newest 3 versions per branch by
+          # default, silently dropping older entries from the feed on every
+          # release. 0 means "preserve everything".
           APPCAST_ARGS=(
             --ed-key-file -
             --link "${{ github.server_url }}/${{ github.repository }}/releases"
             --download-url-prefix "${{ github.server_url }}/${{ github.repository }}/releases/download/${TAG}/"
             --embed-release-notes
+            --maximum-versions 0
           )
           if [[ "$IS_PRERELEASE" == "true" ]]; then
             APPCAST_ARGS+=(--channel beta)
