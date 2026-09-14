@@ -5,6 +5,17 @@
         <link>https://github.com/cuonghm89/Cnotch/releases</link>
         <description>CNotch updates</description>
         <item>
+            <title>1.0.7</title>
+            <pubDate>Mon, 14 Sep 2026 11:40:43 +0000</pubDate>
+            <link>https://github.com/cuonghm89/Cnotch/releases</link>
+            <sparkle:version>8</sparkle:version>
+            <sparkle:shortVersionString>1.0.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<p><strong>Full Changelog</strong>: <a href="https://github.com/cuonghm89/Cnotch/compare/v1.0.6...v1.0.7">https://github.com/cuonghm89/Cnotch/compare/v1.0.6...v1.0.7</a></p>
+]]></description>
+            <enclosure url="https://github.com/cuonghm89/Cnotch/releases/download/v1.0.7/CNotch.dmg" length="10658872" type="application/octet-stream" sparkle:edSignature="+81rHOy3hgNHT5ajZpDAMoEQaz3uwdmKYKJlMTGRa2+KLxzirpL6gloiVsslXTkElKSb3qsPC9c/jveKy5hPAQ=="/>
+        </item>
+        <item>
             <title>1.0.6</title>
             <pubDate>Mon, 14 Sep 2026 04:34:54 +0000</pubDate>
             <link>https://github.com/cuonghm89/Cnotch/releases</link>
