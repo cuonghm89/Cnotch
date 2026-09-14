@@ -12,6 +12,7 @@ import CoreBluetooth
 import Defaults
 import Foundation
 import IOBluetooth
+import IOKit
 import ObjectiveC
 
 final class VolumeManager: NSObject, ObservableObject {
@@ -338,7 +339,11 @@ final class VolumeManager: NSObject, ObservableObject {
             else { return }
             self.rebuildConnectedAccessoriesList()
             self.announceBluetoothConnections([
-                BluetoothAnnouncement(name: accessory.name, icon: accessory.icon, batteryPercentage: accessory.batteryPercentage)
+                BluetoothAnnouncement(
+                    name: accessory.name,
+                    icon: accessory.icon,
+                    batteryPercentage: Self.batteryPercentage(for: accessory)
+                )
             ])
         }
     }
@@ -372,6 +377,13 @@ final class VolumeManager: NSObject, ObservableObject {
             selector: #selector(handleBluetoothAccessoryDisconnected(_:device:))
         )
         return accessory
+    }
+
+    /// Current battery for an accessory: the live HID reading when there is
+    /// one, otherwise whatever was captured for it (audio devices get theirs
+    /// refreshed by the CoreAudio path instead).
+    static func batteryPercentage(for accessory: ConnectedBluetoothAccessory) -> Int? {
+        HIDBatteryLevels.percentage(forAddress: accessory.id) ?? accessory.batteryPercentage
     }
 
     private func rebuildConnectedAccessoriesList() {
@@ -800,6 +812,54 @@ final class VolumeManager: NSObject, ObservableObject {
 
 extension Array where Element == Float32 {
     fileprivate var average: Float32? { isEmpty ? nil : reduce(0, +) / Float32(count) }
+}
+
+/// Battery level for HID accessories -- trackpads, keyboards, mice -- lives on
+/// their IOKit HID service as `BatteryPercent`, keyed by the Bluetooth address.
+/// `IOBluetoothDevice`'s private `batteryPercent*` selectors only answer for
+/// audio devices like AirPods, which is why a Magic Trackpad reporting 23% in
+/// `ioreg` showed no battery at all in the notch.
+///
+/// Read on demand rather than stored: the level is otherwise frozen at whatever
+/// it was the moment the device connected, and never recovers if that first
+/// read came back empty. Cached briefly so repeated SwiftUI body evaluations
+/// don't each walk the registry.
+enum HIDBatteryLevels {
+    private static var cache: [String: Int] = [:]
+    private static var cachedAt = Date.distantPast
+
+    static func percentage(forAddress address: String) -> Int? {
+        if Date().timeIntervalSince(cachedAt) > 5 {
+            reload()
+        }
+        return cache[address]
+    }
+
+    private static func reload() {
+        cachedAt = Date()
+        var levels: [String: Int] = [:]
+        defer { cache = levels }
+
+        var iterator: io_iterator_t = 0
+        guard IOServiceGetMatchingServices(
+            kIOMainPortDefault,
+            IOServiceMatching("AppleDeviceManagementHIDEventService"),
+            &iterator
+        ) == KERN_SUCCESS else { return }
+        defer { IOObjectRelease(iterator) }
+
+        while case let service = IOIteratorNext(iterator), service != 0 {
+            defer { IOObjectRelease(service) }
+            guard let address = IORegistryEntryCreateCFProperty(
+                    service, "DeviceAddress" as CFString, kCFAllocatorDefault, 0
+                  )?.takeRetainedValue() as? String,
+                  let percentage = IORegistryEntryCreateCFProperty(
+                    service, "BatteryPercent" as CFString, kCFAllocatorDefault, 0
+                  )?.takeRetainedValue() as? Int
+            else { continue }
+            levels[address.filter(\.isHexDigit).lowercased()] = percentage
+        }
+    }
 }
 
 /// IOBluetoothDevice's battery accessors aren't in the public header, so

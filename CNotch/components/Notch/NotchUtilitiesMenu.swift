@@ -105,7 +105,7 @@ struct NotchUtilitiesMenu: View {
                         // A plain Text row renders dimmed/disabled in a Menu
                         // since it isn't interactive -- an inert Button (no
                         // action) keeps the normal, non-greyed-out label.
-                        Button(device.batteryPercentage.map { "\(device.name) — \($0)%" } ?? device.name) {}
+                        Button(VolumeManager.batteryPercentage(for: device).map { "\(device.name) — \($0)%" } ?? device.name) {}
                     }
                 } label: {
                     Label {

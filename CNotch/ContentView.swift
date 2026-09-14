@@ -1056,7 +1056,7 @@ struct ContentView: View {
             return (batterySymbolName(for: battery), "\(battery)%")
         }
         guard let accessory = volumeManager.connectedBluetoothAccessories.first else { return nil }
-        return (accessory.icon, accessory.batteryPercentage.map { "\($0)%" })
+        return (accessory.icon, VolumeManager.batteryPercentage(for: accessory).map { "\($0)%" })
     }
 
     private func batterySymbolName(for percentage: Int) -> String {
