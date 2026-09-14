@@ -106,6 +106,7 @@ final class VolumeManager: NSObject, ObservableObject {
     @Published private(set) var connectedBluetoothAccessories: [ConnectedBluetoothAccessory] = []
     private var audioBluetoothAccessories: [ConnectedBluetoothAccessory] = []
     private var genericBluetoothAccessories: [String: ConnectedBluetoothAccessory] = [:]
+    private var trackedBluetoothDevices: [String: IOBluetoothDevice] = [:]
     private var disconnectNotifications: [String: IOBluetoothUserNotification] = [:]
 
     let visibleDuration: TimeInterval = 1.2
@@ -352,8 +353,7 @@ final class VolumeManager: NSObject, ObservableObject {
         DispatchQueue.main.async {
             let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
             guard !address.isEmpty else { return }
-            self.genericBluetoothAccessories.removeValue(forKey: address)
-            self.disconnectNotifications.removeValue(forKey: address)?.unregister()
+            self.forgetGenericAccessory(address)
             self.rebuildConnectedAccessoriesList()
         }
     }
@@ -364,6 +364,12 @@ final class VolumeManager: NSObject, ObservableObject {
     @discardableResult
     private func trackGenericAccessory(_ device: IOBluetoothDevice) -> ConnectedBluetoothAccessory? {
         let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
+        // Major class 0x05 is "Peripheral" -- keyboards, mice, trackpads,
+        // controllers. Everything else that happens to hold a Bluetooth link
+        // (an iPhone, an iPad, another Mac) isn't an accessory of this Mac and
+        // has no battery it will report over Bluetooth, so it would just sit
+        // in the list reading 0%.
+        guard device.deviceClassMajor == 0x05 else { return nil }
         guard !address.isEmpty, !knownBluetoothOutputAddresses.contains(address) else { return nil }
         let accessory = ConnectedBluetoothAccessory(
             id: address,
@@ -372,11 +378,18 @@ final class VolumeManager: NSObject, ObservableObject {
             batteryPercentage: BluetoothDeviceBridge.batteryPercentage(of: device)
         )
         genericBluetoothAccessories[address] = accessory
+        trackedBluetoothDevices[address] = device
         disconnectNotifications[address] = device.register(
             forDisconnectNotification: self,
             selector: #selector(handleBluetoothAccessoryDisconnected(_:device:))
         )
         return accessory
+    }
+
+    private func forgetGenericAccessory(_ address: String) {
+        genericBluetoothAccessories.removeValue(forKey: address)
+        trackedBluetoothDevices.removeValue(forKey: address)
+        disconnectNotifications.removeValue(forKey: address)?.unregister()
     }
 
     /// Current battery for an accessory: the live HID reading when there is
@@ -387,6 +400,12 @@ final class VolumeManager: NSObject, ObservableObject {
     }
 
     private func rebuildConnectedAccessoriesList() {
+        // A disconnect notification can go missing (device out of range, the
+        // Bluetooth stack restarting across a sleep cycle), which otherwise
+        // leaves the accessory listed as connected forever.
+        for (address, device) in trackedBluetoothDevices where !device.isConnected() {
+            forgetGenericAccessory(address)
+        }
         connectedBluetoothAccessories = audioBluetoothAccessories
             + genericBluetoothAccessories.values.sorted { $0.name < $1.name }
     }
@@ -906,6 +925,8 @@ private enum BluetoothDeviceBridge {
         typealias BatterySelector = @convention(c) (AnyObject, Selector) -> Int32
         let send = unsafeBitCast(implementation, to: BatterySelector.self)
         let percentage = send(device, selector)
-        return (0...100).contains(percentage) ? Int(percentage) : nil
+        // 0 is what this selector answers with for a device that simply
+        // has no battery to report (a phone, a Mac) -- not an empty battery.
+        return (1...100).contains(percentage) ? Int(percentage) : nil
     }
 }
