@@ -373,6 +373,11 @@ final class VolumeManager: NSObject, ObservableObject {
     @discardableResult
     private func trackGenericAccessory(_ device: IOBluetoothDevice) -> ConnectedBluetoothAccessory? {
         let address = (device.addressString ?? "").filter(\.isHexDigit).lowercased()
+        // `connectedDevices()` answers from the Bluetooth stack's cached
+        // device list, which keeps listing a device that has since dropped
+        // its link -- a keyboard switched over to its USB cable, say. Ask
+        // the device itself instead; that's a live query.
+        guard device.isConnected() else { return nil }
         // Major class 0x05 is "Peripheral" -- keyboards, mice, trackpads,
         // controllers. Everything else that happens to hold a Bluetooth link
         // (an iPhone, an iPad, another Mac) isn't an accessory of this Mac and
