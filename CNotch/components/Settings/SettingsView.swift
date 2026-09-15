@@ -151,7 +151,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     case hud = "HUD"
     case clipboard = "Clipboard"
     case battery = "Battery"
-    case bluetooth = "Bluetooth"
+    case bluetooth = "Devices"
     case shelf = "Shelf"
     case camera = "Camera"
     case advanced = "Advanced"
@@ -189,7 +189,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .hud: "System volume, brightness, and status indicators."
         case .clipboard: "Clipboard history, image storage, and capture settings."
         case .battery: "Battery status notifications and charging options."
-        case .bluetooth: "Bluetooth output connection notifications."
+        case .bluetooth: "Bluetooth and USB device connection notifications."
         case .shelf: "Drag, drop, and saved Shelf items."
         case .camera: "Camera mirror appearance and access."
         case .advanced: "Accent color, window behavior, and privacy."
@@ -1016,6 +1016,15 @@ struct BluetoothDeviceNotifications: View {
                 }
             }
             .disabled(!bluetoothAuthorized || !showConnectionIndicator)
+
+            // Reading USB attach/detach goes through IOKit, which needs no
+            // permission at all -- so this stays usable even when Bluetooth
+            // access is denied.
+            Section("USB devices") {
+                Defaults.Toggle(key: .showUSBDeviceConnectionIndicator) {
+                    Text("Announce USB devices when plugged in or unplugged")
+                }
+            }
         }
         .accentColor(.effectiveAccent)
         .onAppear {

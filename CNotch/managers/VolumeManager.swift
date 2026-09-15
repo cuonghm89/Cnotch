@@ -288,27 +288,36 @@ final class VolumeManager: NSObject, ObservableObject {
                   Defaults[.showBluetoothDeviceConnectionIndicator],
                   CBManager.authorization == .allowedAlways
             else { return }
-            self.announceBluetoothConnections(newlyConnected.map {
-                BluetoothAnnouncement(name: $0.name, icon: $0.icon, batteryPercentage: $0.bluetoothBatteryPercentage)
+            self.announceDeviceConnections(newlyConnected.map {
+                DeviceAnnouncement(name: $0.name, icon: $0.icon, batteryPercentage: $0.bluetoothBatteryPercentage)
             })
         }
     }
 
-    struct BluetoothAnnouncement {
+    struct DeviceAnnouncement {
+        let title: String
         let name: String
         let icon: String
         let batteryPercentage: Int?
+
+        init(title: String = "Connected", name: String, icon: String, batteryPercentage: Int?) {
+            self.title = title
+            self.name = name
+            self.icon = icon
+            self.batteryPercentage = batteryPercentage
+        }
     }
 
-    private var bluetoothAnnouncementQueue: [BluetoothAnnouncement] = []
+    private var bluetoothAnnouncementQueue: [DeviceAnnouncement] = []
     private var bluetoothAnnouncementTask: Task<Void, Never>?
 
     /// Shows one "Connected" popup per device, in sequence -- the notch only
     /// has a single popup slot, so simultaneous connections queue instead of
     /// all but one being silently dropped. Audio-output devices (from
     /// CoreAudio) and other accessories like keyboards/mice/trackpads (from
-    /// IOBluetooth) both funnel through here so they share one queue.
-    private func announceBluetoothConnections(_ announcements: [BluetoothAnnouncement]) {
+    /// IOBluetooth) and USB devices (from IOKit) all funnel through here so
+    /// they share one queue.
+    func announceDeviceConnections(_ announcements: [DeviceAnnouncement]) {
         bluetoothAnnouncementQueue.append(contentsOf: announcements)
         guard bluetoothAnnouncementTask == nil else { return }
         bluetoothAnnouncementTask = Task { @MainActor in
@@ -319,7 +328,7 @@ final class VolumeManager: NSObject, ObservableObject {
                     status: true,
                     type: .bluetoothDevice,
                     value: device.batteryPercentage.map { CGFloat($0) / 100 } ?? -1,
-                    title: "Connected",
+                    title: device.title,
                     subtitle: device.name,
                     icon: device.icon
                 )
@@ -339,8 +348,8 @@ final class VolumeManager: NSObject, ObservableObject {
                   let accessory = self.trackGenericAccessory(device)
             else { return }
             self.rebuildConnectedAccessoriesList()
-            self.announceBluetoothConnections([
-                BluetoothAnnouncement(
+            self.announceDeviceConnections([
+                DeviceAnnouncement(
                     name: accessory.name,
                     icon: accessory.icon,
                     batteryPercentage: Self.batteryPercentage(for: accessory)

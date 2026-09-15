@@ -208,6 +208,7 @@ extension Defaults.Keys {
     static let showBluetoothDeviceName = Key<Bool>("showBluetoothDeviceName", default: true)
     static let showCompactBluetoothBattery = Key<Bool>("showCompactBluetoothBattery", default: true)
     static let showConnectedBluetoothDevicesInNotch = Key<Bool>("showConnectedBluetoothDevicesInNotch", default: true)
+    static let showUSBDeviceConnectionIndicator = Key<Bool>("showUSBDeviceConnectionIndicator", default: false)
     
     // MARK: Downloads
     static let enableDownloadListener = Key<Bool>("enableDownloadListener", default: true)
