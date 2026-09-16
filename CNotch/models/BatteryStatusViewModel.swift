@@ -71,7 +71,9 @@ class BatteryStatusViewModel: ObservableObject {
             self.notifyImportanChangeStatus()
             withAnimation {
                 self.isInLowPowerMode = isEnabled
-                self.statusText = "Low Power: \(self.isInLowPowerMode ? "On" : "Off")"
+                // Interpolation would make this one string the catalog
+                // can never match, so each state is its own literal key.
+                self.statusText = self.isInLowPowerMode ? "Low Power: On" : "Low Power: Off"
             }
 
         case .isChargingChanged(let isCharging):

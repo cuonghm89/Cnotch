@@ -835,7 +835,7 @@ struct ContentView: View {
                         && vm.notchState == .closed && Defaults[.batteryFeatureEnabled] && Defaults[.showBatteryIndicator] && Defaults[.showPowerStatusNotifications]
                     {
                         HStack(spacing: 0) {
-                            Text(batteryModel.statusText)
+                            Text(LocalizedStringKey(batteryModel.statusText))
                                 .font(.subheadline)
                                 .foregroundStyle(.white)
                                 .padding(.leading, powerNotificationTextOuterMargin)

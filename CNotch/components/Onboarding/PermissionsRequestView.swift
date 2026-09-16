@@ -9,9 +9,12 @@ import SwiftUI
 
 struct PermissionRequestView: View {
     let icon: Image
-    let title: String
-    let description: String
-    let privacyNote: String?
+    // These carry UI copy, not user data: as String, Text(...) picks the
+    // overload that never reaches the String Catalog, so the onboarding
+    // screens stayed English whatever language the app was set to.
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
+    let privacyNote: LocalizedStringKey?
     var isGranted: Bool = false
     var hasRequested: Bool = false
     let onAllow: () -> Void

@@ -2695,7 +2695,7 @@ private func buildBadge(text: String) -> some View {
         .clipShape(Capsule())
 }
 
-private func settingsBadge(text: String) -> some View {
+private func settingsBadge(text: LocalizedStringKey) -> some View {
     Text(text)
         .foregroundStyle(.secondary)
         .font(.footnote.bold())
