@@ -234,6 +234,18 @@ class CNotchViewCoordinator: ObservableObject {
         if Defaults[.screenshotQuickActionsEnabled] {
             ScreenshotWatcher.shared.start()
         }
+        if Defaults[.enableDownloadListener] {
+            DownloadWatcher.shared.start()
+        }
+        downloadListenerCancellable = Defaults.publisher(.enableDownloadListener)
+            .dropFirst()
+            .sink { change in
+                if change.newValue {
+                    DownloadWatcher.shared.start()
+                } else {
+                    DownloadWatcher.shared.stop()
+                }
+            }
         screenshotQuickActionsCancellable = Defaults.publisher(.screenshotQuickActionsEnabled)
             .dropFirst()
             .sink { change in
@@ -259,6 +271,7 @@ class CNotchViewCoordinator: ObservableObject {
     }
 
     private var weatherEnabledCancellable: AnyCancellable?
+    private var downloadListenerCancellable: AnyCancellable?
     private var screenshotQuickActionsCancellable: AnyCancellable?
     private var systemStatsCancellable: AnyCancellable?
 

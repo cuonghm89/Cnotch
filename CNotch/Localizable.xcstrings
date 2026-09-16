@@ -13077,6 +13077,113 @@
         }
       }
     },
+    "Downloaded" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloaded"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã tải xong"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Downloaded"
+          }
+        }
+      }
+    },
     "Downloads" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13179,7 +13286,7 @@
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thư mục Downloads"
+            "value" : "Tải xuống"
           }
         }
       }
@@ -36695,6 +36802,113 @@
         }
       }
     },
+    "Show quick actions when a download finishes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hiện thao tác nhanh khi tải xong"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Show quick actions when a download finishes"
+          }
+        }
+      }
+    },
     "Show settings icon in notch" : {
       "localizations" : {
         "ar" : {
@@ -41982,6 +42196,113 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Volume"
+          }
+        }
+      }
+    },
+    "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theo dõi thư mục Tải xuống và hiện các nút Sao chép, Mở thư mục, Xoá ngay trên notch khi có file tải xong."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Watches your Downloads folder and offers Copy, Reveal, and Delete on the notch as soon as a download lands."
           }
         }
       }

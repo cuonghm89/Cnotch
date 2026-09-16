@@ -879,7 +879,9 @@ struct ContentView: View {
                         )
                         .frame(height: closedNotchContentSize.height, alignment: .center)
                       } else if !showsMusicSneakPeek
-                        && coordinator.expandingView.type == .screenshot && coordinator.expandingView.show
+                        && (coordinator.expandingView.type == .screenshot
+                            || coordinator.expandingView.type == .download)
+                        && coordinator.expandingView.show
                         && vm.notchState == .closed
                       {
                         ScreenshotQuickActionsIndicator(

@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Quick actions shown on the compact notch right after a new screenshot
-/// is detected (see `ScreenshotWatcher`).
+/// Quick actions shown on the compact notch right after a new screenshot is
+/// detected (see `ScreenshotWatcher`), and after a download finishes (see
+/// `DownloadWatcher`) -- the actions wanted are the same in both cases.
 struct ScreenshotQuickActionsIndicator: View {
     let item: ExpandedItem
     let physicalNotchWidth: CGFloat
@@ -43,9 +44,16 @@ struct ScreenshotQuickActionsIndicator: View {
     }
 
     private func copy() {
-        guard let url = item.url, let image = NSImage(contentsOf: url) else { return }
+        guard let url = item.url else { return }
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.writeObjects([image])
+        // A screenshot is most useful on the pasteboard as the image itself,
+        // ready to paste into a message. Any other download is an arbitrary
+        // file, so copy the file instead.
+        if let image = NSImage(contentsOf: url), item.type == .screenshot {
+            NSPasteboard.general.writeObjects([image])
+        } else {
+            NSPasteboard.general.writeObjects([url as NSURL])
+        }
         dismiss()
     }
 
@@ -62,6 +70,6 @@ struct ScreenshotQuickActionsIndicator: View {
     }
 
     private func dismiss() {
-        CNotchViewCoordinator.shared.toggleExpandingView(status: false, type: .screenshot)
+        CNotchViewCoordinator.shared.toggleExpandingView(status: false, type: item.type)
     }
 }

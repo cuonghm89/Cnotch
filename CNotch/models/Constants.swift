@@ -212,10 +212,7 @@ extension Defaults.Keys {
     static let showConnectedUSBDevicesInNotch = Key<Bool>("showConnectedUSBDevicesInNotch", default: true)
     
     // MARK: Downloads
-    static let enableDownloadListener = Key<Bool>("enableDownloadListener", default: true)
-    static let enableSafariDownloads = Key<Bool>("enableSafariDownloads", default: true)
-    static let selectedDownloadIndicatorStyle = Key<DownloadIndicatorStyle>("selectedDownloadIndicatorStyle", default: DownloadIndicatorStyle.progress)
-    static let selectedDownloadIconStyle = Key<DownloadIconStyle>("selectedDownloadIconStyle", default: DownloadIconStyle.onlyAppIcon)
+    static let enableDownloadListener = Key<Bool>("enableDownloadListener", default: false)
     
     // MARK: HUD
     static let hudReplacement = Key<Bool>("hudReplacement", default: false)
