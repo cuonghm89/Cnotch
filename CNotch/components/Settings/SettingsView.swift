@@ -954,6 +954,7 @@ struct Charge: View {
 struct BluetoothDeviceNotifications: View {
     @Default(.bluetoothDeviceIndicatorRows) private var indicatorRows
     @Default(.showBluetoothDeviceConnectionIndicator) private var showConnectionIndicator
+    @Default(.showUSBDeviceConnectionIndicator) private var showUSBIndicator
     @State private var bluetoothAuthorized = CBManager.authorization == .allowedAlways
     @State private var centralManager: CBCentralManager?
 
@@ -1024,6 +1025,10 @@ struct BluetoothDeviceNotifications: View {
                 Defaults.Toggle(key: .showUSBDeviceConnectionIndicator) {
                     Text("Announce USB devices when plugged in or unplugged")
                 }
+                Defaults.Toggle(key: .showConnectedUSBDevicesInNotch) {
+                    Text("Show wired devices in the connected devices list")
+                }
+                .disabled(!showUSBIndicator)
             }
         }
         .accentColor(.effectiveAccent)

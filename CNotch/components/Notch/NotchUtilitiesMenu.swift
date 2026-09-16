@@ -56,11 +56,24 @@ struct NotchUtilitiesMenu: View {
     @ObservedObject private var pomodoro = PomodoroManager.shared
     @ObservedObject private var recorder = VoiceMemoRecorder.shared
     @ObservedObject private var volumeManager = VolumeManager.shared
+    @ObservedObject private var usbMonitor = USBDeviceMonitor.shared
     @State private var showQuickNote = false
     @State private var showNetworkDoctor = false
     @State private var noteText = ""
     @State private var isSavingNote = false
     @State private var noteSaveFailed = false
+
+    private var showsBluetoothDevices: Bool {
+        Defaults[.showBluetoothDeviceConnectionIndicator]
+            && Defaults[.showConnectedBluetoothDevicesInNotch]
+            && !volumeManager.connectedBluetoothAccessories.isEmpty
+    }
+
+    private var showsUSBDevices: Bool {
+        Defaults[.showUSBDeviceConnectionIndicator]
+            && Defaults[.showConnectedUSBDevicesInNotch]
+            && !usbMonitor.connectedDevices.isEmpty
+    }
 
     var body: some View {
         Menu {
@@ -96,16 +109,28 @@ struct NotchUtilitiesMenu: View {
                     showNetworkDoctor = true
                 }
             }
-            if Defaults[.showBluetoothDeviceConnectionIndicator]
-                && Defaults[.showConnectedBluetoothDevicesInNotch]
-                && !volumeManager.connectedBluetoothAccessories.isEmpty
-            {
+            if showsBluetoothDevices || showsUSBDevices {
                 Menu {
-                    ForEach(volumeManager.connectedBluetoothAccessories) { device in
+                    ForEach(showsBluetoothDevices ? volumeManager.connectedBluetoothAccessories : []) { device in
                         // A plain Text row renders dimmed/disabled in a Menu
                         // since it isn't interactive -- an inert Button (no
                         // action) keeps the normal, non-greyed-out label.
                         Button(VolumeManager.batteryPercentage(for: device).map { "\(device.name) — \($0)%" } ?? device.name) {}
+                    }
+                    if showsUSBDevices {
+                        if showsBluetoothDevices { Divider() }
+                        ForEach(usbMonitor.connectedDevices) { device in
+                            Button {} label: {
+                                // The cable icon is what separates a wired
+                                // device from a Bluetooth one here; the rows
+                                // otherwise look identical.
+                                Label {
+                                    Text(verbatim: device.name)
+                                } icon: {
+                                    Image(systemName: "cable.connector")
+                                }
+                            }
+                        }
                     }
                 } label: {
                     Label {

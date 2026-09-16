@@ -15,8 +15,18 @@ import IOKit.usb
 /// and the drain is mandatory or the notification never arms. So the first
 /// pass only records names, and announcing starts from the second.
 @MainActor
-final class USBDeviceMonitor {
+final class USBDeviceMonitor: ObservableObject {
     static let shared = USBDeviceMonitor()
+
+    struct Device: Identifiable, Equatable {
+        let id: UInt64
+        let name: String
+    }
+
+    /// Everything currently attached over USB, for the "connected devices"
+    /// list. Kept up to date whether or not announcements are switched on --
+    /// the list and the popups are separate settings.
+    @Published private(set) var connectedDevices: [Device] = []
 
     private var notifyPort: IONotificationPortRef?
     private var attachedIterator: io_iterator_t = 0
@@ -73,6 +83,7 @@ final class USBDeviceMonitor {
                 announcements.append(.init(name: name, icon: "cable.connector", batteryPercentage: nil))
             }
         }
+        rebuildConnectedDevices()
         announce(announcements)
     }
 
@@ -89,7 +100,14 @@ final class USBDeviceMonitor {
                 )
             }
         }
+        rebuildConnectedDevices()
         announce(announcements)
+    }
+
+    private func rebuildConnectedDevices() {
+        connectedDevices = names
+            .map { Device(id: $0.key, name: $0.value) }
+            .sorted { $0.name < $1.name }
     }
 
     private func announce(_ announcements: [VolumeManager.DeviceAnnouncement]) {
