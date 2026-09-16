@@ -29,7 +29,7 @@ struct NetworkDoctorPanel: View {
                 if !filters.isEmpty {
                     Divider()
                     Text("Network filters")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                     VStack(alignment: .leading, spacing: 5) {
                         ForEach(filters) { filter in
                             filterRow(filter)
@@ -64,15 +64,14 @@ struct NetworkDoctorPanel: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Circle()
                 .fill(filter.isOrphaned ? .red : (filter.isRunning ? .orange : .secondary))
-                .frame(width: 6, height: 6)
+                .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 1) {
-                // A bundle identifier, so never localized.
-                Text(verbatim: filter.id)
-                    .font(.system(size: 10))
+                // A vendor name, so never localized.
+                Text(verbatim: filter.name)
+                    .font(.system(size: 12, weight: .medium))
                     .lineLimit(1)
-                    .truncationMode(.middle)
                 Text(LocalizedStringKey(statusText(for: filter)))
-                    .font(.system(size: 10))
+                    .font(.system(size: 11))
                     .foregroundStyle(filter.isOrphaned ? .red : .secondary)
             }
             Spacer(minLength: 0)

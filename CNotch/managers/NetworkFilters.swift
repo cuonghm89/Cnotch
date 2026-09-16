@@ -24,11 +24,10 @@ import Foundation
 /// listed only under the former, and reads as "not a network filter".
 enum NetworkFilters {
     struct Filter: Identifiable, Equatable {
-        /// The bundle identifier, shown as-is. It isn't pretty, but it names
-        /// the vendor plainly enough to act on, and the display name lives in
-        /// a separate Info.plist inside each staged bundle -- not worth a
-        /// second set of file reads for cosmetics.
+        /// The bundle identifier.
         let id: String
+        /// What to actually show: the vendor, read from the staged bundle.
+        let name: String
         let version: String
         let isEnabled: Bool
         let isRunning: Bool
@@ -49,6 +48,7 @@ enum NetworkFilters {
         else { return [] }
 
         let running = runningExecutablePaths()
+        let names = displayNames()
         return extensions.compactMap { entry -> Filter? in
             guard let identifier = entry["identifier"] as? String,
                   let categories = entry["categories"] as? [String],
@@ -57,6 +57,7 @@ enum NetworkFilters {
             let version = (entry["bundleVersion"] as? [String: Any])?["CFBundleShortVersionString"] as? String
             return Filter(
                 id: identifier,
+                name: names[identifier].map(shorten) ?? identifier,
                 version: version ?? "",
                 isEnabled: (entry["state"] as? String) == "activated_enabled",
                 // A staged extension's executable lives at a path containing
@@ -66,6 +67,41 @@ enum NetworkFilters {
             )
         }
         .sorted { $0.id < $1.id }
+    }
+
+    /// `db.plist` stores no readable name, only the identifier, so the name
+    /// comes from each staged bundle's own Info.plist.
+    private static func displayNames() -> [String: String] {
+        let root = URL(fileURLWithPath: "/Library/SystemExtensions")
+        guard let staged = try? FileManager.default.contentsOfDirectory(
+            at: root, includingPropertiesForKeys: nil
+        ) else { return [:] }
+
+        var names: [String: String] = [:]
+        for folder in staged {
+            guard let bundles = try? FileManager.default.contentsOfDirectory(
+                at: folder, includingPropertiesForKeys: nil
+            ) else { continue }
+            for bundle in bundles where bundle.pathExtension == "systemextension" {
+                guard let info = Bundle(url: bundle)?.infoDictionary,
+                      let identifier = info["CFBundleIdentifier"] as? String,
+                      let display = info["CFBundleDisplayName"] as? String
+                else { continue }
+                names[identifier] = display
+            }
+        }
+        return names
+    }
+
+    /// Every one of these names ends in "... Extension", which is what the
+    /// section heading already says. Drop it and keep the vendor, so the row
+    /// reads "AdGuard" rather than "AdGuard Network Extension".
+    private static func shorten(_ name: String) -> String {
+        for suffix in [" Network Extension", " System Extension", " Extension"] where name.hasSuffix(suffix) {
+            let trimmed = String(name.dropLast(suffix.count))
+            if !trimmed.isEmpty { return trimmed }
+        }
+        return name
     }
 
     private static func runningExecutablePaths() -> [String] {
