@@ -21,6 +21,7 @@ final class USBDeviceMonitor: ObservableObject {
     struct Device: Identifiable, Equatable {
         let id: UInt64
         let name: String
+        let icon: String
     }
 
     /// Everything currently attached over USB, for the "connected devices"
@@ -33,10 +34,10 @@ final class USBDeviceMonitor: ObservableObject {
     private var terminatedIterator: io_iterator_t = 0
     private var isSeeded = false
 
-    /// Product names by registry entry ID. A terminated service can no longer
-    /// be asked for its own name, so the name has to have been kept from when
-    /// the device attached.
-    private var names: [UInt64: String] = [:]
+    /// By registry entry ID. A terminated service can no longer be asked for
+    /// its own name or class, so both have to have been kept from when the
+    /// device attached.
+    private var devices: [UInt64: Device] = [:]
 
     private init() {
         let port = IONotificationPortCreate(kIOMainPortDefault)
@@ -77,10 +78,14 @@ final class USBDeviceMonitor: ObservableObject {
             defer { IOObjectRelease(service) }
             var entryID: UInt64 = 0
             guard IORegistryEntryGetRegistryEntryID(service, &entryID) == KERN_SUCCESS else { continue }
-            let name = Self.productName(of: service)
-            names[entryID] = name
+            let device = Device(
+                id: entryID,
+                name: Self.productName(of: service),
+                icon: Self.icon(of: service)
+            )
+            devices[entryID] = device
             if isSeeded, Defaults[.showUSBDeviceConnectionIndicator] {
-                announcements.append(.init(name: name, icon: "cable.connector", batteryPercentage: nil))
+                announcements.append(.init(name: device.name, icon: device.icon, batteryPercentage: nil))
             }
         }
         rebuildConnectedDevices()
@@ -93,10 +98,11 @@ final class USBDeviceMonitor: ObservableObject {
             defer { IOObjectRelease(service) }
             var entryID: UInt64 = 0
             guard IORegistryEntryGetRegistryEntryID(service, &entryID) == KERN_SUCCESS else { continue }
-            let name = names.removeValue(forKey: entryID) ?? Self.productName(of: service)
+            let device = devices.removeValue(forKey: entryID)
+                ?? Device(id: entryID, name: Self.productName(of: service), icon: Self.icon(of: service))
             if isSeeded, Defaults[.showUSBDeviceConnectionIndicator] {
                 announcements.append(
-                    .init(title: "Disconnected", name: name, icon: "cable.connector", batteryPercentage: nil)
+                    .init(title: "Disconnected", name: device.name, icon: device.icon, batteryPercentage: nil)
                 )
             }
         }
@@ -105,14 +111,53 @@ final class USBDeviceMonitor: ObservableObject {
     }
 
     private func rebuildConnectedDevices() {
-        connectedDevices = names
-            .map { Device(id: $0.key, name: $0.value) }
-            .sorted { $0.name < $1.name }
+        connectedDevices = devices.values.sorted { $0.name < $1.name }
     }
 
     private func announce(_ announcements: [VolumeManager.DeviceAnnouncement]) {
         guard !announcements.isEmpty else { return }
         VolumeManager.shared.announceDeviceConnections(announcements)
+    }
+
+    /// A composite device keeps `bDeviceClass` at 0 and only says what it
+    /// actually is on its interfaces, so the icon has to come from those. A
+    /// keyboard and a mouse share class 3 and are told apart by the boot
+    /// protocol; anything unrecognised keeps the generic connector.
+    private static func icon(of service: io_service_t) -> String {
+        let plane = strdup(kIOServicePlane)
+        defer { free(plane) }
+        var iterator: io_iterator_t = 0
+        guard IORegistryEntryGetChildIterator(service, plane, &iterator) == KERN_SUCCESS else {
+            return "cable.connector"
+        }
+        defer { IOObjectRelease(iterator) }
+
+        var fallback: String?
+        while case let child = IOIteratorNext(iterator), child != 0 {
+            defer { IOObjectRelease(child) }
+            guard let interfaceClass = number(child, "bInterfaceClass") else { continue }
+            switch (interfaceClass, number(child, "bInterfaceProtocol")) {
+            // Boot protocol 1/2 is definitive, so take it and stop looking.
+            case (3, 1): return "keyboard"
+            case (3, 2): return "computermouse"
+            case (8, _): return "externaldrive"
+            // A composite device often leads with an interface that says less
+            // than a later one does (a keyboard's consumer-control interface
+            // reports class 3 with no protocol), so keep looking for a better
+            // answer before settling for these.
+            case (1, _): fallback = fallback ?? "headphones"
+            case (6, _), (14, _): fallback = fallback ?? "camera"
+            case (7, _): fallback = fallback ?? "printer"
+            case (3, _): fallback = fallback ?? "keyboard"
+            default: continue
+            }
+        }
+        return fallback ?? "cable.connector"
+    }
+
+    private static func number(_ service: io_service_t, _ key: String) -> Int? {
+        IORegistryEntryCreateCFProperty(service, key as CFString, kCFAllocatorDefault, 0)?
+            .takeRetainedValue() as? Int
     }
 
     /// A composite device (most keyboards, most drives) leaves its own name

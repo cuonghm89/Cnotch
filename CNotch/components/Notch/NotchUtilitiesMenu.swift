@@ -127,7 +127,7 @@ struct NotchUtilitiesMenu: View {
                                 Label {
                                     Text(verbatim: device.name)
                                 } icon: {
-                                    Image(systemName: "cable.connector")
+                                    Image(systemName: device.icon)
                                 }
                             }
                         }
