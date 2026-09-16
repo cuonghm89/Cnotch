@@ -18,6 +18,7 @@ final class ScreenshotWatcher {
     private var isRunning = false
     private var startedAt = Date()
     private var announcedPaths: Set<String> = []
+    private var pendingAnnouncements: [URL] = []
     private var announcementTask: Task<Void, Never>?
 
     private static let imageExtensions: Set<String> = ["png", "jpg", "jpeg", "tiff", "heic"]
@@ -76,6 +77,8 @@ final class ScreenshotWatcher {
         source?.cancel()
         source = nil
         announcementTask?.cancel()
+        announcementTask = nil
+        pendingAnnouncements.removeAll()
         announcedPaths.removeAll()
     }
 
@@ -107,13 +110,18 @@ final class ScreenshotWatcher {
         announce(candidates.map(\.0))
     }
 
-    /// Shows one Screenshot Quick Actions popup per screenshot, in sequence
-    /// -- the notch only has a single popup slot.
+    /// One popup per file, in sequence -- the notch has a single slot, so they
+    /// queue. New arrivals are appended to that queue rather than replacing it:
+    /// cancelling the running task instead, as this used to, cut the popup that
+    /// was on screen short and dropped it entirely whenever a second file
+    /// landed while the first was still showing.
     private func announce(_ urls: [URL]) {
-        announcementTask?.cancel()
+        pendingAnnouncements.append(contentsOf: urls)
+        guard announcementTask == nil else { return }
         announcementTask = Task { @MainActor in
-            for url in urls {
-                guard !Task.isCancelled else { return }
+            while !pendingAnnouncements.isEmpty {
+                guard !Task.isCancelled else { break }
+                let url = pendingAnnouncements.removeFirst()
                 guard Defaults[.screenshotQuickActionsEnabled], !CNotchViewCoordinator.shared.isScreenLocked else { continue }
                 CNotchViewCoordinator.shared.toggleExpandingView(
                     status: true,
@@ -125,6 +133,7 @@ final class ScreenshotWatcher {
                 )
                 try? await Task.sleep(nanoseconds: 6_500_000_000)
             }
+            announcementTask = nil
         }
     }
 }
