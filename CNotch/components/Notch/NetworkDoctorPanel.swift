@@ -5,6 +5,7 @@ import SwiftUI
 /// combination is invisible in macOS's own Wi-Fi UI.
 struct NetworkDoctorPanel: View {
     @ObservedObject private var doctor = NetworkDoctor.shared
+    @State private var filters: [NetworkFilters.Filter] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -24,6 +25,17 @@ struct NetworkDoctorPanel: View {
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                if !filters.isEmpty {
+                    Divider()
+                    Text("Network filters")
+                        .font(.system(size: 11, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 5) {
+                        ForEach(filters) { filter in
+                            filterRow(filter)
+                        }
+                    }
+                }
             } else if !doctor.isRunning {
                 Text("No check run yet.")
                     .font(.system(size: 11))
@@ -31,6 +43,7 @@ struct NetworkDoctorPanel: View {
             }
 
             Button {
+                filters = NetworkFilters.current()
                 Task { await doctor.runCheck() }
             } label: {
                 Text(doctor.lastResult == nil ? "Run check" : "Run again")
@@ -41,9 +54,34 @@ struct NetworkDoctorPanel: View {
         .frame(width: 290, alignment: .leading)
         .task {
             // Opening the panel is itself the request to check.
+            filters = NetworkFilters.current()
             guard doctor.lastResult == nil, !doctor.isRunning else { return }
             await doctor.runCheck()
         }
+    }
+
+    private func filterRow(_ filter: NetworkFilters.Filter) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Circle()
+                .fill(filter.isOrphaned ? .red : (filter.isRunning ? .orange : .secondary))
+                .frame(width: 6, height: 6)
+            VStack(alignment: .leading, spacing: 1) {
+                // A bundle identifier, so never localized.
+                Text(verbatim: filter.id)
+                    .font(.system(size: 10))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Text(LocalizedStringKey(statusText(for: filter)))
+                    .font(.system(size: 10))
+                    .foregroundStyle(filter.isOrphaned ? .red : .secondary)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func statusText(for filter: NetworkFilters.Filter) -> String {
+        if filter.isOrphaned { return "Enabled but not running" }
+        return filter.isRunning ? "Filtering" : "Off"
     }
 
     @ViewBuilder
