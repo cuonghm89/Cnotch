@@ -43,23 +43,36 @@ final class DownloadWatcher {
         startedAt = Date()
 
         let directory = downloadsDirectory
-        let descriptor = open(directory.path, O_EVTONLY)
-        guard descriptor >= 0 else { isRunning = false; return }
-        watchedDescriptor = descriptor
+        // open() on a TCC-protected folder blocks in the kernel until the user
+        // answers the permission prompt -- and that prompt is drawn by the main
+        // thread, so opening it here would deadlock the app against itself: the
+        // UI never appears, so the prompt never appears, so open() never
+        // returns. Do it off the main thread and hop back with the result.
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let descriptor = open(directory.path, O_EVTONLY)
+            DispatchQueue.main.async {
+                guard let self, self.isRunning else {
+                    if descriptor >= 0 { close(descriptor) }
+                    return
+                }
+                guard descriptor >= 0 else { self.isRunning = false; return }
+                self.watchedDescriptor = descriptor
 
-        let source = DispatchSource.makeFileSystemObjectSource(
-            fileDescriptor: descriptor,
-            eventMask: .write,
-            queue: .main
-        )
-        source.setEventHandler { [weak self] in
-            self?.checkForNewDownload(in: directory)
+                let source = DispatchSource.makeFileSystemObjectSource(
+                    fileDescriptor: descriptor,
+                    eventMask: .write,
+                    queue: .main
+                )
+                source.setEventHandler { [weak self] in
+                    self?.checkForNewDownload(in: directory)
+                }
+                source.setCancelHandler { [weak self] in
+                    if let fd = self?.watchedDescriptor, fd >= 0 { close(fd) }
+                }
+                source.resume()
+                self.source = source
+            }
         }
-        source.setCancelHandler { [weak self] in
-            if let fd = self?.watchedDescriptor, fd >= 0 { close(fd) }
-        }
-        source.resume()
-        self.source = source
     }
 
     func stop() {

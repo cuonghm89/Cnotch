@@ -7,6 +7,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>CNotch watches your Downloads folder so it can show a download on the notch the moment it finishes.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>CNotch watches your screenshot folder so it can offer quick actions on the notch right after you take one.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>CNotch uses your location to show the current weather on the notch. This is optional and only used while the Weather feature is enabled.</string>
 	<key>SUFeedURL</key>
