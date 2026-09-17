@@ -43,7 +43,7 @@ struct NetworkDoctorPanel: View {
             }
 
             Button {
-                filters = NetworkFilters.current()
+                Task { filters = await Self.currentFilters() }
                 Task { await doctor.runCheck() }
             } label: {
                 Text(doctor.lastResult == nil ? "Run check" : "Run again")
@@ -54,10 +54,17 @@ struct NetworkDoctorPanel: View {
         .frame(width: 330, alignment: .leading)
         .task {
             // Opening the panel is itself the request to check.
-            filters = NetworkFilters.current()
+            filters = await Self.currentFilters()
             guard doctor.lastResult == nil, !doctor.isRunning else { return }
             await doctor.runCheck()
         }
+    }
+
+    /// The scan lists every app bundle, reads each .appex's Info.plist and
+    /// walks the path of every running process -- 70ms here and it grows with
+    /// how much is installed, so it stays off the main actor.
+    private static func currentFilters() async -> [NetworkFilters.Filter] {
+        await Task.detached(priority: .utility) { NetworkFilters.current() }.value
     }
 
     private func filterRow(_ filter: NetworkFilters.Filter) -> some View {

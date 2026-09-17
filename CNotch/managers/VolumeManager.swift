@@ -306,9 +306,12 @@ final class VolumeManager: NSObject, ObservableObject {
         knownBluetoothDeviceIDs = currentKnown
         knownBluetoothOutputAddresses = currentKnownAddresses
         isFirstDeviceDiscovery = false
-        // This runs off the main thread, so it's the right place to pay for
-        // the reload rather than making the menu wait for it when it opens.
-        if !currentAudioAccessories.isEmpty { BluetoothBatteryLevels.reload() }
+        // Warm the battery cache so the menu reads a filled one, but never
+        // inline: this is reached from init() on the main thread as well as
+        // from the HAL listener off it, and reload() waits on a subprocess.
+        if !currentAudioAccessories.isEmpty {
+            DispatchQueue.global(qos: .utility).async { BluetoothBatteryLevels.reload() }
+        }
 
         DispatchQueue.main.async {
             self.currentOutputDevice = devices.first { $0.id == defaultDeviceID }
@@ -1081,6 +1084,15 @@ enum BluetoothBatteryLevels {
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
+        // Stamp the attempt whatever happens. Leaving cachedAt alone on
+        // failure kept the cache eternally stale, and since every finished
+        // attempt republishes the list, the re-render scheduled another
+        // attempt -- a spawn/publish loop for as long as the failure lasted.
+        defer {
+            lock.lock()
+            cachedAt = Date()
+            lock.unlock()
+        }
         guard (try? process.run()) != nil,
               let data = try? pipe.fileHandleForReading.readToEnd()
         else { return }
@@ -1096,12 +1108,14 @@ enum BluetoothBatteryLevels {
         var levels: [String: Int] = [:]
         for line in output.split(separator: "\n") {
             // "-JBL LIVE460NC (id=25760649)\t90%; discharging present: true"
-            guard let idRange = line.range(of: " (id="),
-                  let percentRange = line.range(of: "%")
-            else { continue }
+            guard let idRange = line.range(of: " (id=") else { continue }
             let name = line[line.startIndex..<idRange.lowerBound]
                 .drop { $0 == " " || $0 == "-" }
+            // Both markers are searched after the id, never across the whole
+            // line: a device named "Bose 100%" would otherwise put the "%"
+            // before the ")", and the resulting inverted Range traps.
             guard let closing = line.range(of: ")", range: idRange.upperBound..<line.endIndex),
+                  let percentRange = line.range(of: "%", range: closing.upperBound..<line.endIndex),
                   let percentage = Int(line[closing.upperBound..<percentRange.lowerBound]
                     .filter(\.isNumber))
             else { continue }

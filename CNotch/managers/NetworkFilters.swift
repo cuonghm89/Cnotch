@@ -35,7 +35,7 @@ import Foundation
 ///   all, so they are found by looking for the `.appex` bundles that declare a
 ///   NetworkExtension extension point.
 enum NetworkFilters {
-    enum Status: Equatable {
+    enum Status: Equatable, Sendable {
         /// Loaded, with a process behind it.
         case enabled
         /// Registered and switched on, but nothing is there to answer for it.
@@ -49,7 +49,7 @@ enum NetworkFilters {
         case installed
     }
 
-    struct Filter: Identifiable, Equatable {
+    struct Filter: Identifiable, Equatable, Sendable {
         let id: String
         /// What to show: the vendor, not the bundle identifier.
         let name: String
@@ -143,11 +143,16 @@ enum NetworkFilters {
                 for appex in bundles where appex.pathExtension == "appex" {
                     guard let info = Bundle(url: appex)?.infoDictionary,
                           let point = (info["NSExtension"] as? [String: Any])?["NSExtensionPointIdentifier"] as? String,
-                          point.contains("networkextension"),
-                          let identifier = info["CFBundleIdentifier"] as? String
+                          point.contains("networkextension")
                     else { continue }
                     let name = app.deletingPathExtension().lastPathComponent
-                    let isRunning = running.contains { $0.contains(identifier) }
+                    // Matched on the bundle's path, not its identifier: an
+                    // appex executable is named after the bundle, so
+                    // "PacketTunnel.appex/Contents/MacOS/PacketTunnel" never
+                    // contains "com.vendor.app.KSPacketTunnel" and a running
+                    // tunnel always read as idle.
+                    let prefix = appex.path + "/"
+                    let isRunning = running.contains { $0.hasPrefix(prefix) }
                     byApp[name] = (byApp[name] ?? false) || isRunning
                 }
             }
