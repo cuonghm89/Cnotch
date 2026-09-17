@@ -33,6 +33,10 @@ final class VolumeManager: NSObject, ObservableObject {
         let modelUID: String
         let iconURL: URL?
         let bluetoothBatteryPercentage: Int?
+        /// The 3.5mm jack. Built-in transport covers the speakers too, so the
+        /// two are told apart by the output's data source rather than by its
+        /// name, which is localized.
+        let isHeadphoneJack: Bool
 
         var isBluetooth: Bool {
             transportType == kAudioDeviceTransportTypeBluetooth
@@ -273,6 +277,16 @@ final class VolumeManager: NSObject, ObservableObject {
                 if !isFirstDeviceDiscovery && !previousKnown.contains(d.id) {
                     newlyConnected.append(d)
                 }
+            } else if d.isHeadphoneJack {
+                // Plugging into the jack is just as much "a device I
+                // connected" as pairing over Bluetooth, and CoreAudio already
+                // reports it -- it was only ever missing because the loop
+                // looked at nothing but the Bluetooth transports.
+                currentAudioAccessories.append(
+                    ConnectedBluetoothAccessory(
+                        id: d.uid, name: d.name, icon: "headphones", batteryPercentage: nil
+                    )
+                )
             }
         }
         knownBluetoothDeviceIDs = currentKnown
@@ -473,7 +487,9 @@ final class VolumeManager: NSObject, ObservableObject {
                     outputUID: uid,
                     isBluetooth: transportType == kAudioDeviceTransportTypeBluetooth
                         || transportType == kAudioDeviceTransportTypeBluetoothLE
-                )
+                ),
+                isHeadphoneJack: transportType == kAudioDeviceTransportTypeBuiltIn
+                    && isHeadphoneJack(deviceID)
             )
         }
         .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
@@ -541,6 +557,23 @@ final class VolumeManager: NSObject, ObservableObject {
         guard AudioObjectGetPropertyData(deviceID, &address, 0, nil, &dataSize, &iconURL) == noErr
         else { return nil }
         return iconURL?.takeRetainedValue() as URL?
+    }
+
+    /// CoreAudio reports the built-in output's data source as a four-char
+    /// code: 'hdpn' when something is plugged into the headphone jack, 'ispk'
+    /// for the internal speakers.
+    private func isHeadphoneJack(_ deviceID: AudioObjectID) -> Bool {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyDataSource,
+            mScope: kAudioDevicePropertyScopeOutput,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        guard AudioObjectHasProperty(deviceID, &address) else { return false }
+        var source: UInt32 = 0
+        var dataSize = UInt32(MemoryLayout<UInt32>.size)
+        guard AudioObjectGetPropertyData(deviceID, &address, 0, nil, &dataSize, &source) == noErr
+        else { return false }
+        return source == 0x6864_706E  // 'hdpn'
     }
 
     private func deviceTransportType(_ deviceID: AudioObjectID) -> UInt32 {

@@ -1057,7 +1057,14 @@ struct ContentView: View {
         {
             return (batterySymbolName(for: battery), "\(battery)%")
         }
-        guard let accessory = volumeManager.connectedBluetoothAccessories.first else { return nil }
+        // This slot exists to show a battery level, so prefer an accessory
+        // that has one. Wired headphones now appear in the same list and have
+        // no battery, and taking simply the first would let them push the
+        // trackpad's percentage out of the one slot there is.
+        let accessories = volumeManager.connectedBluetoothAccessories
+        guard let accessory = accessories.first(where: { VolumeManager.batteryPercentage(for: $0) != nil })
+            ?? accessories.first
+        else { return nil }
         return (accessory.icon, VolumeManager.batteryPercentage(for: accessory).map { "\($0)%" })
     }
 
