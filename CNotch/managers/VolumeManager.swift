@@ -443,9 +443,21 @@ final class VolumeManager: NSObject, ObservableObject {
     /// one, otherwise whatever was captured for it (audio devices get theirs
     /// refreshed by the CoreAudio path instead).
     static func batteryPercentage(for accessory: ConnectedBluetoothAccessory) -> Int? {
-        HIDBatteryLevels.percentage(forAddress: accessory.id)
-            ?? BluetoothBatteryLevels.percentage(forAddress: accessory.id)
+        // An accessory's id is a bare address when it came from IOBluetooth
+        // but a CoreAudio UID -- "78-5E-A2-E3-E9-FA:output" -- when it came
+        // from the audio side, while both battery sources are keyed by plain
+        // address. Without normalising, every audio device silently missed.
+        let address = normalizedAddress(accessory.id)
+        return HIDBatteryLevels.percentage(forAddress: address)
+            ?? BluetoothBatteryLevels.percentage(forAddress: address)
             ?? accessory.batteryPercentage
+    }
+
+    private static func normalizedAddress(_ identifier: String) -> String {
+        let hex = identifier.filter(\.isHexDigit).lowercased()
+        // A UID can carry hex letters beyond the address itself, so keep the
+        // six bytes an address actually is.
+        return hex.count > 12 ? String(hex.prefix(12)) : hex
     }
 
     private func rebuildConnectedAccessoriesList() {
