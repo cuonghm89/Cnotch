@@ -306,6 +306,9 @@ final class VolumeManager: NSObject, ObservableObject {
         knownBluetoothDeviceIDs = currentKnown
         knownBluetoothOutputAddresses = currentKnownAddresses
         isFirstDeviceDiscovery = false
+        // This runs off the main thread, so it's the right place to pay for
+        // the reload rather than making the menu wait for it when it opens.
+        if !currentAudioAccessories.isEmpty { BluetoothBatteryLevels.reload() }
 
         DispatchQueue.main.async {
             self.currentOutputDevice = devices.first { $0.id == defaultDeviceID }
@@ -438,7 +441,9 @@ final class VolumeManager: NSObject, ObservableObject {
     /// one, otherwise whatever was captured for it (audio devices get theirs
     /// refreshed by the CoreAudio path instead).
     static func batteryPercentage(for accessory: ConnectedBluetoothAccessory) -> Int? {
-        HIDBatteryLevels.percentage(forAddress: accessory.id) ?? accessory.batteryPercentage
+        HIDBatteryLevels.percentage(forAddress: accessory.id)
+            ?? BluetoothBatteryLevels.percentage(forAddress: accessory.id)
+            ?? accessory.batteryPercentage
     }
 
     private func rebuildConnectedAccessoriesList() {
@@ -973,6 +978,75 @@ enum HIDBatteryLevels {
                   )?.takeRetainedValue() as? Int
             else { continue }
             levels[address.filter(\.isHexDigit).lowercased()] = percentage
+        }
+    }
+}
+
+/// Battery for a Bluetooth audio device that the private `IOBluetoothDevice`
+/// selectors stay silent about. They answer for AirPods and not much else --
+/// a JBL LIVE460NC reports nothing through them while macOS itself knows the
+/// level perfectly well, and `system_profiler` is the one place that exposes
+/// what the Bluetooth daemon holds without private API.
+///
+/// Reloaded from the CoreAudio refresh, which already runs off the main
+/// thread, so opening the menu reads a warm cache rather than waiting ~100ms
+/// for a subprocess.
+enum BluetoothBatteryLevels {
+    private static let lock = NSLock()
+    private static var cache: [String: Int] = [:]
+    private static var cachedAt = Date.distantPast
+
+    static func percentage(forAddress address: String) -> Int? {
+        lock.lock()
+        let stale = Date().timeIntervalSince(cachedAt) > 60
+        let value = cache[address]
+        lock.unlock()
+        if stale { reload() }
+        lock.lock()
+        defer { lock.unlock() }
+        return cache[address] ?? value
+    }
+
+    static func reload() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
+        process.arguments = ["SPBluetoothDataType", "-json"]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+        guard (try? process.run()) != nil,
+              let data = try? pipe.fileHandleForReading.readToEnd()
+        else { return }
+        process.waitUntilExit()
+
+        var levels: [String: Int] = [:]
+        defer {
+            lock.lock()
+            cache = levels
+            cachedAt = Date()
+            lock.unlock()
+        }
+
+        guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let sections = root["SPBluetoothDataType"] as? [[String: Any]]
+        else { return }
+
+        for section in sections {
+            guard let connected = section["device_connected"] as? [[String: Any]] else { continue }
+            for entry in connected {
+                for (_, value) in entry {
+                    guard let info = value as? [String: Any],
+                          let address = info["device_address"] as? String
+                    else { continue }
+                    // Earbuds report a level per side instead of one main
+                    // level; the lower of the two is the one that matters.
+                    let percentages = ["device_batteryLevelMain", "device_batteryLevelLeft", "device_batteryLevelRight"]
+                        .compactMap { info[$0] as? String }
+                        .compactMap { Int($0.filter(\.isNumber)) }
+                    guard let percentage = percentages.min() else { continue }
+                    levels[address.filter(\.isHexDigit).lowercased()] = percentage
+                }
+            }
         }
     }
 }
