@@ -12,7 +12,7 @@ struct NetworkDoctorPanel: View {
             header
 
             if let result = doctor.lastResult {
-                VStack(alignment: .leading, spacing: 7) {
+                VStack(alignment: .leading, spacing: 9) {
                     layerRow("Wi-Fi path", ok: result.hasPath)
                     layerRow("Routing (TCP to 1.1.1.1)", ok: result.tcpOK)
                     layerRow("DNS", ok: result.dnsOK)
@@ -22,15 +22,15 @@ struct NetworkDoctorPanel: View {
                 Divider()
 
                 Text(LocalizedStringKey(NetworkDoctor.subtitle(for: result.verdict)))
-                    .font(.system(size: 11))
+                    .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if !filters.isEmpty {
                     Divider()
                     Text("Network filters")
-                        .font(.system(size: 12, weight: .semibold))
-                    VStack(alignment: .leading, spacing: 5) {
+                        .font(.system(size: 13, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 8) {
                         ForEach(filters) { filter in
                             filterRow(filter)
                         }
@@ -38,7 +38,7 @@ struct NetworkDoctorPanel: View {
                 }
             } else if !doctor.isRunning {
                 Text("No check run yet.")
-                    .font(.system(size: 11))
+                    .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }
 
@@ -51,7 +51,7 @@ struct NetworkDoctorPanel: View {
             .disabled(doctor.isRunning)
         }
         .padding(16)
-        .frame(width: 290, alignment: .leading)
+        .frame(width: 330, alignment: .leading)
         .task {
             // Opening the panel is itself the request to check.
             filters = NetworkFilters.current()
@@ -63,15 +63,15 @@ struct NetworkDoctorPanel: View {
     private func filterRow(_ filter: NetworkFilters.Filter) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Circle()
-                .fill(filter.isOrphaned ? .red : (filter.isRunning ? .yellow : .secondary))
-                .frame(width: 7, height: 7)
+                .fill(filter.isOrphaned ? .red : (filter.isRunning ? .green : .secondary))
+                .frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 1) {
                 // A vendor name, so never localized.
                 Text(verbatim: filter.name)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 13, weight: .medium))
                     .lineLimit(1)
                 Text(LocalizedStringKey(statusText(for: filter)))
-                    .font(.system(size: 11))
+                    .font(.system(size: 12))
                     .foregroundStyle(filter.isOrphaned ? .red : .secondary)
             }
             Spacer(minLength: 0)
@@ -112,9 +112,9 @@ struct NetworkDoctorPanel: View {
         HStack(spacing: 8) {
             Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .foregroundStyle(ok ? .green : .red)
-                .font(.system(size: 11))
+                .font(.system(size: 13))
             Text(label)
-                .font(.system(size: 11))
+                .font(.system(size: 13))
             Spacer(minLength: 8)
         }
     }
