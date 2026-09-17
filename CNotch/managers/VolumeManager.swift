@@ -460,6 +460,12 @@ final class VolumeManager: NSObject, ObservableObject {
         return hex.count > 12 ? String(hex.prefix(12)) : hex
     }
 
+    /// Republish the list so a battery that arrived after the view was last
+    /// built shows up.
+    func refreshConnectedAccessories() {
+        rebuildConnectedAccessoriesList()
+    }
+
     private func rebuildConnectedAccessoriesList() {
         // A disconnect notification can go missing (device out of range, the
         // Bluetooth stack restarting across a sleep cycle), which otherwise
@@ -1026,15 +1032,36 @@ enum BluetoothBatteryLevels {
     private static var cache: [String: Int] = [:]
     private static var cachedAt = Date.distantPast
 
+    private static var isReloading = false
+
+    /// A pure cache read, and it has to stay that way: this is called from
+    /// inside a SwiftUI body, and `reload()` runs a subprocess. Waiting on one
+    /// during a render pumps the run loop, re-enters SwiftUI's update, and
+    /// AttributeGraph aborts the process -- which is exactly how this crashed
+    /// (`BluetoothBatteryLevels.reload` directly under
+    /// `NotchUtilitiesMenu.body.getter` in the report).
+    ///
+    /// A stale cache schedules a refresh instead of waiting for one, and the
+    /// refresh republishes the list so the view comes back with the number.
     static func percentage(forAddress address: String) -> Int? {
         lock.lock()
-        let stale = Date().timeIntervalSince(cachedAt) > 60
         let value = cache[address]
+        let shouldRefresh = !isReloading && Date().timeIntervalSince(cachedAt) > 60
+        if shouldRefresh { isReloading = true }
         lock.unlock()
-        if stale { reload() }
-        lock.lock()
-        defer { lock.unlock() }
-        return cache[address] ?? value
+
+        if shouldRefresh {
+            DispatchQueue.global(qos: .utility).async {
+                reload()
+                lock.lock()
+                isReloading = false
+                lock.unlock()
+                DispatchQueue.main.async {
+                    VolumeManager.shared.refreshConnectedAccessories()
+                }
+            }
+        }
+        return value
     }
 
     static func reload() {
