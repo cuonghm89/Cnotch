@@ -409,13 +409,15 @@ final class VolumeManager: NSObject, ObservableObject {
         // its link -- a keyboard switched over to its USB cable, say. Ask
         // the device itself instead; that's a live query.
         guard device.isConnected() else { return nil }
-        // Major class 0x05 is "Peripheral" -- keyboards, mice, trackpads,
-        // controllers. Everything else that happens to hold a Bluetooth link
-        // (an iPhone, an iPad, another Mac) isn't an accessory of this Mac and
-        // has no battery it will report over Bluetooth, so it would just sit
-        // in the list reading 0%.
-        guard device.deviceClassMajor == 0x05 else { return nil }
-        guard !address.isEmpty, !knownBluetoothOutputAddresses.contains(address) else { return nil }
+        // Every connected device, whatever its class. This used to keep only
+        // "Peripheral" (0x05) because anything else showed a bogus 0%, but
+        // that was the battery read being wrong, not the device being the
+        // wrong kind -- and it silently dropped headsets, which are class
+        // 0x04. Deduplication against CoreAudio happens when the list is
+        // built, not here: a Bluetooth headset appears in CoreAudio only
+        // while it is the active audio route and vanishes from it otherwise,
+        // so the entry has to exist to fall back on.
+        guard !address.isEmpty else { return nil }
         let accessory = ConnectedBluetoothAccessory(
             id: address,
             name: device.name ?? device.addressString ?? "Bluetooth Device",
@@ -453,8 +455,13 @@ final class VolumeManager: NSObject, ObservableObject {
         for (address, device) in trackedBluetoothDevices where !device.isConnected() {
             forgetGenericAccessory(address)
         }
+        // CoreAudio and IOBluetooth can both know the same headset; prefer
+        // CoreAudio's entry, which carries the audio-side battery reading.
+        let audioAddresses = Set(audioBluetoothAccessories.map { $0.id.filter(\.isHexDigit).lowercased() })
         connectedBluetoothAccessories = audioBluetoothAccessories
-            + genericBluetoothAccessories.values.sorted { $0.name < $1.name }
+            + genericBluetoothAccessories.values
+                .filter { !audioAddresses.contains($0.id) }
+                .sorted { $0.name < $1.name }
     }
 
     /// Bluetooth's own class-of-device bits -- major 0x05 is "Peripheral",
@@ -462,13 +469,24 @@ final class VolumeManager: NSObject, ObservableObject {
     /// combo, with joystick/gamepad called out separately.
     private static func accessoryIcon(for device: IOBluetoothDevice) -> String {
         // "bluetooth" isn't an SF Symbol (Apple doesn't ship the trademarked
-        // logo as one) -- it silently renders nothing, so fall back to a
-        // generic accessory glyph instead.
-        guard device.deviceClassMajor == 0x05 else { return "cable.connector" }
-        switch device.deviceClassMinor & 0x30 {
-        case 0x10, 0x30: return "keyboard"
-        case 0x20: return "computermouse"
-        default: return (device.deviceClassMinor & 0x0F) == 0x02 ? "gamecontroller" : "cable.connector"
+        // logo as one) -- it silently renders nothing, so every branch has to
+        // end at some other glyph.
+        switch device.deviceClassMajor {
+        case 0x01: return "laptopcomputer"
+        case 0x02: return "iphone"
+        case 0x04:
+            // Audio/Video. Minor 0x05 is a loudspeaker; the rest of what a
+            // Mac ever pairs with here is worn on the head.
+            return (device.deviceClassMinor & 0x3F) == 0x05 ? "hifispeaker" : "headphones"
+        case 0x05:
+            switch device.deviceClassMinor & 0x30 {
+            case 0x10, 0x30: return "keyboard"
+            case 0x20: return "computermouse"
+            default: return (device.deviceClassMinor & 0x0F) == 0x02 ? "gamecontroller" : "cable.connector"
+            }
+        case 0x06: return "printer"
+        case 0x07: return "applewatch"
+        default: return "cable.connector"
         }
     }
 
