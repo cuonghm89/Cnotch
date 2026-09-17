@@ -16,7 +16,7 @@ struct NetworkDoctorPanel: View {
                     layerRow("Wi-Fi path", ok: result.hasPath)
                     layerRow("Routing (TCP to 1.1.1.1)", ok: result.tcpOK)
                     layerRow("DNS", ok: result.dnsOK)
-                    layerRow("TLS through filters", ok: result.tlsOK)
+                    layerRow("TLS handshake", ok: result.tlsOK)
                 }
 
                 Divider()
@@ -63,7 +63,7 @@ struct NetworkDoctorPanel: View {
     private func filterRow(_ filter: NetworkFilters.Filter) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Circle()
-                .fill(filter.isOrphaned ? .red : (filter.isRunning ? .orange : .secondary))
+                .fill(filter.isOrphaned ? .red : (filter.isRunning ? .yellow : .secondary))
                 .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 1) {
                 // A vendor name, so never localized.
@@ -78,9 +78,15 @@ struct NetworkDoctorPanel: View {
         }
     }
 
+    /// Deliberately says "Enabled", not "Filtering". An extension can declare
+    /// more than one role -- Kaspersky's is both a network filter and an
+    /// endpoint security extension -- and switching its network half off in
+    /// its own app leaves the extension enabled with its process still up for
+    /// the other half. macOS exposes no per-role state, so claiming it is
+    /// filtering would be asserting more than is known.
     private func statusText(for filter: NetworkFilters.Filter) -> String {
         if filter.isOrphaned { return "Enabled but not running" }
-        return filter.isRunning ? "Filtering" : "Off"
+        return filter.isRunning ? "Enabled" : "Off"
     }
 
     @ViewBuilder
