@@ -89,7 +89,9 @@ struct ControllerOptionView: View {
                     .font(.headline)
                     .fontWeight(.semibold)
 
-                Text(controller.description)
+                // UI copy, not a device's own name -- Text(String) would
+                // take the overload that never reaches the String Catalog.
+                Text(LocalizedStringKey(controller.description))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
