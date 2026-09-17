@@ -449,7 +449,7 @@ final class VolumeManager: NSObject, ObservableObject {
         // address. Without normalising, every audio device silently missed.
         let address = normalizedAddress(accessory.id)
         return HIDBatteryLevels.percentage(forAddress: address)
-            ?? BluetoothBatteryLevels.percentage(forAddress: address)
+            ?? BluetoothBatteryLevels.percentage(forName: accessory.name)
             ?? accessory.batteryPercentage
     }
 
@@ -1031,21 +1031,19 @@ enum BluetoothBatteryLevels {
     private static let lock = NSLock()
     private static var cache: [String: Int] = [:]
     private static var cachedAt = Date.distantPast
-
     private static var isReloading = false
 
     /// A pure cache read, and it has to stay that way: this is called from
-    /// inside a SwiftUI body, and `reload()` runs a subprocess. Waiting on one
+    /// inside a SwiftUI body, and reloading runs a subprocess. Waiting on one
     /// during a render pumps the run loop, re-enters SwiftUI's update, and
-    /// AttributeGraph aborts the process -- which is exactly how this crashed
-    /// (`BluetoothBatteryLevels.reload` directly under
-    /// `NotchUtilitiesMenu.body.getter` in the report).
-    ///
-    /// A stale cache schedules a refresh instead of waiting for one, and the
-    /// refresh republishes the list so the view comes back with the number.
-    static func percentage(forAddress address: String) -> Int? {
+    /// AttributeGraph aborts the process -- which is how this crashed once
+    /// already. A stale cache schedules a refresh rather than waiting for one,
+    /// and the refresh republishes the list so the number arrives a moment
+    /// later.
+    static func percentage(forName name: String) -> Int? {
+        let key = normalizedName(name)
         lock.lock()
-        let value = cache[address]
+        let value = cache[key]
         let shouldRefresh = !isReloading && Date().timeIntervalSince(cachedAt) > 60
         if shouldRefresh { isReloading = true }
         lock.unlock()
@@ -1064,10 +1062,22 @@ enum BluetoothBatteryLevels {
         return value
     }
 
+    /// `pmset -g accps` lists exactly what the Bluetooth daemon knows, for
+    /// every accessory at once, in about 10ms.
+    ///
+    /// `system_profiler` was the obvious place to look and turned out to be
+    /// the wrong one: it reported the JBL at 100% one afternoon and no battery
+    /// at all an hour later, while the daemon had a figure the whole time. It
+    /// is also ten times slower.
+    ///
+    /// Matched on the name rather than the address because that is all this
+    /// output carries -- normalised, since pmset mangles a curly apostrophe
+    /// into a lone surrogate and "Cuong Hoang's Trackpad" would never compare
+    /// equal to itself otherwise.
     static func reload() {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/sbin/system_profiler")
-        process.arguments = ["SPBluetoothDataType", "-json"]
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
+        process.arguments = ["-g", "accps"]
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
@@ -1076,35 +1086,36 @@ enum BluetoothBatteryLevels {
         else { return }
         process.waitUntilExit()
 
+        // Not String(data:encoding:.utf8): pmset mangles a curly apostrophe
+        // into a byte sequence that isn't valid UTF-8, so that initialiser
+        // returns nil and the whole read silently yields nothing. Decoding
+        // leniently substitutes a replacement character instead, which the
+        // name normalisation then drops anyway.
+        let output = String(decoding: data, as: UTF8.self)
+
         var levels: [String: Int] = [:]
-        defer {
-            lock.lock()
-            cache = levels
-            cachedAt = Date()
-            lock.unlock()
+        for line in output.split(separator: "\n") {
+            // "-JBL LIVE460NC (id=25760649)\t90%; discharging present: true"
+            guard let idRange = line.range(of: " (id="),
+                  let percentRange = line.range(of: "%")
+            else { continue }
+            let name = line[line.startIndex..<idRange.lowerBound]
+                .drop { $0 == " " || $0 == "-" }
+            guard let closing = line.range(of: ")", range: idRange.upperBound..<line.endIndex),
+                  let percentage = Int(line[closing.upperBound..<percentRange.lowerBound]
+                    .filter(\.isNumber))
+            else { continue }
+            levels[normalizedName(String(name))] = percentage
         }
 
-        guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-              let sections = root["SPBluetoothDataType"] as? [[String: Any]]
-        else { return }
+        lock.lock()
+        cache = levels
+        cachedAt = Date()
+        lock.unlock()
+    }
 
-        for section in sections {
-            guard let connected = section["device_connected"] as? [[String: Any]] else { continue }
-            for entry in connected {
-                for (_, value) in entry {
-                    guard let info = value as? [String: Any],
-                          let address = info["device_address"] as? String
-                    else { continue }
-                    // Earbuds report a level per side instead of one main
-                    // level; the lower of the two is the one that matters.
-                    let percentages = ["device_batteryLevelMain", "device_batteryLevelLeft", "device_batteryLevelRight"]
-                        .compactMap { info[$0] as? String }
-                        .compactMap { Int($0.filter(\.isNumber)) }
-                    guard let percentage = percentages.min() else { continue }
-                    levels[address.filter(\.isHexDigit).lowercased()] = percentage
-                }
-            }
-        }
+    private static func normalizedName(_ name: String) -> String {
+        name.lowercased().filter { $0.isLetter || $0.isNumber }
     }
 }
 
