@@ -23,6 +23,10 @@ final class VolumeManager: NSObject, ObservableObject {
         let name: String
         let icon: String
         let batteryPercentage: Int?
+        /// True when `name` is a catalog key rather than a device's own name.
+        /// A real device name must never be translated; the jack's label has
+        /// to be, because the hardware supplies no name to show.
+        var isLocalizedName: Bool = false
     }
 
     struct OutputDevice: Identifiable, Equatable {
@@ -278,13 +282,23 @@ final class VolumeManager: NSObject, ObservableObject {
                     newlyConnected.append(d)
                 }
             } else if d.isHeadphoneJack {
+                // Nothing identifies what is plugged into an analog jack --
+                // it carries no data channel, so there is no name, brand or
+                // model to read. What the Mac can tell is whether the plug
+                // has a microphone contact, which separates headphones from
+                // a headset.
+                let hasMicrophone = externalMicrophoneConnected(among: devices)
                 // Plugging into the jack is just as much "a device I
                 // connected" as pairing over Bluetooth, and CoreAudio already
                 // reports it -- it was only ever missing because the loop
                 // looked at nothing but the Bluetooth transports.
                 currentAudioAccessories.append(
                     ConnectedBluetoothAccessory(
-                        id: d.uid, name: d.name, icon: "headphones", batteryPercentage: nil
+                        id: d.uid,
+                        name: hasMicrophone ? "Wired headset (3.5mm)" : "Wired headphones (3.5mm)",
+                        icon: hasMicrophone ? "headset" : "headphones",
+                        batteryPercentage: nil,
+                        isLocalizedName: true
                     )
                 )
             }
@@ -557,6 +571,41 @@ final class VolumeManager: NSObject, ObservableObject {
         guard AudioObjectGetPropertyData(deviceID, &address, 0, nil, &dataSize, &iconURL) == noErr
         else { return nil }
         return iconURL?.takeRetainedValue() as URL?
+    }
+
+    /// A headset plugged into the same jack shows up as a second, input-side
+    /// built-in device whose source is 'emic' -- the built-in microphone
+    /// reports 'imic' instead.
+    private func externalMicrophoneConnected(among devices: [OutputDevice]) -> Bool {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDevices,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var dataSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(
+            AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &dataSize
+        ) == noErr else { return false }
+        let count = Int(dataSize) / MemoryLayout<AudioObjectID>.size
+        guard count > 0 else { return false }
+        var deviceIDs = [AudioObjectID](repeating: kAudioObjectUnknown, count: count)
+        guard AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &dataSize, &deviceIDs
+        ) == noErr else { return false }
+
+        return deviceIDs.contains { deviceID in
+            var source = AudioObjectPropertyAddress(
+                mSelector: kAudioDevicePropertyDataSource,
+                mScope: kAudioDevicePropertyScopeInput,
+                mElement: kAudioObjectPropertyElementMain
+            )
+            guard AudioObjectHasProperty(deviceID, &source) else { return false }
+            var value: UInt32 = 0
+            var size = UInt32(MemoryLayout<UInt32>.size)
+            guard AudioObjectGetPropertyData(deviceID, &source, 0, nil, &size, &value) == noErr
+            else { return false }
+            return value == 0x656D_6963  // 'emic'
+        }
     }
 
     /// CoreAudio reports the built-in output's data source as a four-char
