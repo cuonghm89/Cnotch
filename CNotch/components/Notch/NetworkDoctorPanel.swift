@@ -63,30 +63,45 @@ struct NetworkDoctorPanel: View {
     private func filterRow(_ filter: NetworkFilters.Filter) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Circle()
-                .fill(filter.isOrphaned ? .red : (filter.isRunning ? .green : .secondary))
+                .fill(color(for: filter.status))
                 .frame(width: 8, height: 8)
             VStack(alignment: .leading, spacing: 1) {
                 // A vendor name, so never localized.
                 Text(verbatim: filter.name)
                     .font(.system(size: 13, weight: .medium))
                     .lineLimit(1)
-                Text(LocalizedStringKey(statusText(for: filter)))
+                Text(LocalizedStringKey(statusText(for: filter.status)))
                     .font(.system(size: 12))
-                    .foregroundStyle(filter.isOrphaned ? .red : .secondary)
+                    .foregroundStyle(filter.status == .orphaned ? .red : .secondary)
             }
             Spacer(minLength: 0)
         }
     }
 
-    /// Deliberately says "Enabled", not "Filtering". An extension can declare
-    /// more than one role -- Kaspersky's is both a network filter and an
-    /// endpoint security extension -- and switching its network half off in
-    /// its own app leaves the extension enabled with its process still up for
-    /// the other half. macOS exposes no per-role state, so claiming it is
-    /// filtering would be asserting more than is known.
-    private func statusText(for filter: NetworkFilters.Filter) -> String {
-        if filter.isOrphaned { return "Enabled but not running" }
-        return filter.isRunning ? "Enabled" : "Off"
+    /// Green means the same here as it does on the rows above: working as it
+    /// should. A filter that is switched on is not a fault, so red is kept for
+    /// the one state that genuinely is wrong.
+    private func color(for status: NetworkFilters.Status) -> Color {
+        switch status {
+        case .enabled: .green
+        case .orphaned: .red
+        case .off, .installed: .secondary
+        }
+    }
+
+    /// Deliberately never says "Filtering". An extension can declare more than
+    /// one role -- Kaspersky's is both a network filter and an endpoint
+    /// security extension -- and switching its network half off in its own app
+    /// leaves it enabled with the process still up for the other half. macOS
+    /// exposes no per-role state, so claiming it is filtering would be
+    /// asserting more than is known.
+    private func statusText(for status: NetworkFilters.Status) -> String {
+        switch status {
+        case .enabled: "Enabled"
+        case .orphaned: "Enabled but not running"
+        case .off: "Off"
+        case .installed: "Installed, not running"
+        }
     }
 
     @ViewBuilder

@@ -17,61 +17,87 @@ import Foundation
 /// it. Both states look identical there, and both break connections in ways
 /// the Wi-Fi menu shows as a perfectly healthy network.
 ///
-/// Read from the system's own database rather than by shelling out to
-/// `systemextensionsctl`, which is not only a subprocess but actually hides
-/// some of this: it prints an extension under one category heading, so a
-/// filter that registers as *both* endpoint security and network extension is
-/// listed only under the former, and reads as "not a network filter".
+/// Nothing here is keyed to a particular vendor -- whatever a machine has
+/// installed is what it lists, and machines with none show no section at all.
+///
+/// There are two ways to ship a network provider on macOS, and a machine can
+/// have both, so both are read:
+///
+/// - A **system extension**, staged under /Library/SystemExtensions and listed
+///   in the system's own database. Read that database rather than shelling out
+///   to `systemextensionsctl`, which is not only a subprocess but actually
+///   hides some of this: it prints an extension under a single category
+///   heading, so a filter registering as both endpoint security and network
+///   extension is listed only under the former and reads as "not a network
+///   filter".
+/// - An **app extension** bundled inside the app itself, the older mechanism
+///   still used by most VPN clients. These appear in no extension database at
+///   all, so they are found by looking for the `.appex` bundles that declare a
+///   NetworkExtension extension point.
 enum NetworkFilters {
-    struct Filter: Identifiable, Equatable {
-        /// The bundle identifier.
-        let id: String
-        /// What to actually show: the vendor, read from the staged bundle.
-        let name: String
-        let version: String
-        let isEnabled: Bool
-        let isRunning: Bool
-
+    enum Status: Equatable {
+        /// Loaded, with a process behind it.
+        case enabled
         /// Registered and switched on, but nothing is there to answer for it.
         /// Worth calling out separately: this is the state that looks fine
         /// everywhere else.
-        var isOrphaned: Bool { isEnabled && !isRunning }
+        case orphaned
+        /// Switched off.
+        case off
+        /// Present on disk but not currently running -- a VPN client that
+        /// isn't connected, say.
+        case installed
     }
+
+    struct Filter: Identifiable, Equatable {
+        let id: String
+        /// What to show: the vendor, not the bundle identifier.
+        let name: String
+        let status: Status
+    }
+
+    static func current() -> [Filter] {
+        let running = runningExecutablePaths()
+        let extensions = systemExtensions(running: running)
+        // An app shipping both mechanisms would otherwise be listed twice.
+        let alreadyListed = Set(extensions.map(\.name))
+        let apps = appExtensions(running: running).filter { !alreadyListed.contains($0.name) }
+        return (extensions + apps).sorted { $0.name < $1.name }
+    }
+
+    // MARK: - System extensions
 
     private static let databaseURL = URL(fileURLWithPath: "/Library/SystemExtensions/db.plist")
     private static let networkCategory = "com.apple.system_extension.network_extension"
 
-    static func current() -> [Filter] {
+    private static func systemExtensions(running: [String]) -> [Filter] {
         guard let data = try? Data(contentsOf: databaseURL),
               let root = try? PropertyListSerialization.propertyList(from: data, format: nil),
-              let extensions = (root as? [String: Any])?["extensions"] as? [[String: Any]]
+              let entries = (root as? [String: Any])?["extensions"] as? [[String: Any]]
         else { return [] }
 
-        let running = runningExecutablePaths()
-        let names = displayNames()
-        return extensions.compactMap { entry -> Filter? in
+        let names = stagedDisplayNames()
+        return entries.compactMap { entry -> Filter? in
             guard let identifier = entry["identifier"] as? String,
                   let categories = entry["categories"] as? [String],
                   categories.contains(networkCategory)
             else { return nil }
-            let version = (entry["bundleVersion"] as? [String: Any])?["CFBundleShortVersionString"] as? String
+
+            let isEnabled = (entry["state"] as? String) == "activated_enabled"
+            // A staged extension's executable lives at a path containing its
+            // bundle identifier, so that's enough to match on.
+            let isRunning = running.contains { $0.contains(identifier) }
             return Filter(
                 id: identifier,
                 name: names[identifier].map(shorten) ?? identifier,
-                version: version ?? "",
-                isEnabled: (entry["state"] as? String) == "activated_enabled",
-                // A staged extension's executable lives at a path containing
-                // its bundle identifier, so that's enough to match on without
-                // resolving each bundle.
-                isRunning: running.contains { $0.contains(identifier) }
+                status: isEnabled ? (isRunning ? .enabled : .orphaned) : .off
             )
         }
-        .sorted { $0.id < $1.id }
     }
 
     /// `db.plist` stores no readable name, only the identifier, so the name
     /// comes from each staged bundle's own Info.plist.
-    private static func displayNames() -> [String: String] {
+    private static func stagedDisplayNames() -> [String: String] {
         let root = URL(fileURLWithPath: "/Library/SystemExtensions")
         guard let staged = try? FileManager.default.contentsOfDirectory(
             at: root, includingPropertiesForKeys: nil
@@ -93,9 +119,47 @@ enum NetworkFilters {
         return names
     }
 
-    /// Every one of these names ends in "... Extension", which is what the
-    /// section heading already says. Drop it and keep the vendor, so the row
-    /// reads "AdGuard" rather than "AdGuard Network Extension".
+    // MARK: - App extensions
+
+    /// One row per app, not per provider: a VPN client typically ships a
+    /// separate tunnel for each protocol it speaks, and listing three rows for
+    /// one app would say nothing extra.
+    private static func appExtensions(running: [String]) -> [Filter] {
+        let roots = [
+            URL(fileURLWithPath: "/Applications"),
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications")
+        ]
+
+        var byApp: [String: Bool] = [:]
+        for root in roots {
+            let apps = (try? FileManager.default.contentsOfDirectory(
+                at: root, includingPropertiesForKeys: nil
+            )) ?? []
+            for app in apps where app.pathExtension == "app" {
+                let plugins = app.appendingPathComponent("Contents/PlugIns")
+                let bundles = (try? FileManager.default.contentsOfDirectory(
+                    at: plugins, includingPropertiesForKeys: nil
+                )) ?? []
+                for appex in bundles where appex.pathExtension == "appex" {
+                    guard let info = Bundle(url: appex)?.infoDictionary,
+                          let point = (info["NSExtension"] as? [String: Any])?["NSExtensionPointIdentifier"] as? String,
+                          point.contains("networkextension"),
+                          let identifier = info["CFBundleIdentifier"] as? String
+                    else { continue }
+                    let name = app.deletingPathExtension().lastPathComponent
+                    let isRunning = running.contains { $0.contains(identifier) }
+                    byApp[name] = (byApp[name] ?? false) || isRunning
+                }
+            }
+        }
+        return byApp.map { Filter(id: $0.key, name: $0.key, status: $0.value ? .enabled : .installed) }
+    }
+
+    // MARK: - Shared
+
+    /// Every staged extension's name ends in "... Extension", which is what
+    /// the section heading already says. Drop it and keep the vendor, so the
+    /// row reads "AdGuard" rather than "AdGuard Network Extension".
     private static func shorten(_ name: String) -> String {
         for suffix in [" Network Extension", " System Extension", " Extension"] where name.hasSuffix(suffix) {
             let trimmed = String(name.dropLast(suffix.count))
