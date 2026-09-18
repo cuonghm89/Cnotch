@@ -179,7 +179,23 @@ class TemporaryFileStorageService {
             return nil
         }
     }
+    /// Zipping is blocking work -- `zip(1)` plus a file copy per item -- and
+    /// blocking work has no business on Swift concurrency's cooperative pool.
+    /// That pool is only as wide as the machine has cores and every `async`
+    /// call in the app shares it, so a single large archive parked a thread
+    /// for as long as the archive took. Its own queue costs nothing and can't
+    /// starve anything else.
     func createZip(from urls: [URL], suggestedName: String? = nil) async -> URL? {
+        await withCheckedContinuation { continuation in
+            Self.archiveQueue.async {
+                continuation.resume(returning: Self.buildZip(from: urls, suggestedName: suggestedName))
+            }
+        }
+    }
+
+    private static let archiveQueue = DispatchQueue(label: "com.cuonghm89.cnotch.zip", qos: .userInitiated)
+
+    private static func buildZip(from urls: [URL], suggestedName: String? = nil) -> URL? {
         let tempDir = URL(fileURLWithPath: NSTemporaryDirectory())
         let uuid = UUID().uuidString
         let workingDir = tempDir.appendingPathComponent("zip_\(uuid)", isDirectory: true)
