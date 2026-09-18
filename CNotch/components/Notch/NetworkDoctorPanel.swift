@@ -26,6 +26,14 @@ struct NetworkDoctorPanel: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
+                // When, so a result can never pass for current again.
+                HStack(spacing: 4) {
+                    Text("Checked at")
+                    Text(result.checkedAt, style: .time)
+                }
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+
                 if !filters.isEmpty {
                     Divider()
                     Text("Network filters")
@@ -53,9 +61,13 @@ struct NetworkDoctorPanel: View {
         .padding(16)
         .frame(width: 330, alignment: .leading)
         .task {
-            // Opening the panel is itself the request to check.
+            // Opening the panel is itself the request to check, every time.
+            // Skipping when a result already existed meant the panel showed
+            // whatever the last run found -- a red result captured during an
+            // outage stayed on screen long after the network recovered, with
+            // nothing to say it was an old one.
             filters = await Self.currentFilters()
-            guard doctor.lastResult == nil, !doctor.isRunning else { return }
+            guard !doctor.isRunning else { return }
             await doctor.runCheck()
         }
     }
