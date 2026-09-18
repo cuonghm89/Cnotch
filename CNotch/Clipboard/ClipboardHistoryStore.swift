@@ -306,16 +306,26 @@ final class ClipboardHistoryStore: ObservableObject {
         return NSBitmapImageRep(cgImage: cgImage).representation(using: .png, properties: [:])
     }
 
+    /// One queue of its own, deliberately serial, and deliberately not Swift
+    /// concurrency.
+    ///
+    /// `VNImageRequestHandler.perform` blocks the thread it is called on while
+    /// Vision waits on a capacity-limited queue of its own. Run that from
+    /// `Task.detached` and it blocks a thread of the cooperative pool, which
+    /// is only as wide as the machine has cores -- and `load()` starts one per
+    /// stored image at once. Once every thread in the pool is parked inside
+    /// Vision, Vision can no longer get a thread to do the actual work, so the
+    /// tasks never finish and the pool never frees up: every `async` call in
+    /// the app, anywhere, stops running for good. That deadlock is what made
+    /// the network panel sit on "Checking…" forever.
+    private static let ocrQueue = DispatchQueue(label: "com.cuonghm89.cnotch.ocr", qos: .utility)
+
     private func recognizeText(in entry: ClipboardEntry) {
         guard Defaults[.clipboardOCREnabled], entry.kind == .image, let data = imageData(for: entry) else { return }
 
-        Task.detached(priority: .utility) { [weak self] in
-            guard let text = Self.recognizedText(in: data) else {
-                print("🔍 OCR: no text found in image \(entry.id)")
-                return
-            }
-            print("✅ OCR: recognized \(text.count) chars in image \(entry.id)")
-            await self?.storeOCRText(text, for: entry.id)
+        Self.ocrQueue.async { [weak self] in
+            guard let text = Self.recognizedText(in: data) else { return }
+            Task { @MainActor in self?.storeOCRText(text, for: entry.id) }
         }
     }
 
