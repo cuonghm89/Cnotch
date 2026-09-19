@@ -160,6 +160,7 @@
 		C1A0B2073B00000100000004 /* MicrophoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B2083B00000100000005 /* MicrophoneManager.swift */; };
 		C1A0B2093B00000100000006 /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B20A3B00000100000007 /* WeatherManager.swift */; };
 		C1A0B30B3B00000100000008 /* ScreenshotWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */; };
+		D9316DC82CD5E1D7D0AC6DF8 /* QuickScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 084B0ABCC7CB41BADCDAAB18 /* QuickScreenshot.swift */; };
 		C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */; };
 		C1A0B4113B0000010000000E /* VoiceMemoRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4123B0000010000000F /* VoiceMemoRecorder.swift */; };
 		C1A0B4133B00000100000010 /* PomodoroManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B4143B00000100000011 /* PomodoroManager.swift */; };
@@ -352,6 +353,7 @@
 		C1A0B2083B00000100000005 /* MicrophoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneManager.swift; sourceTree = "<group>"; };
 		C1A0B20A3B00000100000007 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotWatcher.swift; sourceTree = "<group>"; };
+		084B0ABCC7CB41BADCDAAB18 /* QuickScreenshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickScreenshot.swift; sourceTree = "<group>"; };
 		C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotQuickActionsIndicator.swift; sourceTree = "<group>"; };
 		C1A0B4123B0000010000000F /* VoiceMemoRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceMemoRecorder.swift; sourceTree = "<group>"; };
 		C1A0B4143B00000100000011 /* PomodoroManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroManager.swift; sourceTree = "<group>"; };
@@ -587,6 +589,7 @@
 				C1A0B2083B00000100000005 /* MicrophoneManager.swift */,
 				C1A0B20A3B00000100000007 /* WeatherManager.swift */,
 				C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */,
+				084B0ABCC7CB41BADCDAAB18 /* QuickScreenshot.swift */,
 				C1A0B4163B00000100000013 /* SystemStatsManager.swift */,
 				C1A0B4143B00000100000011 /* PomodoroManager.swift */,
 				C1A0B4123B0000010000000F /* VoiceMemoRecorder.swift */,
@@ -1085,6 +1088,7 @@
 				C1A0B2073B00000100000004 /* MicrophoneManager.swift in Sources */,
 				C1A0B2093B00000100000006 /* WeatherManager.swift in Sources */,
 				C1A0B30B3B00000100000008 /* ScreenshotWatcher.swift in Sources */,
+				D9316DC82CD5E1D7D0AC6DF8 /* QuickScreenshot.swift in Sources */,
 				C1A0B4153B00000100000012 /* SystemStatsManager.swift in Sources */,
 				C1A0B4133B00000100000010 /* PomodoroManager.swift in Sources */,
 				C1A0B4113B0000010000000E /* VoiceMemoRecorder.swift in Sources */,

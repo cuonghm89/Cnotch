@@ -15,4 +15,13 @@ extension KeyboardShortcuts.Name {
     static let increaseBacklight = Self("increaseBacklight", default: .init(.f2, modifiers: [.command]))
     static let toggleSneakPeek = Self("toggleSneakPeek", default: .init(.h, modifiers: [.command, .shift]))
     static let toggleNotchOpen = Self("toggleNotchOpen", default: .init(.i, modifiers: [.command, .shift]))
+    // The system's own screenshot combinations, taken over wholesale.
+    //
+    // Those are the keys the hands already know, and macOS gives them up
+    // without a fight: the shortcut recorder refuses anything the system
+    // still holds, so on a Mac where Screenshots are switched off in
+    // Keyboard Settings these are simply free -- and on one where they are
+    // not, the system wins and the user picks something else.
+    static let captureScreenshot = Self("captureScreenshot", default: .init(.four, modifiers: [.command, .shift]))
+    static let captureFullScreen = Self("captureFullScreen", default: .init(.three, modifiers: [.command, .shift]))
 }

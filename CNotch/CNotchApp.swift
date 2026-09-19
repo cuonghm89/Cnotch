@@ -469,6 +469,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        KeyboardShortcuts.onKeyDown(for: .captureScreenshot) {
+            QuickScreenshot.shared.capture(.region)
+        }
+
+        KeyboardShortcuts.onKeyDown(for: .captureFullScreen) {
+            QuickScreenshot.shared.capture(.fullScreen)
+        }
+
         KeyboardShortcuts.onKeyDown(for: .toggleNotchOpen) { [weak self] in
             Task { [weak self] in
                 guard let self = self else { return }

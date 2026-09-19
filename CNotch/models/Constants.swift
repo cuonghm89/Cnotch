@@ -287,6 +287,11 @@ extension Defaults.Keys {
     // MARK: Voice Memo
     static let voiceMemoButtonEnabled = Key<Bool>("voiceMemoButtonEnabled", default: true)
     static let micMuteShortcutEnabled = Key<Bool>("micMuteShortcutEnabled", default: true)
+    static let quickScreenshotEnabled = Key<Bool>("quickScreenshotEnabled", default: true)
+    /// A plain path, not a security-scoped bookmark: the app is not
+    /// sandboxed, so it can write where the user points it.
+    static let quickScreenshotFolder = Key<String?>("quickScreenshotFolder", default: nil)
+    static let audioOutputSwitcherEnabled = Key<Bool>("audioOutputSwitcherEnabled", default: true)
     static let networkDoctorEnabled = Key<Bool>("networkDoctorEnabled", default: true)
     static let networkDoctorOnWake = Key<Bool>("networkDoctorOnWake", default: true)
 

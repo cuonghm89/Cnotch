@@ -270,6 +270,16 @@ struct ContentView: View {
         }
     }
 
+    /// A shot waiting to be copied, saved or edited.
+    ///
+    /// Hovering the notch normally opens it, and the strip only draws while
+    /// the notch is closed -- so reaching for the three buttons replaced them
+    /// with the full notch before the pointer arrived. The one moment the
+    /// strip must survive a hover is the one where it is asking a question.
+    private var isAwaitingScreenshotChoice: Bool {
+        coordinator.expandingView.show && coordinator.expandingView.type == .pendingScreenshot
+    }
+
     private var showsClosedSystemHUD: Bool {
         coordinator.sneakPeek.show
             && coordinator.sneakPeek.type != .music
@@ -880,6 +890,7 @@ struct ContentView: View {
                         .frame(height: closedNotchContentSize.height, alignment: .center)
                       } else if !showsMusicSneakPeek
                         && (coordinator.expandingView.type == .screenshot
+                            || coordinator.expandingView.type == .pendingScreenshot
                             || coordinator.expandingView.type == .download)
                         && coordinator.expandingView.show
                         && vm.notchState == .closed
@@ -1326,6 +1337,7 @@ struct ContentView: View {
             
             guard vm.notchState == .closed,
                   !coordinator.sneakPeek.show,
+                  !isAwaitingScreenshotChoice,
                   Defaults[.openNotchOnHover] else { return }
             
             hoverTask = Task {
@@ -1336,7 +1348,8 @@ struct ContentView: View {
                     guard self.vm.notchState == .closed,
                           self.isHovering,
                           self.vm.isMouseHovering(),
-                          !self.coordinator.sneakPeek.show else { return }
+                          !self.coordinator.sneakPeek.show,
+                          !self.isAwaitingScreenshotChoice else { return }
                     
                     self.doOpen()
                 }

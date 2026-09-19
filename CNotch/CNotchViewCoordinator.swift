@@ -22,6 +22,8 @@ enum SneakContentType {
     case bluetoothDevice
     case liveActivity
     case screenshot
+    /// Captured but not yet committed to disk -- see `QuickScreenshot`.
+    case pendingScreenshot
 }
 
 struct sneakPeek {
@@ -389,7 +391,14 @@ class CNotchViewCoordinator: ObservableObject {
         didSet {
             if expandingView.show {
                 expandingViewTask?.cancel()
-                let duration: TimeInterval = (expandingView.type == .download ? 2 : expandingView.type == .screenshot ? 6 : 3)
+                // A pending shot gets longest: the strip is the only place
+                // to copy or edit it, and it commits itself when this runs out.
+                let duration: TimeInterval = switch expandingView.type {
+                case .download: 2
+                case .screenshot: 6
+                case .pendingScreenshot: 9
+                default: 3
+                }
                 let currentType = expandingView.type
                 expandingViewTask = Task { [weak self] in
                     try? await Task.sleep(for: .seconds(duration))

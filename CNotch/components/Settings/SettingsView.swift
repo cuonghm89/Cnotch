@@ -154,6 +154,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     case bluetooth = "Devices"
     case shelf = "Shelf"
     case camera = "Camera"
+    case shortcuts = "Shortcuts"
     case advanced = "Advanced"
     case help = "Help"
     case about = "About"
@@ -173,6 +174,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .bluetooth: "airpodspro"
         case .shelf: "books.vertical"
         case .camera: "web.camera"
+        case .shortcuts: "keyboard"
         case .advanced: "gearshape.2"
         case .help: "questionmark.circle"
         case .about: "info.circle"
@@ -192,6 +194,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .bluetooth: "Bluetooth and USB device connection notifications."
         case .shelf: "Drag, drop, and saved Shelf items."
         case .camera: "Camera mirror appearance and access."
+        case .shortcuts: "Keyboard shortcuts, and where quick screenshots are saved."
         case .advanced: "Accent color, window behavior, and privacy."
         case .help: "How to use every feature, in English or Vietnamese."
         case .about: "Version, updates, and project information."
@@ -262,6 +265,7 @@ struct SettingsView: View {
                 }
 
                 Section("System") {
+                    sidebarRow(.shortcuts)
                     sidebarRow(.advanced)
                 }
 
@@ -323,6 +327,8 @@ struct SettingsView: View {
                     ModuleSettings(moduleID: .camera) {
                         CameraSettings()
                     }
+                    case .shortcuts:
+                    ShortcutSettings()
                     case .advanced:
                     Advanced()
                     case .help:
@@ -2555,6 +2561,16 @@ struct Advanced: View {
             }
 
             Section {
+                Defaults.Toggle(key: .audioOutputSwitcherEnabled) {
+                    Text("Switch audio output from the notch")
+                }
+            } header: {
+                Text("Audio Output")
+            } footer: {
+                Text("Turns the speaker button into a menu of every output the Mac has, so you can move sound to headphones without opening System Settings. With only one output available, the button opens Sound settings as before.")
+            }
+
+            Section {
                 Defaults.Toggle(key: .networkDoctorEnabled) {
                     Text("Show Network Diagnosis in the notch menu")
                 }
@@ -2707,4 +2723,78 @@ private func settingsBadge(text: LocalizedStringKey) -> some View {
 
 #Preview {
     HUD()
+}
+
+
+private struct ShortcutSettings: View {
+    @Default(.quickScreenshotEnabled) private var quickScreenshotEnabled
+    @Default(.quickScreenshotFolder) private var quickScreenshotFolder
+
+    var body: some View {
+        Form {
+            Section {
+                shortcut("Open the notch", for: .toggleNotchOpen)
+                shortcut("Peek at the notch", for: .toggleSneakPeek)
+                shortcut("Clipboard history", for: .clipboardHistoryPanel)
+                shortcut("Mute the microphone", for: .toggleMicrophone)
+                shortcut("Keyboard backlight down", for: .decreaseBacklight)
+                shortcut("Keyboard backlight up", for: .increaseBacklight)
+            } header: {
+                Text("Shortcuts")
+            } footer: {
+                Text("Click a shortcut to record a new one, or clear it to switch the feature off.")
+            }
+
+            Section {
+                Defaults.Toggle(key: .quickScreenshotEnabled) {
+                    Text("Enable quick screenshots")
+                }
+                shortcut("Capture a selection", for: .captureScreenshot)
+                    .disabled(!quickScreenshotEnabled)
+                shortcut("Capture the whole screen", for: .captureFullScreen)
+                    .disabled(!quickScreenshotEnabled)
+
+                HStack {
+                    Text("Save to")
+                    Spacer()
+                    // The resolved folder, not the stored one: it reads
+                    // empty until a folder is chosen, and "nothing" is a
+                    // worse answer than "where they currently go".
+                    Text(verbatim: QuickScreenshot.destinationFolder.path.replacingOccurrences(
+                        of: FileManager.default.homeDirectoryForCurrentUser.path, with: "~"
+                    ))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.head)
+                    Button("Choose…") { chooseFolder() }
+                }
+                .disabled(!quickScreenshotEnabled)
+
+                if quickScreenshotFolder != nil {
+                    Button("Use the system screenshot folder") { quickScreenshotFolder = nil }
+                        .disabled(!quickScreenshotEnabled)
+                }
+            } header: {
+                Text("Quick Screenshot")
+            } footer: {
+                Text("The shot appears on the notch first, as a thumbnail with three choices: copy it, save it, or open it in your image editor. Copying never writes a file. Saving and editing go to the folder below, and ignoring the strip saves it too — the same as the system shortcut. macOS asks for Screen Recording permission the first time.")
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func shortcut(_ label: LocalizedStringKey, for name: KeyboardShortcuts.Name) -> some View {
+        KeyboardShortcuts.Recorder(for: name) { Text(label) }
+    }
+
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+        panel.directoryURL = QuickScreenshot.destinationFolder
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        quickScreenshotFolder = url.path
+    }
 }

@@ -4107,6 +4107,16 @@
         }
       }
     },
+    "Audio Output" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thiết bị phát âm thanh"
+          }
+        }
+      }
+    },
     "Audio Source" : {
       "localizations" : {
         "ar" : {
@@ -7701,6 +7711,26 @@
         }
       }
     },
+    "Capture a selection" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp vùng chọn"
+          }
+        }
+      }
+    },
+    "Capture the whole screen" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp toàn màn hình"
+          }
+        }
+      }
+    },
     "Center black coverage" : {
       "localizations" : {
         "vi" : {
@@ -9091,6 +9121,16 @@
         }
       }
     },
+    "Choose…" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn…"
+          }
+        }
+      }
+    },
     "Circle" : {
       "localizations" : {
         "ar" : {
@@ -9430,6 +9470,16 @@
         }
       }
     },
+    "Click a shortcut to record a new one, or clear it to switch the feature off." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bấm vào một phím tắt để ghi phím mới, hoặc xóa trống để tắt tính năng đó."
+          }
+        }
+      }
+    },
     "Clipboard" : {
       "localizations" : {
         "ar" : {
@@ -9532,6 +9582,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Clipboard"
+          }
+        }
+      }
+    },
+    "Clipboard history" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lịch sử khay nhớ tạm"
           }
         }
       }
@@ -16397,6 +16457,16 @@
         }
       }
     },
+    "Enable quick screenshots" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật chụp màn hình nhanh"
+          }
+        }
+      }
+    },
     "Enable shelf" : {
       "localizations" : {
         "ar" : {
@@ -21828,6 +21898,36 @@
         }
       }
     },
+    "Keyboard backlight down" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giảm đèn nền bàn phím"
+          }
+        }
+      }
+    },
+    "Keyboard backlight up" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tăng đèn nền bàn phím"
+          }
+        }
+      }
+    },
+    "Keyboard shortcuts, and where quick screenshots are saved." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phím tắt bàn phím, và nơi lưu ảnh chụp nhanh."
+          }
+        }
+      }
+    },
     "Language" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25681,6 +25781,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Music controls, player sources, and visualizers."
+          }
+        }
+      }
+    },
+    "Mute the microphone" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tắt micro"
           }
         }
       }
@@ -29949,6 +30059,16 @@
         }
       }
     },
+    "Open the notch" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mở notch"
+          }
+        }
+      }
+    },
     "Option key behaviour" : {
       "localizations" : {
         "ar" : {
@@ -30157,6 +30277,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "PRO"
+          }
+        }
+      }
+    },
+    "Peek at the notch" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liếc nhanh notch"
           }
         }
       }
@@ -31661,6 +31791,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Quick Note"
+          }
+        }
+      }
+    },
+    "Quick Screenshot" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp màn hình nhanh"
           }
         }
       }
@@ -34898,6 +35038,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Đang chạy"
+          }
+        }
+      }
+    },
+    "Save to" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lưu vào"
           }
         }
       }
@@ -40237,6 +40387,16 @@
         }
       }
     },
+    "Sound Settings…" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cài đặt Âm thanh…"
+          }
+        }
+      }
+    },
     "Speed" : {
       "localizations" : {
         "ar" : {
@@ -41097,6 +41257,16 @@
         }
       }
     },
+    "Switch audio output from the notch" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đổi thiết bị phát âm thanh ngay trong notch"
+          }
+        }
+      }
+    },
     "System" : {
       "localizations" : {
         "ar" : {
@@ -41734,6 +41904,16 @@
         }
       }
     },
+    "Take a screenshot" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chụp màn hình"
+          }
+        }
+      }
+    },
     "Tests the network one layer at a time, so a failure can be pinned to the layer that broke. Useful when Wi-Fi looks connected but nothing loads — usually a content filter or VPN that didn't survive sleep." : {
       "localizations" : {
         "ar" : {
@@ -41866,6 +42046,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cảm ơn"
+          }
+        }
+      }
+    },
+    "The shot appears on the notch first, as a thumbnail with three choices: copy it, save it, or open it in your image editor. Copying never writes a file. Saving and editing go to the folder below, and ignoring the strip saves it too — the same as the system shortcut. macOS asks for Screen Recording permission the first time." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ảnh hiện lên notch trước, dạng thumbnail kèm ba lựa chọn: sao chép, lưu, hoặc mở bằng ứng dụng sửa ảnh. Sao chép thì không tạo file nào cả. Lưu và sửa đều vào thư mục bên dưới; bỏ qua không bấm gì thì ảnh cũng được lưu — giống phím tắt hệ thống. Lần đầu dùng, macOS sẽ hỏi quyền Ghi màn hình."
           }
         }
       }
@@ -42502,6 +42692,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Try a different search."
+          }
+        }
+      }
+    },
+    "Turns the speaker button into a menu of every output the Mac has, so you can move sound to headphones without opening System Settings. With only one output available, the button opens Sound settings as before." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biến nút loa thành menu liệt kê mọi thiết bị phát của máy, để chuyển âm thanh sang tai nghe mà không phải mở Cài đặt Hệ thống. Nếu chỉ có một thiết bị, nút vẫn mở phần Âm thanh như trước."
           }
         }
       }
@@ -43586,6 +43786,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dùng phổ tần cho hiệu ứng hình ảnh nhạc"
+          }
+        }
+      }
+    },
+    "Use the system screenshot folder" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng thư mục ảnh chụp của hệ thống"
           }
         }
       }
