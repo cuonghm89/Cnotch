@@ -77,6 +77,13 @@ struct ShelfView: View {
             .onTapGesture { selection.clear() }
     }
 
+    private var shelfItems: some DynamicViewContent {
+        ForEach(tvm.items) { item in
+            ShelfItemView(item: item)
+                .environmentObject(quickLookService)
+        }
+    }
+
     var content: some View {
         Group {
             if tvm.isEmpty {
@@ -95,12 +102,18 @@ struct ShelfView: View {
             } else {
                 ScrollView(.horizontal) {
                     HStack(spacing: spacing) {
-                        ForEach(tvm.items) { item in
-                            ShelfItemView(item: item)
-                                .environmentObject(quickLookService)
+                        #if SDK_MACOS_27
+                        if #available(macOS 27, *) {
+                            shelfItems.reorderable()
+                        } else {
+                            shelfItems
                         }
+                        #else
+                        shelfItems
+                        #endif
                     }
                 }
+                .shelfReorderContainer()
                 .padding(-spacing)
                 .scrollIndicators(.never)
                 .onDrop(of: [.fileURL, .url, .utf8PlainText, .plainText, .data], isTargeted: $vm.dragDetectorTargeting) { providers in
@@ -111,5 +124,37 @@ struct ShelfView: View {
         .onAppear {
             ShelfStateViewModel.shared.cleanupInvalidItems()
         }
+    }
+}
+
+private extension View {
+    /// Receives the drop half of a shelf reorder.
+    ///
+    /// Two gates, for two different questions. `#available` is the runtime
+    /// one: the shelf still has to run on macOS 14, where it keeps the order
+    /// things arrived in, as it always has. `SDK_MACOS_27` is the compile-time
+    /// one, set by the project only when building against the macOS 27 SDK --
+    /// GitHub's runners ship Xcode 26.6 and have no `reorderable()` to call,
+    /// and a release that cannot compile helps nobody. The feature switches
+    /// itself on the first time CI builds with Xcode 27; nothing here needs to
+    /// change for that.
+    @ViewBuilder
+    func shelfReorderContainer() -> some View {
+        #if SDK_MACOS_27
+        if #available(macOS 27, *) {
+            reorderContainer(for: ShelfItem.self) { difference in
+                let target: ShelfItem.ID?
+                switch difference.destination.position {
+                case .before(let id): target = id
+                case .end: target = nil
+                }
+                ShelfStateViewModel.shared.move(ids: difference.sources, before: target)
+            }
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
     }
 }

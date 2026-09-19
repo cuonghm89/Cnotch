@@ -43,6 +43,23 @@ final class ShelfStateViewModel: ObservableObject {
         items = merged
     }
 
+    /// Reorders the shelf, moving `ids` so they sit immediately before
+    /// `target` -- or to the end when `target` is nil.
+    ///
+    /// Persistence rides along: `items` saves itself on every set.
+    func move(ids: [ShelfItem.ID], before target: ShelfItem.ID?) {
+        // Dropping a selection onto one of its own members has nowhere to go.
+        guard !ids.isEmpty, target.map({ !ids.contains($0) }) ?? true else { return }
+
+        let moving = items.filter { ids.contains($0.id) }
+        guard !moving.isEmpty else { return }
+
+        var remaining = items.filter { !ids.contains($0.id) }
+        let insertion = target.flatMap { id in remaining.firstIndex { $0.id == id } } ?? remaining.count
+        remaining.insert(contentsOf: moving, at: insertion)
+        items = remaining
+    }
+
     func remove(_ item: ShelfItem) {
         item.cleanupStoredData()
         items.removeAll { $0.id == item.id }
