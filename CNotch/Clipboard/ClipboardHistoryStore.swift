@@ -25,6 +25,18 @@ struct ClipboardEntry: Codable, Identifiable, Hashable {
     /// Optional so entries persisted before this field existed still decode.
     let sourceAppBundleID: String?
     let sourceAppName: String?
+    /// Kept out of the history limit and out of "clear".
+    ///
+    /// Optional rather than `Bool = false` because synthesized decoding does
+    /// not fall back to a default when the key is missing, and every entry
+    /// written before this existed is missing it -- a non-optional would throw
+    /// and take the whole history with it.
+    private var pinned: Bool?
+
+    var isPinned: Bool {
+        get { pinned ?? false }
+        set { pinned = newValue }
+    }
 
     init(
         kind: ClipboardEntryKind,
@@ -195,10 +207,23 @@ final class ClipboardHistoryStore: ObservableObject {
         persist()
     }
 
+    /// Clears the history but keeps whatever is pinned -- pinning is the
+    /// only way to say "not this one", so a clear that took pinned entries
+    /// with it would make pinning worthless. Deleting a pinned entry one at a
+    /// time still works.
     func clear() {
-        entries.forEach { removeImageFile(for: $0) }
-        entries = []
+        let (kept, discarded) = entries.reduce(into: ([ClipboardEntry](), [ClipboardEntry]())) { result, entry in
+            entry.isPinned ? result.0.append(entry) : result.1.append(entry)
+        }
+        discarded.forEach { removeImageFile(for: $0) }
+        entries = kept
         hudEntry = nil
+        persist()
+    }
+
+    func togglePin(_ entry: ClipboardEntry) {
+        guard let index = entries.firstIndex(where: { $0.id == entry.id }) else { return }
+        entries[index].isPinned.toggle()
         persist()
     }
 
@@ -262,8 +287,16 @@ final class ClipboardHistoryStore: ObservableObject {
         }
 
         entries.insert(entry, at: 0)
-        while entries.count > Defaults[.clipboardHistoryLimit] {
-            removeImageFile(for: entries.removeLast())
+        // Drop the oldest unpinned entry, not simply the oldest: a pinned one
+        // is there precisely because it should outlive the limit.
+        //
+        // `dropFirst` skips the entry just inserted. Without it, a history
+        // pinned to the brim leaves the new arrival as the only unpinned
+        // entry, so it evicts itself the instant it is copied. A full house of
+        // pinned entries simply stops evicting, which is the user's own doing.
+        while entries.count > Defaults[.clipboardHistoryLimit],
+              let oldestUnpinned = entries.dropFirst().lastIndex(where: { !$0.isPinned }) {
+            removeImageFile(for: entries.remove(at: oldestUnpinned))
         }
         persist()
         recognizeText(in: entry)

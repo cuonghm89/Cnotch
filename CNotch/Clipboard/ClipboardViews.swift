@@ -50,8 +50,14 @@ struct ClipboardHistoryView: View {
 
     private var filteredEntries: [ClipboardEntry] {
         let searched = ClipboardEntrySearch.results(for: searchQuery, in: store.entries, mode: searchMode)
-        guard let selectedAppFilter else { return searched }
-        return searched.filter { $0.sourceAppBundleID == selectedAppFilter }
+        let filtered = selectedAppFilter.map { bundleID in
+            searched.filter { $0.sourceAppBundleID == bundleID }
+        } ?? searched
+        // Sorted here rather than in the store so what is saved stays in
+        // copy order -- the duplicate check reads the newest entry off the
+        // front, and pinning something must not make it look like the last
+        // thing copied.
+        return filtered.filter(\.isPinned) + filtered.filter { !$0.isPinned }
     }
 
     var body: some View {
@@ -260,6 +266,20 @@ private struct ClipboardEntryRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+
+            Button {
+                store.togglePin(entry)
+            } label: {
+                Image(systemName: entry.isPinned ? "pin.fill" : "pin")
+                    .font(.system(size: 11))
+            }
+            .buttonStyle(.plain)
+            // A pinned entry keeps its marker on show; an unpinned one only
+            // offers the button under the pointer, so a long history isn't a
+            // column of identical icons.
+            .foregroundStyle(entry.isPinned ? Color.accentColor : .secondary)
+            .opacity(entry.isPinned || isHovering ? 1 : 0)
+            .accessibilityLabel(entry.isPinned ? "Unpin clipboard entry" : "Pin clipboard entry")
 
             Button {
                 store.delete(entry)

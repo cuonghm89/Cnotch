@@ -30479,6 +30479,16 @@
         }
       }
     },
+    "Pin clipboard entry" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ghim mục trong khay nhớ tạm"
+          }
+        }
+      }
+    },
     "Play/Pause" : {
       "localizations" : {
         "ar" : {
@@ -43247,6 +43257,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Đã bật tiếng"
+          }
+        }
+      }
+    },
+    "Unpin clipboard entry" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bỏ ghim mục trong khay nhớ tạm"
           }
         }
       }
