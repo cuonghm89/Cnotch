@@ -84,6 +84,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        // Before anything else: the media adapter is a child process that
+        // nothing else will ever stop.
+        NowPlayingController.terminateAdapters()
         NotificationCenter.default.removeObserver(self)
         if let welcomeAnimationObserver {
             NotificationCenter.default.removeObserver(welcomeAnimationObserver)
@@ -355,6 +358,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         AppLog.display.notice("CNotch \(version, privacy: .public) (\(build, privacy: .public)) launched")
+        NowPlayingController.reapStrayAdapters()
         _ = VolumeManager.shared
         _ = NetworkDoctor.shared
         _ = USBDeviceMonitor.shared

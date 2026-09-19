@@ -111,10 +111,7 @@ final class NowPlayingController: ObservableObject, MediaControllerProtocol {
         }
         
         if let process = self.process {
-            if process.isRunning {
-                process.terminate()
-                process.waitUntilExit()
-            }
+            Self.endAdapter(process)
         }
 
         self.process = nil
@@ -190,6 +187,125 @@ final class NowPlayingController: ObservableObject, MediaControllerProtocol {
     }
     
     // MARK: - Setup Methods
+    // MARK: - Adapter lifetime
+
+    /// Every adapter this app has started and not yet seen exit.
+    ///
+    /// The perl adapter installs no signal handlers, never reads stdin and
+    /// never checks whether its parent is still alive, so nothing makes it
+    /// stop when the app goes away -- four of them were found running with
+    /// PPID 1 after a handful of launches, one per launch, each holding a
+    /// framework in memory for a Mac that had long since moved on.
+    private nonisolated static let adapterLock = NSLock()
+    private nonisolated(unsafe) static var liveAdapters: [Process] = []
+
+    private nonisolated static func register(_ process: Process) {
+        adapterLock.lock()
+        liveAdapters.append(process)
+        adapterLock.unlock()
+    }
+
+    private nonisolated static func forget(_ process: Process) {
+        adapterLock.lock()
+        liveAdapters.removeAll { $0 === process }
+        adapterLock.unlock()
+    }
+
+    /// Ends an adapter without parking the caller.
+    ///
+    /// `deinit` runs on whichever thread released the last reference, and the
+    /// controller is swapped from a main-actor context -- so the
+    /// `waitUntilExit()` this replaces parked the main thread until perl chose
+    /// to go, with the UI frozen for as long as that took. Since the script
+    /// handles no signals, how long that is was never ours to know.
+    ///
+    /// SIGTERM first, because that is the polite request and a script with no
+    /// handler for it dies on the spot. SIGKILL after a grace period, for the
+    /// case where it doesn't: an orphan that outlives the app is worse than an
+    /// abrupt end to a process that only streams what is playing.
+    private nonisolated static func endAdapter(_ process: Process) {
+        forget(process)
+        guard process.isRunning else { return }
+        process.terminate()
+
+        let pid = process.processIdentifier
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 2) {
+            // `isRunning` guards against signalling a pid the system has
+            // since handed to somebody else.
+            guard process.isRunning else { return }
+            AppLog.media.notice("Now Playing adapter ignored SIGTERM; killing \(pid, privacy: .public)")
+            kill(pid, SIGKILL)
+        }
+    }
+
+    /// Kills adapters left behind by an earlier run.
+    ///
+    /// Quitting normally runs `applicationWillTerminate` and takes the adapter
+    /// with it, but nothing runs when the app is force quit, killed or
+    /// crashes -- and the adapter cannot notice on its own, having no signal
+    /// handler, no stdin to see close and no check on whether its parent is
+    /// still there. It was found with PPID 1, still streaming for an app that
+    /// no longer existed, once per abnormal exit.
+    ///
+    /// So whatever ended the last run, the next launch tidies up after it.
+    /// Matching is on the full path of this bundle's own script, so two copies
+    /// of the app never reap each other, and our own adapters are skipped by
+    /// the registry rather than by guessing at parentage.
+    nonisolated static func reapStrayAdapters() {
+        guard let script = Bundle.main.url(forResource: "mediaremote-adapter", withExtension: "pl")?.path
+        else { return }
+
+        adapterLock.lock()
+        let ours = Set(liveAdapters.map(\.processIdentifier))
+        adapterLock.unlock()
+
+        var reaped = 0
+        for pid in runningPIDs() where !ours.contains(pid) && pid != getpid() {
+            guard let arguments = processArguments(pid), arguments.contains(script) else { continue }
+            kill(pid, SIGTERM)
+            reaped += 1
+        }
+        if reaped > 0 {
+            AppLog.media.notice("Reaped \(reaped, privacy: .public) stray Now Playing adapter(s) from an earlier run")
+        }
+    }
+
+    private nonisolated static func runningPIDs() -> [pid_t] {
+        var size = proc_listpids(UInt32(PROC_ALL_PIDS), 0, nil, 0)
+        guard size > 0 else { return [] }
+        var pids = [pid_t](repeating: 0, count: Int(size) / MemoryLayout<pid_t>.size)
+        size = proc_listpids(UInt32(PROC_ALL_PIDS), 0, &pids, size)
+        guard size > 0 else { return [] }
+        return pids.filter { $0 > 0 }
+    }
+
+    /// The process's argv, NUL-separated, straight from the kernel. There is
+    /// no API for "what arguments is this process running with", and the
+    /// executable path alone says only `/usr/bin/perl`, which is not ours to
+    /// kill.
+    private nonisolated static func processArguments(_ pid: pid_t) -> String? {
+        var mib: [Int32] = [CTL_KERN, KERN_PROCARGS2, pid]
+        var size = 0
+        guard sysctl(&mib, 3, nil, &size, nil, 0) == 0, size > 0 else { return nil }
+        var buffer = [UInt8](repeating: 0, count: size)
+        guard sysctl(&mib, 3, &buffer, &size, nil, 0) == 0 else { return nil }
+        return String(decoding: buffer.prefix(size), as: UTF8.self)
+    }
+
+    /// Called as the app quits. There is no time left for a grace period, so
+    /// this is the polite request only -- and it is enough, because a perl
+    /// script with no SIGTERM handler ends on delivery whether or not anyone
+    /// is still around to watch.
+    nonisolated static func terminateAdapters() {
+        adapterLock.lock()
+        let adapters = liveAdapters
+        liveAdapters.removeAll()
+        adapterLock.unlock()
+        for adapter in adapters where adapter.isRunning {
+            adapter.terminate()
+        }
+    }
+
     private func setupNowPlayingObserver() async {
         let process = Process()
         guard
@@ -209,7 +325,11 @@ final class NowPlayingController: ObservableObject, MediaControllerProtocol {
         self.process = process
         self.pipeHandler = pipeHandler
         process.terminationHandler = { [weak self] completedProcess in
-            DispatchQueue.main.async {
+            Self.forget(completedProcess)
+            // Captured again for the inner closure: referring to the outer
+            // closure's capture from a second, concurrently-executing one is
+            // what Swift 6 rejects.
+            DispatchQueue.main.async { [weak self] in
                 guard let self,
                       !self.isInvalidated,
                       self.process === completedProcess
@@ -217,14 +337,19 @@ final class NowPlayingController: ObservableObject, MediaControllerProtocol {
 
                 self.process = nil
                 self.pipeHandler = nil
-                Task { [weak self] in
-                    await self?.setupNowPlayingObserver()
+                // Through a local rather than `[weak self]`: `self` here is
+                // the binding from the `guard` above, and capturing that in a
+                // concurrent task is what Swift 6 rejects.
+                let controller = self
+                Task { [weak controller] in
+                    await controller?.setupNowPlayingObserver()
                 }
             }
         }
 
         do {
             try process.run()
+            Self.register(process)
             streamTask = Task { [weak self] in
                 await self?.processJSONStream()
             }
