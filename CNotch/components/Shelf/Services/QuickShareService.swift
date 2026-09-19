@@ -75,7 +75,6 @@ class QuickShareService: ObservableObject {
     @MainActor
     func showFilePicker(for provider: QuickShareProvider, from view: NSView?) async {
         guard !isPickerOpen else {
-            print("⚠️ QuickShareService: File picker already open")
             return
         }
 
@@ -195,7 +194,6 @@ private class SharingServiceDelegate: NSObject {}
                 }
             }
         }
-        print("❌ Failed to resolve bookmark for shelf item")
         return nil
     }
 }

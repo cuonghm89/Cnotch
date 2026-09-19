@@ -451,7 +451,6 @@ final class ShelfItemViewModel: ObservableObject {
                                 try await NSWorkspace.shared.open(allSelectedURLs, withApplicationAt: appURL, configuration: config)
                             }
                         } catch {
-                            print("❌ Failed to open with application: \(error.localizedDescription)")
                         }
                 }
                 return
@@ -723,11 +722,9 @@ final class ShelfItemViewModel: ObservableObject {
                             let config = NSWorkspace.OpenConfiguration()
                             if alwaysCheckbox.state == .on, let bundleID = Bundle(url: appURL)?.bundleIdentifier {
                                 if let contentType = (try? fileURL.resourceValues(forKeys: [.contentTypeKey]))?.contentType {
-                                    let status = LSSetDefaultRoleHandlerForContentType(contentType.identifier as CFString, LSRolesMask.all, bundleID as CFString)
-                                    if status != noErr { print("⚠️ Failed to set default handler for \(contentType.identifier): \(status)") }
+                                    _ = LSSetDefaultRoleHandlerForContentType(contentType.identifier as CFString, LSRolesMask.all, bundleID as CFString)
                                 } else if let scheme = fileURL.scheme {
-                                    let status = LSSetDefaultHandlerForURLScheme(scheme as CFString, bundleID as CFString)
-                                    if status != noErr { print("⚠️ Failed to set default handler for scheme \(scheme): \(status)") }
+                                    _ = LSSetDefaultHandlerForURLScheme(scheme as CFString, bundleID as CFString)
                                 }
                             }
 
@@ -739,7 +736,6 @@ final class ShelfItemViewModel: ObservableObject {
                                 try await NSWorkspace.shared.open([fileURL], withApplicationAt: appURL, configuration: config)
                             }
                         } catch {
-                            print("❌ Failed to open with application: \(error.localizedDescription)")
                         }
                     }
                 }
@@ -775,7 +771,6 @@ final class ShelfItemViewModel: ObservableObject {
                                         ShelfStateViewModel.shared.updateBookmark(for: item, bookmark: newBookmark.data)
                                     }
                                 } catch {
-                                    print("❌ Failed to rename file: \(error.localizedDescription)")
                                 }
                                 if didStart { fileURL.stopAccessingSecurityScopedResource() }
                             }
@@ -811,7 +806,6 @@ final class ShelfItemViewModel: ObservableObject {
                         }
                     }
                 } catch {
-                    print("❌ Failed to remove background: \(error.localizedDescription)")
                     showErrorAlert(title: "Background Removal Failed", message: error.localizedDescription)
                 }
             }
@@ -841,7 +835,6 @@ final class ShelfItemViewModel: ObservableObject {
                         }
                     }
                 } catch {
-                    print("❌ Failed to create PDF: \(error.localizedDescription)")
                     showErrorAlert(title: "PDF Creation Failed", message: error.localizedDescription)
                 }
             }
@@ -1049,7 +1042,6 @@ final class ShelfItemViewModel: ObservableObject {
                             }
                         }
                     } catch {
-                        print("❌ Failed to convert image: \(error.localizedDescription)")
                         showErrorAlert(title: "Image Conversion Failed", message: error.localizedDescription)
                     }
                 }

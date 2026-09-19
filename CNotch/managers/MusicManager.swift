@@ -80,9 +80,7 @@ class MusicManager: ObservableObject {
         Task { @MainActor in
             do {
                 self.isNowPlayingDeprecated = try await self.mediaChecker.checkDeprecationStatus()
-                print("Deprecation check completed: \(self.isNowPlayingDeprecated)")
             } catch {
-                print("Failed to check deprecation status: \(error). Defaulting to false.")
                 self.isNowPlayingDeprecated = false
             }
 
@@ -142,7 +140,6 @@ class MusicManager: ObservableObject {
 
     private func setActiveControllerBasedOnPreference() {
         let preferredType = Defaults[.mediaController]
-        print("Preferred Media Controller: \(preferredType)")
 
         if let controller = createController(for: preferredType) {
             setActiveController(controller)
@@ -747,22 +744,14 @@ class MusicManager: ObservableObject {
     }
     func openMusicApp() {
         guard let bundleID = bundleIdentifier else {
-            print("Error: appBundleIdentifier is nil")
             return
         }
 
         let workspace = NSWorkspace.shared
         if let appURL = workspace.urlForApplication(withBundleIdentifier: bundleID) {
             let configuration = NSWorkspace.OpenConfiguration()
-            workspace.openApplication(at: appURL, configuration: configuration) { (app, error) in
-                if let error = error {
-                    print("Failed to launch app with bundle ID: \(bundleID), error: \(error)")
-                } else {
-                    print("Launched app with bundle ID: \(bundleID)")
-                }
-            }
+            workspace.openApplication(at: appURL, configuration: configuration, completionHandler: nil)
         } else {
-            print("Failed to find app with bundle ID: \(bundleID)")
         }
     }
 

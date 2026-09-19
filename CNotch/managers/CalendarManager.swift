@@ -83,7 +83,6 @@ class CalendarManager: ObservableObject {
     func checkCalendarAuthorization() async {
         let status = EKEventStore.authorizationStatus(for: .event)
         DispatchQueue.main.async {
-            print("📅 Current calendar authorization status: \(status)")
             self.calendarAuthorizationStatus = status
         }
 
@@ -113,14 +112,13 @@ class CalendarManager: ObservableObject {
         case .writeOnly:
             NSLog("Write only")
         @unknown default:
-            print("Unknown authorization status")
+            break
         }
     }
     
     func checkReminderAuthorization() async {
         let status = EKEventStore.authorizationStatus(for: .reminder)
         DispatchQueue.main.async {
-            print("📅 Current reminder authorization status: \(status)")
             self.reminderAuthorizationStatus = status
         }
 
@@ -142,7 +140,7 @@ class CalendarManager: ObservableObject {
         case .writeOnly:
             NSLog("Write only")
         @unknown default:
-            print("Unknown authorization status")
+            break
         }
     }
         

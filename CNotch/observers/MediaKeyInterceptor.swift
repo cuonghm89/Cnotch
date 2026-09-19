@@ -192,12 +192,9 @@ final class MediaKeyInterceptor {
         if FileManager.default.fileExists(atPath: defaultPath) {
             do {
                 audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: defaultPath))
-                print("🔊 [MediaKeyInterceptor] Loaded default Bezel audio from: \(defaultPath)")
             } catch {
-                print("⚠️ [MediaKeyInterceptor] Failed to init AVAudioPlayer with default path \(defaultPath): \(error.localizedDescription)")
             }
         } else {
-            print("⚠️ [MediaKeyInterceptor] Default bezel audio not found at: \(defaultPath)")
         }
 
         if let player = audioPlayer {
@@ -213,13 +210,7 @@ final class MediaKeyInterceptor {
 
         prepareAudioPlayerIfNeeded()
         guard let player = audioPlayer else {
-            print("⚠️ [MediaKeyInterceptor] No audio player available to play feedback sound")
             return
-        }
-        if let url = player.url {
-            print("🔊 [MediaKeyInterceptor] Playing feedback sound from: \(url.path)")
-        } else {
-            print("🔊 [MediaKeyInterceptor] Playing feedback sound (no url available for AVAudioPlayer)")
         }
         if player.isPlaying {
             player.stop()

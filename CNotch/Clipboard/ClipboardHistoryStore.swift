@@ -374,7 +374,6 @@ final class ClipboardHistoryStore: ObservableObject {
         guard let image = NSImage(data: data),
               let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)
         else {
-            print("⚠️ OCR: failed to create CGImage from clipboard data")
             return nil
         }
 
@@ -386,7 +385,6 @@ final class ClipboardHistoryStore: ObservableObject {
         do {
             try VNImageRequestHandler(cgImage: cgImage).perform([request])
         } catch {
-            print("❌ OCR: recognition failed – \(error.localizedDescription)")
             return nil
         }
 

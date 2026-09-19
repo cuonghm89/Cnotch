@@ -45,8 +45,7 @@ extension NSItemProvider {
         let (data, suggestedName) = await withCheckedContinuation {
             (continuation: CheckedContinuation<(Data?, String?), Never>) in
             loadItem(forTypeIdentifier: UTType.data.identifier, options: nil) { item, error in
-                if let error = error {
-                    print("Error loading data for type \(UTType.data.identifier): \(error.localizedDescription)")
+                if error != nil {
                     continuation.resume(returning: (nil, nil))
                     return
                 }
@@ -62,19 +61,15 @@ extension NSItemProvider {
                     do {
                         // Delete the file first
                         try fileManager.removeItem(at: url)
-                        print("Deleted file: \(url.path)")
 
                         // Check folder contents
                         let contents = try fileManager.contentsOfDirectory(atPath: folderURL.path)
                         if contents.isEmpty {
                             try fileManager.removeItem(at: folderURL)
-                            print("Folder was empty, deleted folder: \(folderURL.path)")
                         } else {
-                            print("Folder not deleted — it still contains \(contents.count) item(s).")
                         }
 
                     } catch {
-                        print("Error: \(error.localizedDescription)")
                     }
                     
                     continuation.resume(returning: (data, url.lastPathComponent))
@@ -120,8 +115,7 @@ extension NSItemProvider {
     func loadFileURL(typeIdentifier: String) async -> URL? {
         await withCheckedContinuation { (cont: CheckedContinuation<URL?, Never>) in
             self.loadItem(forTypeIdentifier: typeIdentifier, options: nil) { item, error in
-                if let error = error {
-                    print("❌ Error loading item for type \(typeIdentifier): \(error.localizedDescription)")
+                if error != nil {
                     cont.resume(returning: nil)
                     return
                 }
