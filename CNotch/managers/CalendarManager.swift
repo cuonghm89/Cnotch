@@ -6,6 +6,7 @@
 //
 
 import Defaults
+import os
 import EventKit
 import SwiftUI
 
@@ -101,16 +102,16 @@ class CalendarManager: ObservableObject {
                     calendars: selectedCalendars.map { $0.id })
             }
         case .restricted, .denied:
-            NSLog("Calendar access denied or restricted")
+            AppLog.calendar.notice("Calendar access denied or restricted")
         case .fullAccess:
-            NSLog("Full access")
+            AppLog.calendar.debug("Full access")
             await reloadCalendarAndReminderLists()
             events = await calendarService.events(
                 from: currentWeekStartDate,
                 to: Calendar.current.date(byAdding: .day, value: 1, to: currentWeekStartDate)!,
                 calendars: selectedCalendars.map { $0.id })
         case .writeOnly:
-            NSLog("Write only")
+            AppLog.calendar.debug("Write only")
         @unknown default:
             break
         }
@@ -133,12 +134,12 @@ class CalendarManager: ObservableObject {
                 await reloadCalendarAndReminderLists()
             }
         case .restricted, .denied:
-            NSLog("Reminder access denied or restricted")
+            AppLog.calendar.notice("Reminder access denied or restricted")
         case .fullAccess:
-            NSLog("Full access")
+            AppLog.calendar.debug("Full access")
             await reloadCalendarAndReminderLists()
         case .writeOnly:
-            NSLog("Write only")
+            AppLog.calendar.debug("Write only")
         @unknown default:
             break
         }

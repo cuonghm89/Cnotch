@@ -6,6 +6,7 @@
 //
 
 
+import os
 import AppKit
 @preconcurrency import Foundation
 import UniformTypeIdentifiers
@@ -40,7 +41,7 @@ extension NSItemProvider {
     
     /// Loads raw data for the given type identifier
     func loadData() async -> Data? {
-        NSLog(String(describing: self.registeredTypeIdentifiers))
+        AppLog.shelf.debug("Loading provider types \(String(describing: self.registeredTypeIdentifiers))")
         guard hasItemConformingToTypeIdentifier(UTType.data.identifier) else { return nil }
         let (data, suggestedName) = await withCheckedContinuation {
             (continuation: CheckedContinuation<(Data?, String?), Never>) in
@@ -66,10 +67,10 @@ extension NSItemProvider {
                         let contents = try fileManager.contentsOfDirectory(atPath: folderURL.path)
                         if contents.isEmpty {
                             try fileManager.removeItem(at: folderURL)
-                        } else {
                         }
 
                     } catch {
+                        AppLog.shelf.debug("Could not tidy the dropped folder: \(error.localizedDescription, privacy: .public)")
                     }
                     
                     continuation.resume(returning: (data, url.lastPathComponent))

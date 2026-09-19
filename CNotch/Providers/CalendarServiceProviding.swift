@@ -7,6 +7,7 @@
 //  Modified by Alexander on 08/06/25
 //
 
+import os
 import Foundation
 @preconcurrency import EventKit
 
@@ -121,6 +122,7 @@ class CalendarService: CalendarServiceProviding {
         do {
             try store.save(reminder, commit: true)
         } catch {
+            AppLog.calendar.error("Saving the reminder failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

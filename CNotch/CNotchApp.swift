@@ -5,6 +5,7 @@
 //  Created by Harsh Vardhan  Goswami  on 02/08/24.
 //
 
+import os
 import AVFoundation
 import Combine
 import Defaults
@@ -348,6 +349,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // A heartbeat at notice level, so a log gathered from a user always
+        // starts by saying which build produced everything under it.
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        AppLog.display.notice("CNotch \(version, privacy: .public) (\(build, privacy: .public)) launched")
         _ = VolumeManager.shared
         _ = NetworkDoctor.shared
         _ = USBDeviceMonitor.shared

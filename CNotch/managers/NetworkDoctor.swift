@@ -48,10 +48,13 @@ final class NetworkDoctor: ObservableObject {
     @Published private(set) var lastResult: Result?
     @Published private(set) var isRunning = false
 
+    // `nonisolated`: the class is @MainActor, so these constants are too,
+    // and the probes read them from detached tasks. Swift 6 makes that
+    // isolation crossing an error rather than a warning.
     /// Raw-IP TCP target: Cloudflare's resolver, reachable without DNS.
-    private static let tcpProbeHost = "1.1.1.1"
-    private static let tcpProbePort: UInt16 = 443
-    private static let dnsProbeHost = "www.apple.com"
+    private nonisolated static let tcpProbeHost = "1.1.1.1"
+    private nonisolated static let tcpProbePort: UInt16 = 443
+    private nonisolated static let dnsProbeHost = "www.apple.com"
     /// The same tiny page macOS itself uses for connectivity checks.
     private static let tlsProbeURL = URL(string: "https://www.apple.com/library/test/success.html")!
 

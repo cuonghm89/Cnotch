@@ -6,6 +6,7 @@
 //
 
 import KeyboardShortcuts
+import os
 import SwiftUI
 import Carbon
 
@@ -38,7 +39,7 @@ extension KeyboardShortcuts.Shortcut {
         
         let source = TISCopyCurrentKeyboardLayoutInputSource().takeRetainedValue()
         guard let ptr = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else {
-            NSLog("Could not get keyboard layout data")
+            AppLog.shortcuts.error("Could not get keyboard layout data")
             return nil
         }
         let layoutData = Unmanaged<CFData>.fromOpaque(ptr).takeUnretainedValue() as Data
@@ -48,7 +49,7 @@ extension KeyboardShortcuts.Shortcut {
                            &deadKeys, maxNameLength, &nameLength, &nameBuffer)
         }
         guard osStatus == noErr else {
-            NSLog("Code: 0x%04X  Status: %+i", carbonKeyCode, osStatus);
+            AppLog.shortcuts.error("Key translation failed for code \(carbonKeyCode, format: .hex, privacy: .public), status \(osStatus, privacy: .public)")
             return nil
         }
         

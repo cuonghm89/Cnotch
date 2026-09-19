@@ -6,6 +6,7 @@
 //  Modified by Pranav on 2025-06-16.
 //
 
+import os
 import Foundation
 import Combine
 import SwiftUI
@@ -40,6 +41,7 @@ final class YouTubeMusicController: MediaControllerProtocol {
             try? await Task.sleep(for: .milliseconds(150))
             await updatePlaybackInfo()
         } catch {
+            AppLog.media.error("Toggling the YouTube Music like failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -150,6 +152,7 @@ final class YouTubeMusicController: MediaControllerProtocol {
         } catch YouTubeMusicError.authenticationRequired {
             await authManager.invalidateToken()
         } catch {
+            AppLog.media.error("Reading YouTube Music playback failed: \(error.localizedDescription, privacy: .public)")
         }
     }
     
@@ -395,6 +398,7 @@ final class YouTubeMusicController: MediaControllerProtocol {
         } catch YouTubeMusicError.authenticationRequired {
             await authManager.invalidateToken()
         } catch {
+            AppLog.media.error("Refreshing YouTube Music state failed: \(error.localizedDescription, privacy: .public)")
         }
     }
     

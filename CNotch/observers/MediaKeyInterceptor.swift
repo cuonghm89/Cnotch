@@ -4,6 +4,7 @@
 //
 //  Created by Alexander on 2025-11-23.
 
+import os
 import Foundation
 import AppKit
 import ApplicationServices
@@ -193,6 +194,7 @@ final class MediaKeyInterceptor {
             do {
                 audioPlayer = try AVAudioPlayer(contentsOf: URL(fileURLWithPath: defaultPath))
             } catch {
+                AppLog.media.debug("System volume feedback sound unavailable: \(error.localizedDescription, privacy: .public)")
             }
         } else {
         }

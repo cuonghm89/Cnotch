@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
@@ -451,6 +452,7 @@ final class ShelfItemViewModel: ObservableObject {
                                 try await NSWorkspace.shared.open(allSelectedURLs, withApplicationAt: appURL, configuration: config)
                             }
                         } catch {
+                            AppLog.shelf.error("Opening the selected items failed: \(error.localizedDescription, privacy: .public)")
                         }
                 }
                 return
@@ -530,7 +532,7 @@ final class ShelfItemViewModel: ObservableObject {
                     if !fileURLs.isEmpty {
                         // Start security-scoped access for all URLs and keep them active
                         ShelfItemViewModel.copiedURLs = fileURLs.filter { $0.startAccessingSecurityScopedResource() }
-                        NSLog("🔐 Started security-scoped access for \(ShelfItemViewModel.copiedURLs.count) copied files")
+                        AppLog.shelf.debug("Started security-scoped access for \(ShelfItemViewModel.copiedURLs.count, privacy: .public) copied files")
                         
                         // Write to pasteboard
                         pb.writeObjects(fileURLs as [NSURL])
@@ -736,6 +738,7 @@ final class ShelfItemViewModel: ObservableObject {
                                 try await NSWorkspace.shared.open([fileURL], withApplicationAt: appURL, configuration: config)
                             }
                         } catch {
+                            AppLog.shelf.error("Opening the item failed: \(error.localizedDescription, privacy: .public)")
                         }
                     }
                 }
@@ -763,7 +766,7 @@ final class ShelfItemViewModel: ObservableObject {
                         if response == .OK, let newURL = savePanel.url {
                             Task {
                                 do {
-                                    NSLog("🔐 Rename: moving from \(fileURL.path) to \(newURL.path) (securityScope=\(didStart))")
+                                    AppLog.shelf.debug("Rename: moving from \(fileURL.path) to \(newURL.path) (securityScope=\(didStart, privacy: .public))")
 
                                     try FileManager.default.moveItem(at: fileURL, to: newURL)
 
@@ -771,6 +774,7 @@ final class ShelfItemViewModel: ObservableObject {
                                         ShelfStateViewModel.shared.updateBookmark(for: item, bookmark: newBookmark.data)
                                     }
                                 } catch {
+                                    AppLog.shelf.error("Renaming the item failed: \(error.localizedDescription, privacy: .public)")
                                 }
                                 if didStart { fileURL.stopAccessingSecurityScopedResource() }
                             }

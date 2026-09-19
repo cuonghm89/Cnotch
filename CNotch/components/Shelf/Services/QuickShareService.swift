@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import os
 import Foundation
 import UniformTypeIdentifiers
 
@@ -142,7 +143,7 @@ class QuickShareService: ObservableObject {
     }
 
     private func stopSharingAccessingURLs() {
-        NSLog("Stopping sharing access to URLs")
+        AppLog.shelf.debug("Stopping sharing access to URLs")
         for url in sharingAccessingURLs {
             url.stopAccessingSecurityScopedResource()
         }

@@ -5,6 +5,7 @@
 //  Created by Alexander on 2025-03-29.
 //
 
+import os
 import AppKit
 import Combine
 import Foundation
@@ -390,6 +391,7 @@ actor JSONLinesPipeHandler {
                 await onLine(decodedObject)
             }
         } catch {
+            AppLog.media.error("Now Playing stream ended on error: \(error.localizedDescription, privacy: .public)")
         }
     }
     
@@ -442,6 +444,7 @@ actor JSONLinesPipeHandler {
             try fileHandle.close()
             try pipe.fileHandleForWriting.close()
         } catch {
+            AppLog.media.error("Closing the Now Playing pipe failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

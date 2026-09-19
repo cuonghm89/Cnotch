@@ -5,6 +5,7 @@
 //  Created by Alexander on 2025-09-24.
 //
 
+import os
 import Foundation
 
 // Access model types
@@ -69,6 +70,7 @@ final class ShelfPersistenceService {
             let data = try encoder.encode(items)
             try data.write(to: fileURL, options: Data.WritingOptions.atomic)
         } catch {
+            AppLog.shelf.error("Saving the shelf failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

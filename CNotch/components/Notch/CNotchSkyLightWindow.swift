@@ -6,6 +6,7 @@
 //
 
 import Cocoa
+import os
 import SkyLightWindow
 import Defaults
 import Combine
@@ -136,7 +137,7 @@ final class CNotchFileDropContainerView: NSView {
         guard !fileURLs(from: sender.draggingPasteboard).isEmpty else { return [] }
         acceptsCurrentDrag = acceptsFileDrop()
         #if DEBUG
-        NSLog("Shelf container draggingEntered: \(acceptsCurrentDrag)")
+        AppLog.shelf.debug("Shelf container draggingEntered: \(self.acceptsCurrentDrag, privacy: .public)")
         #endif
         return acceptsCurrentDrag ? .copy : []
     }
@@ -157,7 +158,7 @@ final class CNotchFileDropContainerView: NSView {
         defer { acceptsCurrentDrag = false }
         let accepted = acceptsCurrentDrag && onFileDrop(fileURLs(from: sender.draggingPasteboard))
         #if DEBUG
-        NSLog("Shelf container performDragOperation: \(accepted)")
+        AppLog.shelf.debug("Shelf container performDragOperation: \(accepted, privacy: .public)")
         #endif
         return accepted
     }

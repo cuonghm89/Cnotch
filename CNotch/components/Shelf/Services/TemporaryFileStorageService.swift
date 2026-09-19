@@ -5,6 +5,7 @@
 //  Created by Alexander on 2025-09-24.
 //
 
+import os
 import Foundation
 import AppKit
 import UniformTypeIdentifiers
@@ -54,10 +55,10 @@ class TemporaryFileStorageService {
             let contents = try FileManager.default.contentsOfDirectory(atPath: folderURL.path)
             if contents.isEmpty {
                 try FileManager.default.removeItem(at: folderURL)
-            } else {
             }
 
         } catch {
+            AppLog.shelf.debug("Could not tidy the temporary folder: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -254,6 +255,7 @@ class TemporaryFileStorageService {
                     try FileManager.default.copyItem(at: src, to: dest)
                 }
             } catch {
+                AppLog.shelf.error("Copying an item into the archive failed: \(error.localizedDescription, privacy: .public)")
             }
         }
 
@@ -271,6 +273,7 @@ class TemporaryFileStorageService {
                     }
                 }
             } catch {
+                AppLog.shelf.debug("Could not clear the archive working folder: \(error.localizedDescription, privacy: .public)")
             }
             return archiveURL
         } else {

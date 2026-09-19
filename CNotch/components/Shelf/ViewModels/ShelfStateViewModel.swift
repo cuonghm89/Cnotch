@@ -5,6 +5,7 @@
 //  Created by Alexander on 2025-10-09.
 
 import Foundation
+import os
 import AppKit
 
 @MainActor
@@ -141,7 +142,7 @@ final class ShelfStateViewModel: ObservableObject {
         let bookmark = Bookmark(data: bookmarkData)
         let result = bookmark.resolve()
         if let refreshed = result.refreshedData, refreshed != bookmarkData {
-            NSLog("Bookmark for \(item) stale; refreshing")
+            AppLog.shelf.notice("Bookmark stale, refreshing: \(item.id, privacy: .public)")
             scheduleDeferredBookmarkUpdate(for: item, bookmark: refreshed)
         }
         return result.url
@@ -152,7 +153,7 @@ final class ShelfStateViewModel: ObservableObject {
         let bookmark = Bookmark(data: bookmarkData)
         let result = bookmark.resolve()
         if let refreshed = result.refreshedData, refreshed != bookmarkData {
-            NSLog("Bookmark for \(item) stale; refreshing")
+            AppLog.shelf.notice("Bookmark stale, refreshing: \(item.id, privacy: .public)")
             updateBookmark(for: item, bookmark: refreshed)
         }
         return result.url

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 import AppKit
 
 struct Bookmark: Sendable, Equatable, Codable {
@@ -31,7 +32,7 @@ struct Bookmark: Sendable, Equatable, Codable {
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
-            NSLog("⚠️ Created a standard bookmark for \(url.path)")
+            AppLog.shelf.notice("Created a standard bookmark for \(url.path)")
         }
     }
 
@@ -43,7 +44,7 @@ struct Bookmark: Sendable, Equatable, Codable {
         if let resolved = resolve(options: [], refreshOptions: []) {
             return resolved
         }
-        NSLog("❌ Failed to resolve bookmark")
+        AppLog.shelf.error("Failed to resolve bookmark")
         return (nil, nil)
     }
 

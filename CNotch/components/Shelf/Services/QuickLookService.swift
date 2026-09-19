@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 import UniformTypeIdentifiers
 import SwiftUI
 import QuickLookUI
@@ -62,7 +63,7 @@ final class QuickLookService: ObservableObject {
     }
     
     private func stopAccessingCurrentURLs() {
-        NSLog("Stopping access to \(accessingURLs.count) URLs")
+        AppLog.shelf.debug("Stopping access to \(self.accessingURLs.count, privacy: .public) URLs")
         for url in accessingURLs where url.isFileURL {
             url.stopAccessingSecurityScopedResource()
         }

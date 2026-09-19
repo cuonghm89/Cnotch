@@ -5,6 +5,7 @@
 //  Created by Harsh Vardhan  Goswami  on 03/08/24.
 //
 import AppKit
+import os
 import Combine
 import Defaults
 import SwiftUI
@@ -185,7 +186,7 @@ class MusicManager: ObservableObject {
 
         // Check for playback state changes (playing/paused)
         if state.isPlaying != self.isPlaying {
-            NSLog("Playback state changed: \(state.isPlaying ? "Playing" : "Paused")")
+            AppLog.media.debug("Playback state changed: \(state.isPlaying ? "Playing" : "Paused", privacy: .public)")
             withAnimation(.smooth) {
                 self.isPlaying = state.isPlaying
                 self.updateIdleState(state: state.isPlaying)
