@@ -52,8 +52,16 @@ final class VolumeManager: NSObject, ObservableObject {
         }
 
         var audioSourceIcon: String {
+            // The 3.5mm jack reports built-in transport, so it has to be
+            // checked first or headphones show as speakers.
+            if isHeadphoneJack {
+                return "headphones"
+            }
+            // A speaker, not a laptop. This icon is the button you press to
+            // move the sound somewhere else, and nobody hunting for that
+            // looks for a picture of a computer.
             if isBuiltIn {
-                return "laptopcomputer"
+                return "speaker.wave.2"
             }
             if isBluetooth && bluetoothBatteryPercentage != nil {
                 return "airpodspro"
@@ -67,9 +75,16 @@ final class VolumeManager: NSObject, ObservableObject {
             case kAudioDeviceTransportTypeUSB,
                  kAudioDeviceTransportTypeHDMI,
                  kAudioDeviceTransportTypeDisplayPort,
-                 kAudioDeviceTransportTypeThunderbolt,
-                 kAudioDeviceTransportTypeAggregate:
+                 kAudioDeviceTransportTypeThunderbolt:
                 return "hifispeaker.2"
+            // Loopback drivers and the like -- BlackHole, a meeting app's
+            // capture device. They are not speakers and showing them as one
+            // makes the list impossible to read at a glance.
+            case kAudioDeviceTransportTypeVirtual:
+                return "waveform"
+            // Several real devices wired together as one.
+            case kAudioDeviceTransportTypeAggregate:
+                return "square.stack.3d.up"
             default:
                 return "speaker.wave.2"
             }
@@ -103,6 +118,10 @@ final class VolumeManager: NSObject, ObservableObject {
     @Published private(set) var isMuted: Bool = false
     @Published private(set) var lastChangeAt: Date = .distantPast
     @Published private(set) var currentOutputDevice: OutputDevice?
+    /// Every output the system currently has. Already gathered on each
+    /// refresh to work out which one is in use -- it was simply thrown away
+    /// afterwards.
+    @Published private(set) var availableOutputDevices: [OutputDevice] = []
     private var knownBluetoothDeviceIDs: Set<AudioObjectID> = []
     private var knownBluetoothOutputAddresses: Set<String> = []
     private var isFirstDeviceDiscovery: Bool = true
@@ -258,6 +277,37 @@ final class VolumeManager: NSObject, ObservableObject {
         return defaultDeviceID
     }
 
+    /// Makes `device` the system output.
+    ///
+    /// The notch already knew every device and which one was playing; tapping
+    /// the name opened System Settings rather than doing anything with that.
+    /// This is the one call that was missing.
+    ///
+    /// The list is refreshed straight afterwards rather than trusting the
+    /// write: CoreAudio also posts a change notification, but a device can
+    /// refuse to become the default -- one that has just disappeared, most
+    /// obviously -- and the UI should show what is true, not what was asked
+    /// for.
+    @discardableResult
+    func selectOutputDevice(_ device: OutputDevice) -> Bool {
+        guard device.id != systemOutputDeviceID() else { return true }
+
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultOutputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var deviceID = device.id
+        let status = AudioObjectSetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject),
+            &address, 0, nil,
+            UInt32(MemoryLayout<AudioObjectID>.size),
+            &deviceID
+        )
+        refreshOutputDevices()
+        return status == noErr
+    }
+
     func refreshOutputDevices() {
         let devices = outputDevices()
         let defaultDeviceID = systemOutputDeviceID()
@@ -314,6 +364,7 @@ final class VolumeManager: NSObject, ObservableObject {
         }
 
         DispatchQueue.main.async {
+            self.availableOutputDevices = devices
             self.currentOutputDevice = devices.first { $0.id == defaultDeviceID }
             self.audioBluetoothAccessories = currentAudioAccessories
             self.rebuildConnectedAccessoriesList()

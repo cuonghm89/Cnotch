@@ -541,20 +541,57 @@ private struct AudioSourceButton: View {
     @ObservedObject private var volumeManager = VolumeManager.shared
 
     var body: some View {
-        DynamicIslandMusicButton(icon: outputDevice?.audioSourceIcon ?? "speaker.wave.2", image: deviceIcon) {
-            guard let url = URL(string: "x-apple.systempreferences:com.apple.Sound-Settings.extension") else { return }
-            NSWorkspace.shared.open(url)
+        // A menu when there is somewhere to switch to, the old button
+        // otherwise: a Mac with only its own speakers has nothing to choose
+        // between, and a menu of one item is worse than no menu.
+        if Defaults[.audioOutputSwitcherEnabled], volumeManager.availableOutputDevices.count > 1 {
+            Menu {
+                ForEach(volumeManager.availableOutputDevices) { device in
+                    Button {
+                        volumeManager.selectOutputDevice(device)
+                    } label: {
+                        // A device's own name, never localized. The checkmark
+                        // marks the one playing; SwiftUI has no toggle style
+                        // here that survives the notch's dark background.
+                        Label {
+                            Text(verbatim: device.id == outputDevice?.id ? "✓  \(device.name)" : device.name)
+                        } icon: {
+                            Image(systemName: device.audioSourceIcon)
+                        }
+                    }
+                }
+                Divider()
+                Button("Sound Settings…") { Self.openSoundSettings() }
+            } label: {
+                buttonFace
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+        } else {
+            DynamicIslandMusicButton(icon: outputDevice?.audioSourceIcon ?? "speaker.wave.2") {
+                Self.openSoundSettings()
+            }
         }
+    }
+
+    private var buttonFace: some View {
+        Image(systemName: outputDevice?.audioSourceIcon ?? "speaker.wave.2")
+            .font(.system(size: 18, weight: .bold))
+            .foregroundStyle(.white.opacity(0.82))
+            .frame(width: 24, height: 24)
+            .contentShape(Rectangle())
+    }
+
+    private static func openSoundSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.Sound-Settings.extension") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private var outputDevice: VolumeManager.OutputDevice? {
         volumeManager.currentOutputDevice
     }
 
-    private var deviceIcon: NSImage? {
-        guard let outputDevice, !outputDevice.isBuiltIn, let iconURL = outputDevice.iconURL else { return nil }
-        return NSImage(contentsOf: iconURL)
-    }
 }
 
 // MARK: - Volume Control View
