@@ -59,6 +59,7 @@ struct NotchUtilitiesMenu: View {
     @ObservedObject private var usbMonitor = USBDeviceMonitor.shared
     @State private var showQuickNote = false
     @State private var showNetworkDoctor = false
+    @State private var showNetworkSpeed = false
     @State private var noteText = ""
     @State private var isSavingNote = false
     @State private var noteSaveFailed = false
@@ -107,6 +108,11 @@ struct NotchUtilitiesMenu: View {
             if Defaults[.networkDoctorEnabled] {
                 Button("Network Diagnosis", systemImage: "stethoscope") {
                     showNetworkDoctor = true
+                }
+            }
+            if Defaults[.networkSpeedTestEnabled] {
+                Button("Network Speed", systemImage: "speedometer") {
+                    showNetworkSpeed = true
                 }
             }
             if showsBluetoothDevices || showsUSBDevices {
@@ -160,6 +166,10 @@ struct NotchUtilitiesMenu: View {
             // Popover content is hosted in its own window and doesn't inherit
             // the locale ContentView sets, so re-apply it here.
             NetworkDoctorPanel()
+                .applyAppLanguage()
+        }
+        .popover(isPresented: $showNetworkSpeed, arrowEdge: .bottom) {
+            NetworkSpeedPanel()
                 .applyAppLanguage()
         }
     }

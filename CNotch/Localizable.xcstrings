@@ -2680,6 +2680,16 @@
         }
       }
     },
+    "Again" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đo lại"
+          }
+        }
+      }
+    },
     "All" : {
       "localizations" : {
         "ar" : {
@@ -6362,6 +6372,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Both"
+          }
+        }
+      }
+    },
+    "Both directions are about the same, so the limit is the connection itself rather than the route." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hai hướng xấp xỉ nhau, nên nút thắt nằm ở chính đường truyền chứ không phải ở tuyến đi."
           }
         }
       }
@@ -10455,6 +10475,16 @@
         }
       }
     },
+    "Compares a nearby server with one abroad, so a slow connection can be told apart from a congested international route." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So sánh một máy chủ gần với một máy chủ ở nước ngoài, để phân biệt mạng chậm với tuyến quốc tế đang nghẽn."
+          }
+        }
+      }
+    },
     "Connected" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11514,6 +11544,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tỉ lệ bán kính góc"
+          }
+        }
+      }
+    },
+    "Couldn't measure" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không đo được"
           }
         }
       }
@@ -13448,6 +13488,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Display interactive player controls and album artwork in the notch."
+          }
+        }
+      }
+    },
+    "Domestic" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trong nước"
           }
         }
       }
@@ -21143,6 +21193,16 @@
         }
       }
     },
+    "Include a speed measurement" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kèm phần đo tốc độ"
+          }
+        }
+      }
+    },
     "Indicator Layout" : {
       "localizations" : {
         "vi" : {
@@ -21894,6 +21954,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Installed, not running"
+          }
+        }
+      }
+    },
+    "International" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quốc tế"
           }
         }
       }
@@ -23766,6 +23836,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dung lượng tối đa: %lld%%"
+          }
+        }
+      }
+    },
+    "Measure" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đo"
+          }
+        }
+      }
+    },
+    "Measure again" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đo lại"
+          }
+        }
+      }
+    },
+    "Measure speed" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đo tốc độ"
+          }
+        }
+      }
+    },
+    "Measured at" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đo lúc"
+          }
+        }
+      }
+    },
+    "Measuring" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang đo"
+          }
+        }
+      }
+    },
+    "Measuring latency" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang đo độ trễ"
           }
         }
       }
@@ -26215,6 +26345,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Network Diagnosis"
+          }
+        }
+      }
+    },
+    "Network Speed" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tốc độ mạng"
           }
         }
       }
@@ -41914,6 +42054,26 @@
         }
       }
     },
+    "Testing international speed" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang đo tốc độ quốc tế"
+          }
+        }
+      }
+    },
+    "Testing local speed" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang đo tốc độ trong nước"
+          }
+        }
+      }
+    },
     "Tests the network one layer at a time, so a failure can be pinned to the layer that broke. Useful when Wi-Fi looks connected but nothing loads — usually a content filter or VPN that didn't survive sleep." : {
       "localizations" : {
         "ar" : {
@@ -42046,6 +42206,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cảm ơn"
+          }
+        }
+      }
+    },
+    "The international route is the slower half." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuyến quốc tế là phía chậm hơn."
+          }
+        }
+      }
+    },
+    "The local route is the slower half, which is unusual — worth checking Wi-Fi and the router." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuyến trong nước lại chậm hơn — chuyện này bất thường, nên kiểm tra Wi-Fi và bộ định tuyến."
           }
         }
       }

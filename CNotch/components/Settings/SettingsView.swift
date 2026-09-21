@@ -2577,6 +2577,9 @@ struct Advanced: View {
                 Defaults.Toggle(key: .networkDoctorOnWake) {
                     Text("Check automatically after waking from sleep")
                 }
+                Defaults.Toggle(key: .networkSpeedTestEnabled) {
+                    Text("Include a speed measurement")
+                }
             } header: {
                 Text("Network Diagnosis")
             } footer: {

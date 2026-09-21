@@ -133,7 +133,7 @@ struct CNotchHeader: View {
     /// for the same row).
     private var showsUtilitiesMenu: Bool {
         Defaults[.quickNoteEnabled] || Defaults[.pomodoroButtonEnabled] || Defaults[.voiceMemoButtonEnabled]
-            || Defaults[.networkDoctorEnabled]
+            || Defaults[.networkDoctorEnabled] || Defaults[.networkSpeedTestEnabled]
             || (Defaults[.showBluetoothDeviceConnectionIndicator]
                 && Defaults[.showConnectedBluetoothDevicesInNotch]
                 && !volumeManager.connectedBluetoothAccessories.isEmpty)

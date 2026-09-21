@@ -292,6 +292,7 @@ extension Defaults.Keys {
     /// sandboxed, so it can write where the user points it.
     static let quickScreenshotFolder = Key<String?>("quickScreenshotFolder", default: nil)
     static let audioOutputSwitcherEnabled = Key<Bool>("audioOutputSwitcherEnabled", default: true)
+    static let networkSpeedTestEnabled = Key<Bool>("networkSpeedTestEnabled", default: true)
     static let networkDoctorEnabled = Key<Bool>("networkDoctorEnabled", default: true)
     static let networkDoctorOnWake = Key<Bool>("networkDoctorOnWake", default: true)
 
