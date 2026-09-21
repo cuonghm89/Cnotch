@@ -12,7 +12,7 @@ struct NetworkDoctorPanel: View {
             header
 
             if let result = doctor.lastResult {
-                VStack(alignment: .leading, spacing: 9) {
+                VStack(alignment: .leading, spacing: 10) {
                     layerRow("Wi-Fi path", ok: result.hasPath)
                     layerRow("Routing (TCP to 1.1.1.1)", ok: result.tcpOK)
                     layerRow("DNS", ok: result.dnsOK)
@@ -21,24 +21,31 @@ struct NetworkDoctorPanel: View {
 
                 Divider()
 
-                Text(LocalizedStringKey(NetworkDoctor.subtitle(for: result.verdict)))
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(LocalizedStringKey(NetworkDoctor.subtitle(for: result.verdict)))
+                        .font(.system(size: 15))
+                        .multilineTextAlignment(.leading)
+                        .lineLimit(nil)
+                        // The pair, not just fixedSize: without the frame the
+                        // Text asks for its whole width on one line and is
+                        // then truncated instead of wrapped.
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                // When, so a result can never pass for current again.
-                HStack(spacing: 4) {
-                    Text("Checked at")
-                    Text(result.checkedAt, style: .time)
+                    // When, so a result can never pass for current again.
+                    HStack(spacing: 4) {
+                        Text("Checked at")
+                        Text(result.checkedAt, style: .time)
+                    }
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
                 }
-                .font(.system(size: 11))
-                .foregroundStyle(.tertiary)
 
                 if !filters.isEmpty {
                     Divider()
                     Text("Network filters")
-                        .font(.system(size: 13, weight: .semibold))
-                    VStack(alignment: .leading, spacing: 8) {
+                        .font(.system(size: 15, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 10) {
                         ForEach(filters) { filter in
                             filterRow(filter)
                         }
@@ -46,7 +53,7 @@ struct NetworkDoctorPanel: View {
                 }
             } else if !doctor.isRunning {
                 Text("No check run yet.")
-                    .font(.system(size: 13))
+                    .font(.system(size: 15))
                     .foregroundStyle(.secondary)
             }
 
@@ -55,11 +62,14 @@ struct NetworkDoctorPanel: View {
                 Task { await doctor.runCheck() }
             } label: {
                 Text(doctor.lastResult == nil ? "Run check" : "Run again")
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
             .disabled(doctor.isRunning)
         }
         .padding(16)
-        .frame(width: 330, alignment: .leading)
+        .frame(width: 360, alignment: .leading)
         .task {
             // Opening the panel is itself the request to check, every time.
             // Skipping when a result already existed meant the panel showed
@@ -80,20 +90,24 @@ struct NetworkDoctorPanel: View {
     }
 
     private func filterRow(_ filter: NetworkFilters.Filter) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Circle()
-                .fill(color(for: filter.status))
-                .frame(width: 8, height: 8)
-            VStack(alignment: .leading, spacing: 1) {
-                // A vendor name, so never localized.
-                Text(verbatim: filter.name)
-                    .font(.system(size: 13, weight: .medium))
-                    .lineLimit(1)
-                Text(LocalizedStringKey(statusText(for: filter.status)))
-                    .font(.system(size: 12))
-                    .foregroundStyle(filter.status == .orphaned ? .red : .secondary)
-            }
-            Spacer(minLength: 0)
+        HStack(spacing: 8) {
+            // The same marks as the four rows above, at the same size: a
+            // coloured dot said the same thing in a different alphabet, and
+            // the panel asks the reader to compare the two halves.
+            Image(systemName: symbol(for: filter.status))
+                .foregroundStyle(color(for: filter.status))
+                .font(.system(size: 15))
+            // A vendor name, so never localized.
+            Text(verbatim: filter.name)
+                .font(.system(size: 15, weight: .medium))
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Spacer(minLength: 10)
+            Text(LocalizedStringKey(statusText(for: filter.status)))
+                .font(.system(size: 14))
+                .foregroundStyle(filter.status == .orphaned ? .red : .secondary)
+                .lineLimit(1)
+                .layoutPriority(1)
         }
     }
 
@@ -105,6 +119,17 @@ struct NetworkDoctorPanel: View {
         case .enabled: .green
         case .orphaned: .red
         case .off, .installed: .secondary
+        }
+    }
+
+    /// A tick for working, a cross for the broken state, a dash for the two
+    /// that are simply not running -- which are told apart by the words
+    /// beside them, not by the mark.
+    private func symbol(for status: NetworkFilters.Status) -> String {
+        switch status {
+        case .enabled: "checkmark.circle.fill"
+        case .orphaned: "xmark.circle.fill"
+        case .off, .installed: "minus.circle.fill"
         }
     }
 
@@ -146,9 +171,9 @@ struct NetworkDoctorPanel: View {
         HStack(spacing: 8) {
             Image(systemName: ok ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .foregroundStyle(ok ? .green : .red)
-                .font(.system(size: 13))
+                .font(.system(size: 15))
             Text(label)
-                .font(.system(size: 13))
+                .font(.system(size: 15))
             Spacer(minLength: 8)
         }
     }
