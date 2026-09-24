@@ -159,8 +159,9 @@ final class ShelfItemViewModel: ObservableObject {
 
             // Create and retain lifecycle delegate for the entire share operation
             let lifecycle = SharingStateManager.shared.makeDelegate { [weak self] in
-                self?.sharingLifecycle = nil
-                self?.stopSharingAccessingURLs()
+                guard let self else { return }
+                self.sharingLifecycle = nil
+                self.stopSharingAccessingURLs()
             }
             self.sharingLifecycle = lifecycle
 

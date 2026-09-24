@@ -728,8 +728,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 object: window,
                 queue: .main
             ) { [weak self] _ in
-                self?.coordinator.firstLaunch = false
-                UserDefaults.standard.set(true, forKey: Self.onboardingCompletedKey)
+                // `queue: .main` above is the guarantee; assumeIsolated tells
+                // the compiler what the registration already promised.
+                MainActor.assumeIsolated {
+                    self?.coordinator.firstLaunch = false
+                    UserDefaults.standard.set(true, forKey: Self.onboardingCompletedKey)
+                }
             }
 
             onboardingWindowController = NSWindowController(window: window)

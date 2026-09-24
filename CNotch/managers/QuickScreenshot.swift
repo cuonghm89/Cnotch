@@ -104,8 +104,11 @@ final class QuickScreenshot {
             process.arguments = mode.arguments + [temporary.path]
             // terminationHandler, not waitUntilExit: nothing here may park a
             // thread waiting on a person.
-            process.terminationHandler = { _ in
-                Task { @MainActor in
+            // Captured again at each step rather than reaching back into the
+            // enclosing closure's `self`: referring to another closure's
+            // capture from concurrent code is an error under Swift 6.
+            process.terminationHandler = { [weak self] _ in
+                Task { @MainActor [weak self] in
                     self?.isCapturing = false
                     // No file means the selection was cancelled, which is a
                     // normal thing to do and not worth a word.
@@ -117,7 +120,7 @@ final class QuickScreenshot {
                 try process.run()
             } catch {
                 AppLog.display.error("Could not start screencapture: \(error.localizedDescription, privacy: .public)")
-                Task { @MainActor in self?.isCapturing = false }
+                Task { @MainActor [weak self] in self?.isCapturing = false }
             }
         }
     }

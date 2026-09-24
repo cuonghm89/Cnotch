@@ -84,6 +84,7 @@ final class WeatherManager: NSObject, ObservableObject, CLLocationManagerDelegat
         let current: Current
     }
 
+    @MainActor
     private func fetchWeather(latitude: Double, longitude: Double) async {
         var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
         components.queryItems = [
@@ -97,10 +98,8 @@ final class WeatherManager: NSObject, ObservableObject, CLLocationManagerDelegat
               let response = try? JSONDecoder().decode(OpenMeteoResponse.self, from: data)
         else { return }
 
-        await MainActor.run {
-            self.temperatureCelsius = response.current.temperature_2m
-            self.symbolName = Self.symbolName(forWMOCode: response.current.weather_code)
-        }
+        temperatureCelsius = response.current.temperature_2m
+        symbolName = Self.symbolName(forWMOCode: response.current.weather_code)
     }
 
     /// Maps a WMO weather code (https://open-meteo.com/en/docs) to an SF Symbol.
