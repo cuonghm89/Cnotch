@@ -142,6 +142,32 @@ extension Defaults.Keys {
     static let clipboardHistoryLimit = Key<Int>("clipboardHistoryLimit", default: 100)
     static let clipboardImageLimitMB = Key<Int>("clipboardImageLimitMB", default: 10)
     static let clipboardOCREnabled = Key<Bool>("clipboardOCREnabled", default: true)
+    /// Apps whose copies never reach the history, by bundle identifier.
+    ///
+    /// `org.nspasteboard.ConcealedType` only catches apps that volunteer the
+    /// mark, and the ones people most often copy a password out of --
+    /// System Settings, Keychain Access, a browser's own password manager --
+    /// do not. macOS tells no one that a pasteboard item came from a secure
+    /// field, so there is nothing to detect: the only honest mechanism is
+    /// naming the apps.
+    static let clipboardExcludedApps = Key<[String]>(
+        "clipboardExcludedApps",
+        default: [
+            "com.apple.systempreferences",
+            "com.apple.keychainaccess",
+            "com.apple.loginwindow",
+            // Present or not, listing them costs nothing and spares the next
+            // person the same surprise.
+            "com.1password.1password",
+            "com.agilebits.onepassword7",
+            "com.bitwarden.desktop",
+            "org.keepassxc.keepassxc",
+            "com.lastpass.LastPass",
+            "com.dashlane.Dashlane",
+            "in.sinew.Enpass-Desktop",
+            "com.nordpass.macos",
+        ]
+    )
     static let clipboardSearchMode = Key<ClipboardSearchMode>("clipboardSearchMode", default: .exact)
 
     // MARK: Appearance
@@ -292,6 +318,7 @@ extension Defaults.Keys {
     /// sandboxed, so it can write where the user points it.
     static let quickScreenshotFolder = Key<String?>("quickScreenshotFolder", default: nil)
     static let audioOutputSwitcherEnabled = Key<Bool>("audioOutputSwitcherEnabled", default: true)
+    static let networkWakeSnapshotEnabled = Key<Bool>("networkWakeSnapshotEnabled", default: true)
     static let networkSpeedTestEnabled = Key<Bool>("networkSpeedTestEnabled", default: true)
     static let networkDoctorEnabled = Key<Bool>("networkDoctorEnabled", default: true)
     static let networkDoctorOnWake = Key<Bool>("networkDoctorOnWake", default: true)

@@ -1627,6 +1627,7 @@ struct ClipboardSettings: View {
     @Default(.clipboardHistoryLimit) private var historyLimit
     @Default(.clipboardImageLimitMB) private var imageLimitMB
     @Default(.clipboardOCREnabled) private var ocrEnabled
+    @Default(.clipboardExcludedApps) private var excludedApps
     @Default(.clipboardSearchMode) private var searchMode
 
     var body: some View {
@@ -1664,6 +1665,30 @@ struct ClipboardSettings: View {
             }
             .disabled(!enabled)
 
+            Section {
+                ForEach(excludedApps, id: \.self) { bundleID in
+                    HStack(spacing: 8) {
+                        if let icon = ClipboardSourceAppIcon.icon(forBundleID: bundleID) {
+                            Image(nsImage: icon).resizable().frame(width: 16, height: 16)
+                        }
+                        Text(verbatim: Self.displayName(for: bundleID))
+                        Spacer()
+                        Button {
+                            excludedApps.removeAll { $0 == bundleID }
+                        } label: {
+                            Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                Button("Add app…") { addExcludedApp() }
+            } header: {
+                Text("Never record from")
+            } footer: {
+                Text("macOS never says that something was copied from a password field, and only a few apps mark it themselves — so the only reliable way to keep a password out of the history is to name the app it came from. Removing an app here also deletes what it already recorded.")
+            }
+            .disabled(!enabled)
+
             Section("Search") {
                 LiquidGlassSegmentedPicker(
                     "Mode",
@@ -1682,6 +1707,30 @@ struct ClipboardSettings: View {
             .disabled(!enabled)
         }
         .accentColor(.effectiveAccent)
+    }
+}
+
+extension ClipboardSettings {
+    static func displayName(for bundleID: String) -> String {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            // Not installed: show the identifier rather than hiding the row,
+            // since the entry is still doing its job.
+            return bundleID
+        }
+        return FileManager.default.displayName(atPath: url.path)
+    }
+
+    func addExcludedApp() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.application]
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        guard panel.runModal() == .OK, let url = panel.url,
+              let bundleID = Bundle(url: url)?.bundleIdentifier,
+              !excludedApps.contains(bundleID)
+        else { return }
+        excludedApps.append(bundleID)
     }
 }
 
@@ -2579,6 +2628,9 @@ struct Advanced: View {
                 }
                 Defaults.Toggle(key: .networkSpeedTestEnabled) {
                     Text("Include a speed measurement")
+                }
+                Defaults.Toggle(key: .networkWakeSnapshotEnabled) {
+                    Text("Save a diagnostic file when a check fails after waking")
                 }
             } header: {
                 Text("Network Diagnosis")

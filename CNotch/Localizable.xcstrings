@@ -2148,6 +2148,16 @@
         }
       }
     },
+    "Add app…" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thêm ứng dụng…"
+          }
+        }
+      }
+    },
     "Add manually" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -26890,6 +26900,16 @@
         }
       }
     },
+    "Never record from" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không bao giờ ghi lại từ"
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "ar" : {
@@ -29453,6 +29473,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Only download icon"
+          }
+        }
+      }
+    },
+    "Only the domestic route answered — international is unreachable." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉ tuyến trong nước trả lời — không ra được quốc tế."
           }
         }
       }
@@ -34747,6 +34777,16 @@
         }
       }
     },
+    "Routing (TCP)" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Định tuyến (TCP)"
+          }
+        }
+      }
+    },
     "Rows" : {
       "localizations" : {
         "vi" : {
@@ -35178,6 +35218,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Đang chạy"
+          }
+        }
+      }
+    },
+    "Save a diagnostic file when a check fails after waking" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lưu file chẩn đoán khi kiểm tra sau khi thức dậy bị lỗi"
           }
         }
       }
@@ -39452,6 +39502,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Show quick actions when a download finishes"
+          }
+        }
+      }
+    },
+    "Show saved diagnostics (%lld)" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xem file chẩn đoán đã lưu (%lld)"
           }
         }
       }
@@ -47299,6 +47359,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "https://github.com/pear-devs/pear-desktop"
+          }
+        }
+      }
+    },
+    "macOS never says that something was copied from a password field, and only a few apps mark it themselves — so the only reliable way to keep a password out of the history is to name the app it came from. Removing an app here also deletes what it already recorded." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS không bao giờ cho biết một nội dung được copy từ ô mật khẩu, và chỉ vài ứng dụng tự đánh dấu điều đó — nên cách duy nhất chắc chắn để mật khẩu không lọt vào lịch sử là chỉ đích danh ứng dụng. Thêm ứng dụng vào đây cũng xoá luôn những gì nó đã ghi trước đó."
           }
         }
       }
