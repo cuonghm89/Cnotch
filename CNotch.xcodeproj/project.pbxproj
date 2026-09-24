@@ -112,6 +112,7 @@
 		C1A0B7053B00000100000032 /* USBDeviceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B7063B00000100000033 /* USBDeviceMonitor.swift */; };
 		C1A0B7073B00000100000034 /* DownloadWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B7083B00000100000035 /* DownloadWatcher.swift */; };
 		C1A0B7093B00000100000036 /* NetworkFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B70A3B00000100000037 /* NetworkFilters.swift */; };
+		6AC9830F62127486239A4B4F /* NetworkWakeSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC5BCE167F971B45B58F546 /* NetworkWakeSnapshot.swift */; };
 		9A0887322C7A693000C160EA /* TabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0887312C7A693000C160EA /* TabButton.swift */; };
 		9A0887352C7AFF8E00C160EA /* TabSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0887342C7AFF8E00C160EA /* TabSelectionView.swift */; };
 		9A987A0D2C73CA66005CA465 /* ShelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A987A032C73CA66005CA465 /* ShelfView.swift */; };
@@ -314,6 +315,7 @@
 		C1A0B7063B00000100000033 /* USBDeviceMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBDeviceMonitor.swift; sourceTree = "<group>"; };
 		C1A0B7083B00000100000035 /* DownloadWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadWatcher.swift; sourceTree = "<group>"; };
 		C1A0B70A3B00000100000037 /* NetworkFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkFilters.swift; sourceTree = "<group>"; };
+		8CC5BCE167F971B45B58F546 /* NetworkWakeSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkWakeSnapshot.swift; sourceTree = "<group>"; };
 		9A0887312C7A693000C160EA /* TabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabButton.swift; sourceTree = "<group>"; };
 		9A0887342C7AFF8E00C160EA /* TabSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSelectionView.swift; sourceTree = "<group>"; };
 		9A987A032C73CA66005CA465 /* ShelfView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShelfView.swift; sourceTree = "<group>"; };
@@ -591,6 +593,7 @@
 				C1A0B7063B00000100000033 /* USBDeviceMonitor.swift */,
 				C1A0B7083B00000100000035 /* DownloadWatcher.swift */,
 				C1A0B70A3B00000100000037 /* NetworkFilters.swift */,
+				8CC5BCE167F971B45B58F546 /* NetworkWakeSnapshot.swift */,
 				C1A0B2083B00000100000005 /* MicrophoneManager.swift */,
 				C1A0B20A3B00000100000007 /* WeatherManager.swift */,
 				C1A0B30C3B00000100000009 /* ScreenshotWatcher.swift */,
@@ -1092,6 +1095,7 @@
 				C1A0B7053B00000100000032 /* USBDeviceMonitor.swift in Sources */,
 				C1A0B7073B00000100000034 /* DownloadWatcher.swift in Sources */,
 				C1A0B7093B00000100000036 /* NetworkFilters.swift in Sources */,
+				6AC9830F62127486239A4B4F /* NetworkWakeSnapshot.swift in Sources */,
 				C1A0B2073B00000100000004 /* MicrophoneManager.swift in Sources */,
 				C1A0B2093B00000100000006 /* WeatherManager.swift in Sources */,
 				C1A0B30B3B00000100000008 /* ScreenshotWatcher.swift in Sources */,

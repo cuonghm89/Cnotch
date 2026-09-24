@@ -6,6 +6,7 @@ import SwiftUI
 struct NetworkDoctorPanel: View {
     @ObservedObject private var doctor = NetworkDoctor.shared
     @State private var filters: [NetworkFilters.Filter] = []
+    @State private var snapshots: [URL] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -14,7 +15,19 @@ struct NetworkDoctorPanel: View {
             if let result = doctor.lastResult {
                 VStack(alignment: .leading, spacing: 10) {
                     layerRow("Wi-Fi path", ok: result.hasPath)
-                    layerRow("Routing (TCP to 1.1.1.1)", ok: result.tcpOK)
+                    layerRow("Routing (TCP)", ok: result.tcpOK)
+                    if result.tcpOK, !result.tcpInternationalOK {
+                        // Green above, because packets are moving; this is
+                        // the part that green cannot say on its own.
+                        Text("Only the domestic route answered — international is unreachable.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.leading, 23)
+                    }
                     layerRow("DNS", ok: result.dnsOK)
                     layerRow("TLS handshake", ok: result.tlsOK)
                 }
@@ -57,6 +70,17 @@ struct NetworkDoctorPanel: View {
                     .foregroundStyle(.secondary)
             }
 
+            if !snapshots.isEmpty {
+                Divider()
+                Button {
+                    NSWorkspace.shared.activateFileViewerSelecting([snapshots[0]])
+                } label: {
+                    Label("Show saved diagnostics (\(snapshots.count))", systemImage: "folder")
+                        .font(.system(size: 14))
+                }
+                .buttonStyle(.link)
+            }
+
             Button {
                 Task { filters = await Self.currentFilters() }
                 Task { await doctor.runCheck() }
@@ -77,6 +101,7 @@ struct NetworkDoctorPanel: View {
             // outage stayed on screen long after the network recovered, with
             // nothing to say it was an old one.
             filters = await Self.currentFilters()
+            snapshots = NetworkWakeSnapshot.existingSnapshots
             guard !doctor.isRunning else { return }
             await doctor.runCheck()
         }

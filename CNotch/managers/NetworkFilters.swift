@@ -80,10 +80,19 @@ enum NetworkFilters {
         return entries.compactMap { entry -> Filter? in
             guard let identifier = entry["identifier"] as? String,
                   let categories = entry["categories"] as? [String],
-                  categories.contains(networkCategory)
+                  categories.contains(networkCategory),
+                  let state = entry["state"] as? String,
+                  // Upgrading leaves the previous version in the database as
+                  // `terminated_waiting_to_uninstall_on_reboot` until the next
+                  // restart. It shares its identifier with the new one, so it
+                  // matched the same running process and the list showed one
+                  // product twice -- the second row reading "Off", which is
+                  // not what is happening to it. Only states that begin
+                  // `activated` are in the path at all.
+                  state.hasPrefix("activated")
             else { return nil }
 
-            let isEnabled = (entry["state"] as? String) == "activated_enabled"
+            let isEnabled = state == "activated_enabled"
             // A staged extension's executable lives at a path containing its
             // bundle identifier, so that's enough to match on.
             let isRunning = running.contains { $0.contains(identifier) }

@@ -38,7 +38,13 @@ final class NetworkDoctor: ObservableObject {
 
     struct Result: Equatable {
         let hasPath: Bool
+        /// True when *either* target answered.
         let tcpOK: Bool
+        /// True only when the target outside the country answered. Equal to
+        /// `tcpOK` on a healthy connection; false while `tcpOK` is true means
+        /// the domestic route is up and the international one is not, which
+        /// is a fault worth naming rather than averaging away.
+        let tcpInternationalOK: Bool
         let dnsOK: Bool
         let tlsOK: Bool
         let verdict: Verdict
@@ -54,6 +60,13 @@ final class NetworkDoctor: ObservableObject {
     /// Raw-IP TCP target: Cloudflare's resolver, reachable without DNS.
     private nonisolated static let tcpProbeHost = "1.1.1.1"
     private nonisolated static let tcpProbePort: UInt16 = 443
+    /// Tried only when the first fails, and it is inside the country on
+    /// purpose: an international route can be congested or cut while the
+    /// local network is perfectly well, and calling that "no route out"
+    /// would be a false alarm. A resolver, because answering TCP on 53 is
+    /// its job. Not anycast, so it is the fallback and never the first ask.
+    private nonisolated static let domesticProbeHost = "203.113.131.1"
+    private nonisolated static let domesticProbePort: UInt16 = 53
     private nonisolated static let dnsProbeHost = "www.apple.com"
     /// The same tiny page macOS itself uses for connectivity checks.
     private static let tlsProbeURL = URL(string: "https://www.apple.com/library/test/success.html")!
@@ -82,7 +95,8 @@ final class NetworkDoctor: ObservableObject {
         // Probes run in order of dependency, and each one is skipped once a
         // lower layer has already failed -- a TLS timeout tells you nothing
         // new when there's no route to send it over.
-        let tcpOK = hasPath ? await tcpConnects() : false
+        let tcp = hasPath ? await tcpConnects() : (any: false, international: false)
+        let tcpOK = tcp.any
         let dnsOK = tcpOK ? await dnsResolves() : false
         let tlsOK = dnsOK ? await tlsCompletes() : false
 
@@ -102,6 +116,7 @@ final class NetworkDoctor: ObservableObject {
         let result = Result(
             hasPath: hasPath,
             tcpOK: tcpOK,
+            tcpInternationalOK: tcp.international,
             dnsOK: dnsOK,
             tlsOK: tlsOK,
             verdict: verdict,
@@ -160,9 +175,19 @@ final class NetworkDoctor: ObservableObject {
         return false
     }
 
-    private func tcpConnects() async -> Bool {
+    /// Whether TCP works at all, and whether it works beyond the country.
+    private func tcpConnects() async -> (any: Bool, international: Bool) {
         await Task.detached(priority: .utility) {
-            Self.canConnect(host: Self.tcpProbeHost, port: Self.tcpProbePort, timeout: 5)
+            let international = Self.canConnect(
+                host: Self.tcpProbeHost, port: Self.tcpProbePort, timeout: 5
+            )
+            if international { return (true, true) }
+            // Only now, and with a shorter deadline: this runs after a probe
+            // that has already spent its five seconds failing.
+            let domestic = Self.canConnect(
+                host: Self.domesticProbeHost, port: Self.domesticProbePort, timeout: 3
+            )
+            return (domestic, false)
         }.value
     }
 
@@ -245,15 +270,52 @@ final class NetworkDoctor: ObservableObject {
 
     // MARK: - Wake handling
 
-    /// The stack legitimately needs a few seconds after wake, so the first
-    /// failure is never reported -- only one that's still failing on a second
-    /// look is worth interrupting the user for.
+    /// How long Wi-Fi is given to come back before its absence counts as a
+    /// fault. Reassociating and getting an address took longer than the
+    /// twenty-two seconds this used to allow on three occasions out of four
+    /// -- every one of which was reported as "offline" and captured a
+    /// snapshot of a machine whose card simply had not finished waking.
+    private static let linkGracePeriod: TimeInterval = 90
+
+    /// Waits for an interface to carry a real address again.
+    private static func waitForLink(upTo seconds: TimeInterval) async -> Bool {
+        let deadline = Date().addingTimeInterval(seconds)
+        while Date() < deadline {
+            if await Task.detached(priority: .utility, operation: {
+                hasConfiguredInterface()
+            }).value {
+                return true
+            }
+            try? await Task.sleep(for: .seconds(2))
+            if Task.isCancelled { return false }
+        }
+        return false
+    }
+
+    /// The stack legitimately needs time after wake, so nothing is judged
+    /// until the link is back -- and then only a failure that survives a
+    /// second look is worth interrupting the user for.
     private func scheduleWakeCheck() {
         guard Defaults[.networkDoctorOnWake] else { return }
         wakeTask?.cancel()
         wakeTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            try? await Task.sleep(for: .seconds(10))
+
+            // No link yet is not a fault, it is a wake in progress. Only its
+            // refusal to come back at all is worth saying anything about.
+            guard await Self.waitForLink(upTo: Self.linkGracePeriod) else {
+                guard !Task.isCancelled else { return }
+                let stillDown = await self.runCheck()
+                guard stillDown.verdict != .healthy else { return }
+                NetworkWakeSnapshot.capture(stillDown)
+                self.announce(stillDown)
+                return
+            }
+            guard !Task.isCancelled else { return }
+
+            // Associated is not the same as routable: DHCP and the default
+            // route land a moment later.
+            try? await Task.sleep(for: .seconds(5))
             guard !Task.isCancelled else { return }
 
             guard await self.runCheck().verdict != .healthy else { return }
@@ -263,6 +325,10 @@ final class NetworkDoctor: ObservableObject {
 
             let confirmed = await self.runCheck()
             guard confirmed.verdict != .healthy else { return }
+            // Write it down before anything else. The user's next move is
+            // usually a reboot, and three occurrences of this bug have
+            // already been lost that way.
+            NetworkWakeSnapshot.capture(confirmed)
             self.announce(confirmed)
         }
     }
