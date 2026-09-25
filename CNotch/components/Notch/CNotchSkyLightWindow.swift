@@ -54,6 +54,19 @@ class CNotchSkyLightWindow: NSPanel {
     
     private func configureWindow() {
         isFloatingPanel = true
+        // Deliver the click instead of spending it on becoming key.
+        //
+        // A floating panel that is not key takes the first click to become
+        // one, and the control under the pointer never sees it -- which is
+        // why the ⋯ menu needed two clicks even with the app already active:
+        //
+        //     CLICK active=true  window=CNotchSkyLightWindow   <- became key
+        //     CLICK active=true  window=CNotchSkyLightWindow   <- opened the menu
+        //     ACTION                                           <- item chosen
+        //
+        // With this, the panel takes key status only when something actually
+        // needs it, and clicks reach their control on the way.
+        becomesKeyOnlyIfNeeded = true
         isOpaque = false
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
@@ -119,6 +132,15 @@ class CNotchSkyLightWindow: NSPanel {
 
 final class CNotchFileDropContainerView: NSView {
     override var isFlipped: Bool { true }
+
+    /// Takes the click that lands while the app is inactive.
+    ///
+    /// This is the view AppKit asks -- it is what the notch's content sits
+    /// inside -- and the default answer is no, so the first click of any
+    /// interaction was spent activating and never delivered. Measured:
+    /// `CLICK received, active=false` with nothing following it, then a
+    /// second click with `active=true` that finally reached the menu.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     var acceptsFileDrop: () -> Bool = { false }
     var onFileDrop: ([URL]) -> Bool = { _ in false }
     private var acceptsCurrentDrag = false

@@ -284,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.disableSkyLight()
         }
 
-        let hostingView = NSHostingView(
+        let hostingView = FirstMouseHostingView(
             rootView: ContentView()
                 .environmentObject(viewModel)
         )
@@ -779,4 +779,26 @@ extension CGRect: @retroactive Hashable {
     public static func == (lhs: CGRect, rhs: CGRect) -> Bool {
         return lhs.origin == rhs.origin && lhs.size == rhs.size
     }
+}
+
+/// Takes the click that arrives while the app is inactive.
+///
+/// A menu-bar app with no Dock icon is almost never frontmost, and AppKit
+/// spends the first click in an inactive window on activation without
+/// delivering it. An event monitor caught exactly that:
+///
+///     CLICK received, active=false, window=CNotchSkyLightWindow   <- swallowed
+///     CLICK received, active=true,  window=CNotchSkyLightWindow
+///     ACTION: menu item ran                                       <- only now
+///
+/// `acceptsFirstMouse` is asked of the view under the pointer, and
+/// `NSHostingView` answers no by default, so every interaction with the notch
+/// cost a click that did nothing.
+///
+/// This was written once before, on a guess, and then reverted when a log
+/// line showed `active=true` -- a line that came from the second click. The
+/// same misreading twice: attributing a measurement to the press that did not
+/// produce it.
+private final class FirstMouseHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }

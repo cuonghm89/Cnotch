@@ -174,6 +174,7 @@
 		C1A0B6013B0000010000002A /* NotchUtilitiesMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */; };
 		C1A0B7033B00000100000030 /* NetworkDoctorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A0B7043B00000100000031 /* NetworkDoctorPanel.swift */; };
 		ADC92B8DC2F3DEA756A0748C /* NetworkSpeedPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89BB23F64CF2E3D54DCB28B7 /* NetworkSpeedPanel.swift */; };
+		04565878EB9E80A56D9F7206 /* NotchPopoutWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0B75CF452A02FBD8DC2930A /* NotchPopoutWindow.swift */; };
 		F00DBABE2EFC000000000001 /* Knock.caf in Resources */ = {isa = PBXBuildFile; fileRef = F00DBABE2EFC000000000002 /* Knock.caf */; };
 		F38DE6482D8243E7008B5C6D /* BatteryActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */; };
 /* End PBXBuildFile section */
@@ -370,6 +371,7 @@
 		C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchUtilitiesMenu.swift; sourceTree = "<group>"; };
 		C1A0B7043B00000100000031 /* NetworkDoctorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkDoctorPanel.swift; sourceTree = "<group>"; };
 		89BB23F64CF2E3D54DCB28B7 /* NetworkSpeedPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpeedPanel.swift; sourceTree = "<group>"; };
+		D0B75CF452A02FBD8DC2930A /* NotchPopoutWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchPopoutWindow.swift; sourceTree = "<group>"; };
 		F00DBABE2EFC000000000002 /* Knock.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Knock.caf; sourceTree = "<group>"; };
 		F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryActivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -822,6 +824,7 @@
 				C1A0B6023B0000010000002B /* NotchUtilitiesMenu.swift */,
 				C1A0B7043B00000100000031 /* NetworkDoctorPanel.swift */,
 				89BB23F64CF2E3D54DCB28B7 /* NetworkSpeedPanel.swift */,
+				D0B75CF452A02FBD8DC2930A /* NotchPopoutWindow.swift */,
 				C1A0B41E3B0000010000001B /* VoiceMemoIndicator.swift */,
 				C1A0B41A3B00000100000017 /* PomodoroIndicator.swift */,
 				C1A0B30E3B0000010000000B /* ScreenshotQuickActionsIndicator.swift */,
@@ -1199,6 +1202,7 @@
 				C1A0B6013B0000010000002A /* NotchUtilitiesMenu.swift in Sources */,
 				C1A0B7033B00000100000030 /* NetworkDoctorPanel.swift in Sources */,
 				ADC92B8DC2F3DEA756A0748C /* NetworkSpeedPanel.swift in Sources */,
+				04565878EB9E80A56D9F7206 /* NotchPopoutWindow.swift in Sources */,
 				C1A0B41D3B0000010000001A /* VoiceMemoIndicator.swift in Sources */,
 				C1A0B4193B00000100000016 /* PomodoroIndicator.swift in Sources */,
 				C1A0B30D3B0000010000000A /* ScreenshotQuickActionsIndicator.swift in Sources */,

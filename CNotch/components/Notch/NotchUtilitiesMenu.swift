@@ -58,8 +58,6 @@ struct NotchUtilitiesMenu: View {
     @ObservedObject private var volumeManager = VolumeManager.shared
     @ObservedObject private var usbMonitor = USBDeviceMonitor.shared
     @State private var showQuickNote = false
-    @State private var showNetworkDoctor = false
-    @State private var showNetworkSpeed = false
     @State private var noteText = ""
     @State private var isSavingNote = false
     @State private var noteSaveFailed = false
@@ -80,7 +78,7 @@ struct NotchUtilitiesMenu: View {
         Menu {
             if Defaults[.quickNoteEnabled] {
                 Button("Quick Note", systemImage: "square.and.pencil") {
-                    showQuickNote = true
+                    present { showQuickNote = true }
                 }
             }
             if Defaults[.pomodoroButtonEnabled] {
@@ -107,12 +105,16 @@ struct NotchUtilitiesMenu: View {
             }
             if Defaults[.networkDoctorEnabled] {
                 Button("Network Diagnosis", systemImage: "stethoscope") {
-                    showNetworkDoctor = true
+                    NotchPopoutWindow.shared.show(id: "networkDoctor") {
+                        NetworkDoctorPanel().applyAppLanguage()
+                    }
                 }
             }
             if Defaults[.networkSpeedTestEnabled] {
                 Button("Network Speed", systemImage: "speedometer") {
-                    showNetworkSpeed = true
+                    NotchPopoutWindow.shared.show(id: "networkSpeed") {
+                        NetworkSpeedPanel().applyAppLanguage()
+                    }
                 }
             }
             if showsBluetoothDevices || showsUSBDevices {
@@ -162,16 +164,22 @@ struct NotchUtilitiesMenu: View {
         .popover(isPresented: $showQuickNote, arrowEdge: .bottom) {
             quickNoteEditor
         }
-        .popover(isPresented: $showNetworkDoctor, arrowEdge: .bottom) {
-            // Popover content is hosted in its own window and doesn't inherit
-            // the locale ContentView sets, so re-apply it here.
-            NetworkDoctorPanel()
-                .applyAppLanguage()
-        }
-        .popover(isPresented: $showNetworkSpeed, arrowEdge: .bottom) {
-            NetworkSpeedPanel()
-                .applyAppLanguage()
-        }
+    }
+
+    /// Raises the popover on the turn of the run loop after this one.
+    ///
+    /// Clicking a menu item runs inside the menu's own tracking loop, and the
+    /// anchor view is mid-teardown at that moment: the popover gets built and
+    /// its content view renders -- measurements showed the check running and
+    /// the panel drawing its result in 0.28s -- but the window is never put on
+    /// screen. Pressing a second time displayed what the first press had
+    /// already made, which is exactly what it looked like from the outside.
+    ///
+    /// Activating first as well, because this app has no Dock icon and is not
+    /// frontmost when its own menu is clicked.
+    private func present(_ show: @escaping () -> Void) {
+        NSApp.activate(ignoringOtherApps: true)
+        DispatchQueue.main.async(execute: show)
     }
 
     private var quickNoteEditor: some View {
