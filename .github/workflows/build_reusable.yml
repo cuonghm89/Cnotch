@@ -33,13 +33,11 @@ on:
 
 jobs:
   build:
-    # macos-27 (macOS 27.0, Xcode 27.0 build 27A266a -- the same build used
-    # locally, so CI and the developer compile identically). It is a preview
-    # image, and that is the trade: it is the only runner with an Xcode 27
-    # SDK, which is what lets the macOS 27 code behind `SDK_MACOS_27` compile
-    # in at all. Going back is one word, and the SDK gate means the code still
-    # builds on macos-latest -- just without those features.
-    runs-on: macos-27
+    # `macos-27` carries the Xcode 27 SDK and would compile the macOS 27 code
+    # behind `SDK_MACOS_27`, but it is a preview image with little capacity:
+    # a release queued 29 minutes there without being given a machine, against
+    # about 7 minutes end to end here. Worth retrying when it goes GA.
+    runs-on: macos-latest
     permissions:
       contents: write
     env:
