@@ -4,7 +4,8 @@ import SwiftUI
 /// any single row: TCP up + DNS up + TLS down is a filter problem, and that
 /// combination is invisible in macOS's own Wi-Fi UI.
 struct NetworkDoctorPanel: View {
-    @ObservedObject private var doctor = NetworkDoctor.shared
+    @StateObject private var doctor = NetworkDoctor.shared
+    @State private var result: NetworkDoctor.Result?
     @State private var filters: [NetworkFilters.Filter] = []
     @State private var snapshots: [URL] = []
 
@@ -12,7 +13,7 @@ struct NetworkDoctorPanel: View {
         VStack(alignment: .leading, spacing: 12) {
             header
 
-            if let result = doctor.lastResult {
+            if let result {
                 VStack(alignment: .leading, spacing: 10) {
                     layerRow("Wi-Fi path", ok: result.hasPath)
                     layerRow("Routing (TCP)", ok: result.tcpOK)
@@ -83,9 +84,9 @@ struct NetworkDoctorPanel: View {
 
             Button {
                 Task { filters = await Self.currentFilters() }
-                Task { await doctor.runCheck() }
+                Task { result = await doctor.runCheck() }
             } label: {
-                Text(doctor.lastResult == nil ? "Run check" : "Run again")
+                Text(result == nil ? "Run check" : "Run again")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -103,7 +104,7 @@ struct NetworkDoctorPanel: View {
             filters = await Self.currentFilters()
             snapshots = NetworkWakeSnapshot.existingSnapshots
             guard !doctor.isRunning else { return }
-            await doctor.runCheck()
+            result = await doctor.runCheck()
         }
     }
 
@@ -178,9 +179,9 @@ struct NetworkDoctorPanel: View {
         if doctor.isRunning {
             HStack(spacing: 8) {
                 ProgressView().controlSize(.small)
-                Text("Checking…").font(.headline)
+                Text(LocalizedStringKey(doctor.stage ?? "Checking…")).font(.headline)
             }
-        } else if let result = doctor.lastResult {
+        } else if let result {
             HStack(spacing: 8) {
                 Image(systemName: NetworkDoctor.icon(for: result.verdict))
                     .foregroundStyle(result.verdict == .healthy ? .green : .orange)

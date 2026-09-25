@@ -8515,6 +8515,46 @@
         }
       }
     },
+    "Checking DNS" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang kiểm tra DNS"
+          }
+        }
+      }
+    },
+    "Checking TLS" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang kiểm tra TLS"
+          }
+        }
+      }
+    },
+    "Checking routing" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang kiểm tra định tuyến"
+          }
+        }
+      }
+    },
+    "Checking the link" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang kiểm tra kết nối"
+          }
+        }
+      }
+    },
     "Checking…" : {
       "localizations" : {
         "ar" : {
@@ -21978,6 +22018,16 @@
         }
       }
     },
+    "It installs when you quit CNotch." : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sẽ cài khi bạn thoát CNotch."
+          }
+        }
+      }
+    },
     "Keyboard backlight down" : {
       "localizations" : {
         "vi" : {
@@ -32830,6 +32880,16 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Regex"
+          }
+        }
+      }
+    },
+    "Relaunch Now" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Khởi động lại ngay"
           }
         }
       }
@@ -43818,6 +43878,16 @@
         }
       }
     },
+    "Update ready" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã có bản cập nhật"
+          }
+        }
+      }
+    },
     "Upgrade to Pro" : {
       "localizations" : {
         "ar" : {
@@ -44577,6 +44647,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Phiên bản"
+          }
+        }
+      }
+    },
+    "Version %@ is ready" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bản %@ đã sẵn sàng"
           }
         }
       }

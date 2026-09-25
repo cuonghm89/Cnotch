@@ -105,6 +105,25 @@ enum NetworkWakeSnapshot {
         out += section("TCP to 1.1.1.1:80", describe(tcpProbe(host: "1.1.1.1", port: 80)))
         out += section("TCP to 8.8.8.8:443", describe(tcpProbe(host: "8.8.8.8", port: 443)))
         out += section("TCP to 203.113.131.1:443", describe(tcpProbe(host: "203.113.131.1", port: 443)))
+
+        // Connecting is not the same as carrying data. On 2026-09-25 every
+        // connect above succeeded -- 1.1.1.1:443 in 8ms -- while the TLS
+        // probe failed, which leaves three possibilities the capture could
+        // not tell apart: TLS itself, any data at all after the handshake, or
+        // that one hostname. These two send real bytes to a literal address,
+        // one encrypted and one not, and separate all three.
+        out += section("HTTP to 1.1.1.1:80 (bytes, no TLS)", run("/usr/bin/curl", [
+            "-sS", "--max-time", "8", "-o", "/dev/null",
+            "-w", "HTTP %{http_code}, %{size_download} bytes, %{time_total}s",
+            "http://1.1.1.1/",
+        ]))
+        // -k: the certificate cannot match a bare address, and whether the
+        // handshake completes at all is the only question here.
+        out += section("TLS to 1.1.1.1:443 (no DNS)", run("/usr/bin/curl", [
+            "-sS", "--max-time", "8", "-k", "-o", "/dev/null",
+            "-w", "HTTP %{http_code}, handshake %{time_appconnect}s, total %{time_total}s",
+            "https://1.1.1.1/",
+        ]))
         if let gateway {
             out += section("TCP to gateway:80", describe(tcpProbe(host: gateway, port: 80)))
         }

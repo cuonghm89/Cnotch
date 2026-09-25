@@ -53,6 +53,9 @@ final class NetworkDoctor: ObservableObject {
 
     @Published private(set) var lastResult: Result?
     @Published private(set) var isRunning = false
+    /// Which layer is being probed right now, so a long check looks like work
+    /// rather than a hang.
+    @Published private(set) var stage: String?
 
     // `nonisolated`: the class is @MainActor, so these constants are too,
     // and the probes read them from detached tasks. Swift 6 makes that
@@ -89,15 +92,24 @@ final class NetworkDoctor: ObservableObject {
     @discardableResult
     func runCheck() async -> Result {
         isRunning = true
-        defer { isRunning = false }
+        defer {
+            isRunning = false
+            stage = nil
+        }
 
+        stage = "Checking the link"
         let hasPath = await hasUsablePath()
         // Probes run in order of dependency, and each one is skipped once a
         // lower layer has already failed -- a TLS timeout tells you nothing
         // new when there's no route to send it over.
+        if hasPath { stage = "Checking routing" }
         let tcp = hasPath ? await tcpConnects() : (any: false, international: false)
         let tcpOK = tcp.any
+
+        if tcpOK { stage = "Checking DNS" }
         let dnsOK = tcpOK ? await dnsResolves() : false
+
+        if dnsOK { stage = "Checking TLS" }
         let tlsOK = dnsOK ? await tlsCompletes() : false
 
         let verdict: Verdict
@@ -179,13 +191,13 @@ final class NetworkDoctor: ObservableObject {
     private func tcpConnects() async -> (any: Bool, international: Bool) {
         await Task.detached(priority: .utility) {
             let international = Self.canConnect(
-                host: Self.tcpProbeHost, port: Self.tcpProbePort, timeout: 5
+                host: Self.tcpProbeHost, port: Self.tcpProbePort, timeout: 3
             )
             if international { return (true, true) }
             // Only now, and with a shorter deadline: this runs after a probe
             // that has already spent its five seconds failing.
             let domestic = Self.canConnect(
-                host: Self.domesticProbeHost, port: Self.domesticProbePort, timeout: 3
+                host: Self.domesticProbeHost, port: Self.domesticProbePort, timeout: 2
             )
             return (domestic, false)
         }.value
@@ -241,7 +253,7 @@ final class NetworkDoctor: ObservableObject {
                 return status == 0
             }
             group.addTask {
-                try? await Task.sleep(for: .seconds(5))
+                try? await Task.sleep(for: .seconds(3))
                 return false
             }
             let first = await group.next() ?? false
@@ -252,7 +264,7 @@ final class NetworkDoctor: ObservableObject {
 
     private func tlsCompletes() async -> Bool {
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 8
+        configuration.timeoutIntervalForRequest = 5
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.urlCache = nil
         let session = URLSession(configuration: configuration)
