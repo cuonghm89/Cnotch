@@ -5,15 +5,68 @@
 //  Created by Richard Kunkli on 09/08/2024.
 //
 
+import os
 import Defaults
 import SwiftUI
 import Sparkle
 
-final class SoftwareUpdateDelegate: NSObject, SPUUpdaterDelegate {
+@MainActor
+final class SoftwareUpdateDelegate: NSObject, SPUUpdaterDelegate, ObservableObject {
     static let shared = SoftwareUpdateDelegate()
 
-    func allowedChannels(for updater: SPUUpdater) -> Set<String> {
+    /// An update that is downloaded, verified and staged, waiting only for
+    /// the app to quit.
+    struct PendingUpdate {
+        let version: String
+        /// Installs it and relaunches, with no further interaction.
+        let installNow: () -> Void
+    }
+
+    @Published private(set) var pendingUpdate: PendingUpdate?
+
+    nonisolated func allowedChannels(for updater: SPUUpdater) -> Set<String> {
         Defaults[.softwareUpdateChannel] == .beta ? ["beta"] : []
+    }
+
+    /// Sparkle downloads an update, verifies it, unpacks it, and then waits
+    /// in silence until the app quits. Nothing on screen says so.
+    ///
+    /// This copy of the app sat six releases behind for exactly that reason:
+    /// the update was staged and ready the whole time, and the only way to
+    /// discover it was to go looking in Sparkle's cache directory.
+    ///
+    /// Returning true takes over installing, which is what makes the
+    /// "Relaunch now" button possible. The cost is that Sparkle stops its own
+    /// update cycles while one is pending -- acceptable, because the reason
+    /// it has those cycles is to eventually tell the user something, and that
+    /// is now being done here, immediately and with a button.
+    nonisolated func updater(
+        _ updater: SPUUpdater,
+        willInstallUpdateOnQuit item: SUAppcastItem,
+        immediateInstallationBlock immediateInstallHandler: @escaping () -> Void
+    ) -> Bool {
+        let version = item.displayVersionString
+        Task { @MainActor in
+            Self.shared.pendingUpdate = PendingUpdate(
+                version: version,
+                installNow: immediateInstallHandler
+            )
+            AppLog.display.notice("Update \(version, privacy: .public) staged, waiting for quit")
+            Self.shared.announce(version)
+        }
+        return true
+    }
+
+    private func announce(_ version: String) {
+        guard !CNotchViewCoordinator.shared.isScreenLocked else { return }
+        CNotchViewCoordinator.shared.toggleExpandingView(
+            status: true,
+            type: .liveActivity,
+            value: -1,
+            title: "Update ready",
+            subtitle: version,
+            icon: "arrow.down.circle.fill"
+        )
     }
 }
 
@@ -24,9 +77,9 @@ final class SoftwareUpdateDelegate: NSObject, SPUUpdaterDelegate {
 /// it's why updates were being found but never installed: the alert was shown
 /// and never seen.
 extension SoftwareUpdateDelegate: SPUStandardUserDriverDelegate {
-    var supportsGentleScheduledUpdateReminders: Bool { true }
+    nonisolated var supportsGentleScheduledUpdateReminders: Bool { true }
 
-    func standardUserDriverWillHandleShowingUpdate(
+    nonisolated func standardUserDriverWillHandleShowingUpdate(
         _ handleShowingUpdate: Bool,
         forUpdate update: SUAppcastItem,
         state: SPUUserUpdateState
@@ -35,7 +88,7 @@ extension SoftwareUpdateDelegate: SPUStandardUserDriverDelegate {
         // so pull the app forward -- otherwise the window is effectively
         // invisible for a menu bar app.
         guard handleShowingUpdate, !state.userInitiated else { return }
-        NSApp.activate(ignoringOtherApps: true)
+        Task { @MainActor in NSApp.activate(ignoringOtherApps: true) }
     }
 }
 

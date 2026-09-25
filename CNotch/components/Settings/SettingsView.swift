@@ -1527,10 +1527,34 @@ func lighterColor(from nsColor: NSColor, amount: CGFloat = 0.14) -> Color {
 struct About: View {
     @State private var showBuildNumber: Bool = false
     @State private var showOnboarding: Bool = false
+    @ObservedObject private var updateDelegate = SoftwareUpdateDelegate.shared
     let updaterController: SPUStandardUpdaterController
 
     var body: some View {
         Form {
+            if let pending = updateDelegate.pendingUpdate {
+                Section {
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(.green)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Version \(pending.version) is ready")
+                                .font(.system(size: 13, weight: .medium))
+                            // Said plainly, because the old behaviour was to
+                            // say nothing and the page still claimed the app
+                            // was up to date.
+                            Text("It installs when you quit CNotch.")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 8)
+                        Button("Relaunch Now") { pending.installNow() }
+                            .buttonStyle(.borderedProminent)
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
             Section {
                 HStack(spacing: 12) {
                     Image(nsImage: NSApp.applicationIconImage)
