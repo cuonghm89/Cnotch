@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import CoreWLAN
 import Darwin
 import Defaults
 import Foundation
@@ -28,6 +29,15 @@ final class NetworkDoctor: ObservableObject {
         case healthy
         /// No usable path at all -- genuinely offline.
         case offline
+        /// Wi-Fi is switched on but has not joined a network. Split out of
+        /// `offline` because the two want opposite remedies and the panel had
+        /// been showing the same four red rows for both. On 2026-09-28 the
+        /// Mac spent twelve minutes joining saved networks and leaving them
+        /// again four to six seconds later, and every probe failed in under a
+        /// millisecond with no route to send on -- which reads exactly like
+        /// the filter fault this class was written for, and is nothing like
+        /// it.
+        case notAssociated
         /// Path exists but raw TCP to a known IP fails: routing is broken.
         case routeBroken
         /// Raw TCP works but name resolution doesn't.
@@ -114,7 +124,7 @@ final class NetworkDoctor: ObservableObject {
 
         let verdict: Verdict
         if !hasPath {
-            verdict = .offline
+            verdict = await wifiIsOnButUnjoined() ? .notAssociated : .offline
         } else if !tcpOK {
             verdict = .routeBroken
         } else if !dnsOK {
@@ -185,6 +195,25 @@ final class NetworkDoctor: ObservableObject {
             }
         }
         return false
+    }
+
+    /// Whether Wi-Fi is powered on yet has joined nothing.
+    ///
+    /// `hasConfiguredInterface` above cannot answer this. An unassociated
+    /// `en0` still reports `UP` and `RUNNING` -- the 2026-09-28 capture has
+    /// the flags written down -- so the interface walk sees a live interface
+    /// carrying no address and reports "no path". True, and silent about why.
+    private func wifiIsOnButUnjoined() async -> Bool {
+        await Task.detached(priority: .utility) { Self.wifiUnjoined() }.value
+    }
+
+    /// `activePHYMode` rather than `ssid`: reading the network's name needs
+    /// Location permission and returns nil without it, which would make every
+    /// Mac that has not granted it look permanently unassociated. The PHY mode
+    /// is `.modeNone` exactly when nothing is joined, and needs no permission.
+    private nonisolated static func wifiUnjoined() -> Bool {
+        guard let interface = CWWiFiClient.shared().interface() else { return false }
+        return interface.powerOn() && interface.activePHYMode() == .modeNone
     }
 
     /// Whether TCP works at all, and whether it works beyond the country.
@@ -367,6 +396,7 @@ final class NetworkDoctor: ObservableObject {
         switch verdict {
         case .healthy: "Network is healthy"
         case .offline: "No network"
+        case .notAssociated: "Wi-Fi is not connected"
         case .routeBroken: "No route out"
         case .dnsBroken: "DNS is down"
         case .filterBroken: "Network filter is broken"
@@ -376,7 +406,8 @@ final class NetworkDoctor: ObservableObject {
     static func subtitle(for verdict: Verdict) -> String {
         switch verdict {
         case .healthy: "All layers responded"
-        case .offline: "Wi-Fi has no usable path"
+        case .offline: "Wi-Fi is off, or no interface has an address"
+        case .notAssociated: "Wi-Fi is on but hasn't joined a network — check which network it's on"
         case .routeBroken: "Connected, but packets go nowhere"
         case .dnsBroken: "Connections work, names don't resolve"
         case .filterBroken: "Wi-Fi and DNS are fine — a content filter is eating traffic"
@@ -387,6 +418,7 @@ final class NetworkDoctor: ObservableObject {
         switch verdict {
         case .healthy: "checkmark.circle.fill"
         case .offline: "wifi.slash"
+        case .notAssociated: "antenna.radiowaves.left.and.right.slash"
         case .routeBroken: "network.slash"
         case .dnsBroken: "wifi.exclamationmark"
         case .filterBroken: "network.badge.shield.half.filled"

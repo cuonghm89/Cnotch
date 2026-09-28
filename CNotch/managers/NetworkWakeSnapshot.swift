@@ -5,6 +5,7 @@
 //  Writes down what the network looked like the moment it broke.
 //
 
+import CoreWLAN
 import Darwin
 import Defaults
 import Foundation
@@ -81,6 +82,11 @@ enum NetworkWakeSnapshot {
 
         """
 
+        // First, because it is the question that decides which of two very
+        // different faults this is, and the four marks above cannot answer
+        // it -- both read as four failures.
+        out += section("Wi-Fi association", wifiAssociation())
+
         let gateway = defaultGateway()
         out += section("Default gateway", gateway ?? "(none found)")
 
@@ -153,6 +159,34 @@ enum NetworkWakeSnapshot {
         }.joined(separator: "\n"))
 
         return out
+    }
+
+    /// Has the Mac joined a network at all, and how many does it know?
+    ///
+    /// Both halves come from the 2026-09-28 capture, which read exactly like
+    /// the TLS fault this file was written to catch and was nothing of the
+    /// kind. The Mac had joined nothing: it held 256 saved networks -- cafés,
+    /// hotels, hotspots collected over two years -- and the office's own
+    /// enterprise SSID was not among them, so the best network it knew there
+    /// was a captive portal. It joined, found no way out, left four seconds
+    /// later, tried the next, and went round for twelve minutes. The capture
+    /// landed in one of the gaps.
+    private static func wifiAssociation() -> String {
+        var lines: [String] = []
+        if let interface = CWWiFiClient.shared().interface() {
+            lines.append("  Power        \(interface.powerOn() ? "on" : "off")")
+            lines.append("  Joined       \(interface.activePHYMode() == .modeNone ? "NO — not associated" : "yes")")
+            // nil unless Location permission was granted, which is not a
+            // fault and must not be written down as one.
+            lines.append("  SSID         \(interface.ssid() ?? "(needs Location permission)")")
+        } else {
+            lines.append("  (no Wi-Fi interface)")
+        }
+        // The header line is "Preferred networks on en0:", hence dropFirst.
+        let saved = run("/usr/sbin/networksetup", ["-listpreferredwirelessnetworks", "en0"])
+            .split(separator: "\n").dropFirst().count
+        lines.append("  Saved nets   \(saved)")
+        return lines.joined(separator: "\n")
     }
 
     private static func section(_ title: String, _ body: String) -> String {
