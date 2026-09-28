@@ -44,6 +44,15 @@ final class NetworkDoctor: ObservableObject {
         case dnsBroken
         /// TCP and DNS both fine, but TLS dies -- the filtering layer.
         case filterBroken
+        /// Connections open and then carry nothing, encrypted or not.
+        ///
+        /// Told apart from `filterBroken` by a plaintext fetch, because a
+        /// failing TLS probe does not mean TLS is at fault. On 2026-09-28 a
+        /// bare HTTP request to a literal address returned zero bytes over a
+        /// connection that had opened in 54ms, while ICMP and UDP were
+        /// perfect -- so the break was in TCP payload and the word "TLS",
+        /// which this bug had been called for two weeks, was wrong.
+        case dataStalled
     }
 
     struct Result: Equatable {
@@ -57,6 +66,9 @@ final class NetworkDoctor: ObservableObject {
         let tcpInternationalOK: Bool
         let dnsOK: Bool
         let tlsOK: Bool
+        /// nil when it was never asked -- only a failing TLS probe is worth
+        /// following with this one.
+        let carriesData: Bool?
         let verdict: Verdict
         let checkedAt: Date
     }
@@ -80,6 +92,10 @@ final class NetworkDoctor: ObservableObject {
     /// its job. Not anycast, so it is the fallback and never the first ask.
     private nonisolated static let domesticProbeHost = "203.113.131.1"
     private nonisolated static let domesticProbePort: UInt16 = 53
+    /// The plaintext byte probe's target. Port 80 on the same address the
+    /// TCP probe uses, so a failure here cannot be blamed on a different
+    /// host, a different route, or a name that would not resolve.
+    private nonisolated static let bytesProbePort: UInt16 = 80
     private nonisolated static let dnsProbeHost = "www.apple.com"
     /// The same tiny page macOS itself uses for connectivity checks.
     private static let tlsProbeURL = URL(string: "https://www.apple.com/library/test/success.html")!
@@ -122,6 +138,14 @@ final class NetworkDoctor: ObservableObject {
         if dnsOK { stage = "Checking TLS" }
         let tlsOK = dnsOK ? await tlsCompletes() : false
 
+        // Only when TLS failed, and only to ask whether encryption had
+        // anything to do with it.
+        var carriesData: Bool?
+        if dnsOK, !tlsOK {
+            stage = "Checking whether data flows"
+            carriesData = await plaintextBytesFlow()
+        }
+
         let verdict: Verdict
         if !hasPath {
             verdict = await wifiIsOnButUnjoined() ? .notAssociated : .offline
@@ -130,7 +154,7 @@ final class NetworkDoctor: ObservableObject {
         } else if !dnsOK {
             verdict = .dnsBroken
         } else if !tlsOK {
-            verdict = .filterBroken
+            verdict = carriesData == false ? .dataStalled : .filterBroken
         } else {
             verdict = .healthy
         }
@@ -141,6 +165,7 @@ final class NetworkDoctor: ObservableObject {
             tcpInternationalOK: tcp.international,
             dnsOK: dnsOK,
             tlsOK: tlsOK,
+            carriesData: carriesData,
             verdict: verdict,
             checkedAt: Date()
         )
@@ -238,6 +263,20 @@ final class NetworkDoctor: ObservableObject {
     /// believed when the network stack misbehaves has no business depending on
     /// the part of it that is misbehaving.
     private nonisolated static func canConnect(host: String, port: UInt16, timeout: TimeInterval) -> Bool {
+        guard let descriptor = openConnection(host: host, port: port, timeout: timeout) else { return false }
+        close(descriptor)
+        return true
+    }
+
+    /// A connected, non-blocking socket, or nil. The caller closes it.
+    ///
+    /// Shared by the two probes that need one, because "did the handshake
+    /// finish" and "did any bytes follow" are the same connection asked two
+    /// questions, and the second is only meaningful on a socket the first
+    /// has already accepted.
+    private nonisolated static func openConnection(
+        host: String, port: UInt16, timeout: TimeInterval
+    ) -> Int32? {
         var hints = addrinfo()
         hints.ai_family = AF_UNSPEC
         hints.ai_socktype = SOCK_STREAM
@@ -245,29 +284,76 @@ final class NetworkDoctor: ObservableObject {
         // is the next probe down and reported separately.
         hints.ai_flags = AI_NUMERICHOST
         var info: UnsafeMutablePointer<addrinfo>?
-        guard getaddrinfo(host, String(port), &hints, &info) == 0, let resolved = info else { return false }
+        guard getaddrinfo(host, String(port), &hints, &info) == 0, let resolved = info else { return nil }
         defer { freeaddrinfo(info) }
 
         let descriptor = socket(
             resolved.pointee.ai_family, resolved.pointee.ai_socktype, resolved.pointee.ai_protocol
         )
-        guard descriptor >= 0 else { return false }
-        defer { close(descriptor) }
+        guard descriptor >= 0 else { return nil }
 
         // Non-blocking, so the connect can be given a deadline of our own
         // rather than the kernel's minute-and-a-bit.
         _ = fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFL, 0) | O_NONBLOCK)
-        if connect(descriptor, resolved.pointee.ai_addr, resolved.pointee.ai_addrlen) == 0 { return true }
-        guard errno == EINPROGRESS else { return false }
+        if connect(descriptor, resolved.pointee.ai_addr, resolved.pointee.ai_addrlen) == 0 {
+            return descriptor
+        }
+        guard errno == EINPROGRESS else { close(descriptor); return nil }
 
         var poller = pollfd(fd: descriptor, events: Int16(POLLOUT), revents: 0)
-        guard poll(&poller, 1, Int32(timeout * 1000)) > 0 else { return false }
+        guard poll(&poller, 1, Int32(timeout * 1000)) > 0 else { close(descriptor); return nil }
         // Writable only means the attempt finished; it still has to have
         // finished successfully, and a refusal also reports as writable.
         var failure: Int32 = 0
         var size = socklen_t(MemoryLayout<Int32>.size)
-        guard getsockopt(descriptor, SOL_SOCKET, SO_ERROR, &failure, &size) == 0 else { return false }
-        return failure == 0
+        guard getsockopt(descriptor, SOL_SOCKET, SO_ERROR, &failure, &size) == 0, failure == 0 else {
+            close(descriptor)
+            return nil
+        }
+        return descriptor
+    }
+
+    /// Whether a connection that opened will actually carry bytes.
+    ///
+    /// Deliberately plaintext and deliberately to a literal address: no TLS,
+    /// no DNS, no proxy, nothing but a request out and an answer back. When
+    /// this fails on a socket that connected, encryption cannot be the cause
+    /// and neither can name resolution.
+    ///
+    /// A raw socket rather than `URLSession` because App Transport Security
+    /// refuses cleartext http:// -- and the whole value of this probe is that
+    /// it is cleartext.
+    private func plaintextBytesFlow() async -> Bool {
+        await Task.detached(priority: .utility) {
+            Self.receivesBytes(
+                host: Self.tcpProbeHost, port: Self.bytesProbePort, timeout: 4
+            )
+        }.value
+    }
+
+    private nonisolated static func receivesBytes(
+        host: String, port: UInt16, timeout: TimeInterval
+    ) -> Bool {
+        guard let descriptor = openConnection(host: host, port: port, timeout: timeout) else {
+            // Never opened, so this probe has nothing to say: the layer below
+            // already reported the failure and calling it a data stall would
+            // be inventing a second fault out of the first one.
+            return true
+        }
+        defer { close(descriptor) }
+
+        // HTTP/1.0 so the server closes rather than holding the connection
+        // open, and Host: because 1.1.1.1 serves a name-based site.
+        let request = "HEAD / HTTP/1.0\r\nHost: one.one.one.one\r\n\r\n"
+        let sent = request.withCString { send(descriptor, $0, strlen($0), 0) }
+        guard sent > 0 else { return false }
+
+        var poller = pollfd(fd: descriptor, events: Int16(POLLIN), revents: 0)
+        guard poll(&poller, 1, Int32(timeout * 1000)) > 0 else { return false }
+        var buffer = [UInt8](repeating: 0, count: 64)
+        // Any byte at all is the answer. What it says does not matter -- an
+        // error page proves the path carries data just as well as a 200.
+        return recv(descriptor, &buffer, buffer.count, 0) > 0
     }
 
     private func dnsResolves() async -> Bool {
@@ -400,6 +486,7 @@ final class NetworkDoctor: ObservableObject {
         case .routeBroken: "No route out"
         case .dnsBroken: "DNS is down"
         case .filterBroken: "Network filter is broken"
+        case .dataStalled: "Connections carry no data"
         }
     }
 
@@ -411,6 +498,7 @@ final class NetworkDoctor: ObservableObject {
         case .routeBroken: "Connected, but packets go nowhere"
         case .dnsBroken: "Connections work, names don't resolve"
         case .filterBroken: "Wi-Fi and DNS are fine — a content filter is eating traffic"
+        case .dataStalled: "Connections open and then stall — not encryption; a socket filter is holding traffic"
         }
     }
 
@@ -422,6 +510,7 @@ final class NetworkDoctor: ObservableObject {
         case .routeBroken: "network.slash"
         case .dnsBroken: "wifi.exclamationmark"
         case .filterBroken: "network.badge.shield.half.filled"
+        case .dataStalled: "arrow.up.arrow.down.circle.fill"
         }
     }
 }

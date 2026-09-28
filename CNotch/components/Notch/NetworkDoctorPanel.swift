@@ -31,6 +31,13 @@ struct NetworkDoctorPanel: View {
                     }
                     layerRow("DNS", ok: result.dnsOK)
                     layerRow("TLS handshake", ok: result.tlsOK)
+                    // Only drawn when it was asked, which is only when TLS
+                    // failed. A red TLS row on its own invites the wrong
+                    // conclusion -- this row is what says whether encryption
+                    // had anything to do with it.
+                    if let carriesData = result.carriesData {
+                        layerRow("Plain data transfer", ok: carriesData)
+                    }
                 }
 
                 Divider()
