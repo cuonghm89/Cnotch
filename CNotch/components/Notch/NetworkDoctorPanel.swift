@@ -62,6 +62,25 @@ struct NetworkDoctorPanel: View {
                     .foregroundStyle(.secondary)
                 }
 
+                if showsFilterRemedy(result.verdict) {
+                    Divider()
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Restarting the extension that filters traffic clears this, without a reboot.")
+                            .font(.system(size: 14))
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button {
+                            NSWorkspace.shared.open(Self.extensionsPane)
+                        } label: {
+                            Label("Open Login Items & Extensions", systemImage: "gearshape")
+                                .font(.system(size: 14))
+                        }
+                        .buttonStyle(.link)
+                    }
+                }
+
                 if !filters.isEmpty {
                     Divider()
                     Text("Network filters")
@@ -113,6 +132,28 @@ struct NetworkDoctorPanel: View {
             guard !doctor.isRunning else { return }
             result = await doctor.runCheck()
         }
+    }
+
+    /// Where the remedy lives, and it is not where the name suggests.
+    ///
+    /// The filter that broke the network on 2026-09-28 and 2026-09-29 runs
+    /// inside Kaspersky's *Endpoint Security* extension, not a network one --
+    /// the flows arrive at `com.kaspersky.kav.sysext`, even though the
+    /// NEFilterProviderConfiguration names `kavd` as its provider bundle.
+    /// Reading the config instead of watching which process did the work sent
+    /// the user to the wrong Settings pane for a day.
+    ///
+    /// This opens Login Items & Extensions rather than a deeper anchor
+    /// because that is the pane the system actually exposes by URL; the
+    /// Endpoint Security list is a section within it.
+    private static let extensionsPane = URL(
+        string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension"
+    )!
+
+    /// Only the two verdicts that have a remedy worth naming. Suggesting a
+    /// fix for the others would be inventing one.
+    private func showsFilterRemedy(_ verdict: NetworkDoctor.Verdict) -> Bool {
+        verdict == .filterBroken || verdict == .dataStalled
     }
 
     /// The scan lists every app bundle, reads each .appex's Info.plist and
