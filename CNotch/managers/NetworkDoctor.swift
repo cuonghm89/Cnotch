@@ -53,6 +53,29 @@ final class NetworkDoctor: ObservableObject {
         /// perfect -- so the break was in TCP payload and the word "TLS",
         /// which this bug had been called for two weeks, was wrong.
         case dataStalled
+        /// Port 443 will not open while port 80 carries bytes to the same
+        /// address.
+        ///
+        /// Nothing is eating TLS here -- the port itself is shut, which is
+        /// what a guest network does once its sign-in lapses. On 2026-10-06
+        /// this was reported as `filterBroken` on a Mac whose filter was
+        /// switched off, because a failing TLS probe was being read as proof
+        /// of a filter. Port 80 answered `HTTP 200, 463 bytes` in the same
+        /// capture, and that is the fact that separates the two.
+        case portBlocked
+    }
+
+    /// What a plaintext request to a literal address found. Three outcomes,
+    /// not two: "the socket never opened" is not the same answer as "it
+    /// opened and nothing came back", and collapsing them turns one fault
+    /// into a different one.
+    enum DataFlow {
+        /// Bytes came back, whatever TLS is doing.
+        case flowed
+        /// The socket opened and then nothing arrived.
+        case stalled
+        /// The socket never opened, so this probe has nothing to say.
+        case noConnection
     }
 
     struct Result: Equatable {
@@ -68,7 +91,7 @@ final class NetworkDoctor: ObservableObject {
         let tlsOK: Bool
         /// nil when it was never asked -- only a failing TLS probe is worth
         /// following with this one.
-        let carriesData: Bool?
+        let dataFlow: DataFlow?
         let verdict: Verdict
         let checkedAt: Date
     }
@@ -140,10 +163,10 @@ final class NetworkDoctor: ObservableObject {
 
         // Only when TLS failed, and only to ask whether encryption had
         // anything to do with it.
-        var carriesData: Bool?
+        var dataFlow: DataFlow?
         if dnsOK, !tlsOK {
             stage = "Checking whether data flows"
-            carriesData = await plaintextBytesFlow()
+            dataFlow = await plaintextBytesFlow()
         }
 
         let verdict: Verdict
@@ -154,7 +177,16 @@ final class NetworkDoctor: ObservableObject {
         } else if !dnsOK {
             verdict = .dnsBroken
         } else if !tlsOK {
-            verdict = carriesData == false ? .dataStalled : .filterBroken
+            switch dataFlow {
+            case .stalled:
+                verdict = .dataStalled
+            // Bytes move on port 80, but port 443 would not even open. That
+            // is a shut port, not something eating the handshake.
+            case .flowed where !tcp.international:
+                verdict = .portBlocked
+            default:
+                verdict = .filterBroken
+            }
         } else {
             verdict = .healthy
         }
@@ -165,7 +197,7 @@ final class NetworkDoctor: ObservableObject {
             tcpInternationalOK: tcp.international,
             dnsOK: dnsOK,
             tlsOK: tlsOK,
-            carriesData: carriesData,
+            dataFlow: dataFlow,
             verdict: verdict,
             checkedAt: Date()
         )
@@ -323,7 +355,7 @@ final class NetworkDoctor: ObservableObject {
     /// A raw socket rather than `URLSession` because App Transport Security
     /// refuses cleartext http:// -- and the whole value of this probe is that
     /// it is cleartext.
-    private func plaintextBytesFlow() async -> Bool {
+    private func plaintextBytesFlow() async -> DataFlow {
         await Task.detached(priority: .utility) {
             Self.receivesBytes(
                 host: Self.tcpProbeHost, port: Self.bytesProbePort, timeout: 4
@@ -333,12 +365,12 @@ final class NetworkDoctor: ObservableObject {
 
     private nonisolated static func receivesBytes(
         host: String, port: UInt16, timeout: TimeInterval
-    ) -> Bool {
+    ) -> DataFlow {
         guard let descriptor = openConnection(host: host, port: port, timeout: timeout) else {
             // Never opened, so this probe has nothing to say: the layer below
             // already reported the failure and calling it a data stall would
             // be inventing a second fault out of the first one.
-            return true
+            return .noConnection
         }
         defer { close(descriptor) }
 
@@ -346,14 +378,15 @@ final class NetworkDoctor: ObservableObject {
         // open, and Host: because 1.1.1.1 serves a name-based site.
         let request = "HEAD / HTTP/1.0\r\nHost: one.one.one.one\r\n\r\n"
         let sent = request.withCString { send(descriptor, $0, strlen($0), 0) }
-        guard sent > 0 else { return false }
+        guard sent > 0 else { return .stalled }
 
         var poller = pollfd(fd: descriptor, events: Int16(POLLIN), revents: 0)
-        guard poll(&poller, 1, Int32(timeout * 1000)) > 0 else { return false }
+        guard poll(&poller, 1, Int32(timeout * 1000)) > 0 else { return .stalled }
         var buffer = [UInt8](repeating: 0, count: 64)
-        // Any byte at all is the answer. What it says does not matter -- an
-        // error page proves the path carries data just as well as a 200.
-        return recv(descriptor, &buffer, buffer.count, 0) > 0
+        // Any byte at all is the answer. What it says does not matter -- a
+        // captive portal's redirect proves the path carries data just as well
+        // as a 200 from the real server.
+        return recv(descriptor, &buffer, buffer.count, 0) > 0 ? .flowed : .stalled
     }
 
     private func dnsResolves() async -> Bool {
@@ -487,6 +520,7 @@ final class NetworkDoctor: ObservableObject {
         case .dnsBroken: "DNS is down"
         case .filterBroken: "Network filter is broken"
         case .dataStalled: "Connections carry no data"
+        case .portBlocked: "HTTPS is blocked"
         }
     }
 
@@ -499,6 +533,7 @@ final class NetworkDoctor: ObservableObject {
         case .dnsBroken: "Connections work, names don't resolve"
         case .filterBroken: "Wi-Fi and DNS are fine — a content filter is eating traffic"
         case .dataStalled: "Connections open and then stall — not encryption; a socket filter is holding traffic"
+        case .portBlocked: "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
         }
     }
 
@@ -511,6 +546,7 @@ final class NetworkDoctor: ObservableObject {
         case .dnsBroken: "wifi.exclamationmark"
         case .filterBroken: "network.badge.shield.half.filled"
         case .dataStalled: "arrow.up.arrow.down.circle.fill"
+        case .portBlocked: "lock.slash"
         }
     }
 }

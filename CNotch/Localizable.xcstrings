@@ -19823,6 +19823,112 @@
         }
       }
     },
+    "HTTPS is blocked" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HTTPS đang bị chặn"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "HTTPS is blocked"
+          }
+        }
+      }
+    },
     "HUD" : {
       "localizations" : {
         "ar" : {
@@ -31365,6 +31471,112 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "Plain data transfer"
+          }
+        }
+      }
+    },
+    "Plain web traffic works but port 443 won't open \u2014 a guest network may want you to sign in again" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Truy cập web thường vẫn chạy nhưng cổng 443 không mở được — mạng khách có thể đang đòi đăng nhập lại"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Plain web traffic works but port 443 won't open — a guest network may want you to sign in again"
           }
         }
       }

@@ -17,7 +17,11 @@ struct NetworkDoctorPanel: View {
                 VStack(alignment: .leading, spacing: 10) {
                     layerRow("Wi-Fi path", ok: result.hasPath)
                     layerRow("Routing (TCP)", ok: result.tcpOK)
-                    if result.tcpOK, !result.tcpInternationalOK {
+                    // Not when the verdict is portBlocked: there the byte
+                    // probe has just shown the international host answering
+                    // on port 80, so calling it unreachable would contradict
+                    // the row below.
+                    if result.tcpOK, !result.tcpInternationalOK, result.verdict != .portBlocked {
                         // Green above, because packets are moving; this is
                         // the part that green cannot say on its own.
                         Text("Only the domestic route answered — international is unreachable.")
@@ -35,8 +39,8 @@ struct NetworkDoctorPanel: View {
                     // failed. A red TLS row on its own invites the wrong
                     // conclusion -- this row is what says whether encryption
                     // had anything to do with it.
-                    if let carriesData = result.carriesData {
-                        layerRow("Plain data transfer", ok: carriesData)
+                    if let flow = result.dataFlow, flow != .noConnection {
+                        layerRow("Plain data transfer", ok: flow == .flowed)
                     }
                 }
 
