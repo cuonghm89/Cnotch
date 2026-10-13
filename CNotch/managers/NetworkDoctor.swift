@@ -92,6 +92,11 @@ final class NetworkDoctor: ObservableObject {
         /// nil when it was never asked -- only a failing TLS probe is worth
         /// following with this one.
         let dataFlow: DataFlow?
+        /// How many times the Wi-Fi link changed recently, and how many
+        /// networks this Mac has saved. Both nil unless the Mac has joined
+        /// nothing, which is the only verdict they explain.
+        let wifiHops: Int?
+        let savedNetworks: Int?
         let verdict: Verdict
         let checkedAt: Date
     }
@@ -126,7 +131,26 @@ final class NetworkDoctor: ObservableObject {
     private var wakeObserver: Any?
     private var wakeTask: Task<Void, Never>?
 
+    /// When the network was first seen broken, so a recovery can say how long
+    /// it lasted. Cleared once the recovery has been announced.
+    private var brokenSince: Date?
+    private var recoveryWatch: Task<Void, Never>?
+
+    /// Short blips are the after-wake check confirming itself, not an outage
+    /// anyone noticed; that sequence spans about twenty seconds.
+    private static let outageWorthMentioning: TimeInterval = 120
+    /// Re-checks while broken, so a recovery is noticed within a minute
+    /// instead of waiting for the next wake or for the panel to be opened.
+    /// Only while broken: a healthy Mac polls nothing.
+    private static let recoveryPollInterval: TimeInterval = 60
+    /// A bounded watch. If it has been broken this long nobody is waiting on
+    /// a notification any more, and the panel still reports on demand.
+    private static let recoveryWatchLimit: TimeInterval = 3600
+
     private init() {
+        // Counting has to start before the hunt does, not when the panel is
+        // opened in the middle of one.
+        WiFiHops.shared.start()
         wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification,
             object: nil,
@@ -191,6 +215,15 @@ final class NetworkDoctor: ObservableObject {
             verdict = .healthy
         }
 
+        // Only for the verdict they explain. The saved-network count costs a
+        // subprocess, and a healthy Mac has no use for it.
+        var hops: Int?
+        var saved: Int?
+        if verdict == .notAssociated {
+            hops = WiFiHops.shared.recentCount
+            saved = await savedNetworkCount()
+        }
+
         let result = Result(
             hasPath: hasPath,
             tcpOK: tcpOK,
@@ -198,10 +231,13 @@ final class NetworkDoctor: ObservableObject {
             dnsOK: dnsOK,
             tlsOK: tlsOK,
             dataFlow: dataFlow,
+            wifiHops: hops,
+            savedNetworks: saved,
             verdict: verdict,
             checkedAt: Date()
         )
         lastResult = result
+        noteRecovery(verdict)
         return result
     }
 
@@ -493,6 +529,110 @@ final class NetworkDoctor: ObservableObject {
         }
     }
 
+    /// Says when the network comes back, which this never used to do.
+    ///
+    /// It only ever spoke up about failures, so an outage that cleared left
+    /// the user with no sign of it. That matters because some apps do not
+    /// recover on their own: on 2026-10-06 Gemini's long-lived connections
+    /// died during a 55-minute outage and every call it made for the next
+    /// four hours timed out, because the app had been running throughout and
+    /// never rebuilt them. Quitting it was the fix; knowing to was the hard
+    /// part.
+    private func noteRecovery(_ verdict: Verdict) {
+        guard verdict != .healthy else {
+            recoveryWatch?.cancel()
+            recoveryWatch = nil
+            guard let since = brokenSince else { return }
+            brokenSince = nil
+            let outage = Date().timeIntervalSince(since)
+            guard outage >= Self.outageWorthMentioning else { return }
+            announceRecovery(after: outage)
+            return
+        }
+        guard brokenSince == nil else { return }
+        brokenSince = Date()
+        startRecoveryWatch()
+    }
+
+    private func startRecoveryWatch() {
+        recoveryWatch?.cancel()
+        recoveryWatch = Task { @MainActor [weak self] in
+            let deadline = Date().addingTimeInterval(Self.recoveryWatchLimit)
+            while Date() < deadline {
+                try? await Task.sleep(for: .seconds(Self.recoveryPollInterval))
+                guard !Task.isCancelled, let self, self.brokenSince != nil else { return }
+                // runCheck calls back into noteRecovery, which cancels this
+                // task once the answer is healthy.
+                _ = await self.runCheck()
+            }
+        }
+    }
+
+    /// Deliberately not interpolated with the outage length.
+    ///
+    /// These strings are plain catalog keys that the views look up by their
+    /// literal text, because the in-app language picker overrides SwiftUI's
+    /// environment locale and `String(localized:)` does not read it. An
+    /// interpolated String would match no key and show English forever. The
+    /// duration is decoration; "restart what you left open" is the whole
+    /// point, and that fits in a fixed line.
+    private func announceRecovery(after outage: TimeInterval) {
+        CNotchViewCoordinator.shared.toggleExpandingView(
+            status: true,
+            type: .liveActivity,
+            value: -1,
+            title: "Network is back",
+            subtitle: "Apps left open may need restarting",
+            icon: "checkmark.circle.fill"
+        )
+    }
+
+    /// How many networks this Mac would join on its own.
+    ///
+    /// The count is the cause, not a symptom: with 255 of them saved and the
+    /// office's own SSID not among them, the best network this Mac knew at
+    /// work was a captive portal, so it joined, found no way out, left, and
+    /// moved to the next -- for twelve minutes on 2026-09-28 and again on
+    /// 09-29.
+    /// Its own queue, because this waits on a subprocess.
+    ///
+    /// `Task.detached` would put that wait on Swift concurrency's cooperative
+    /// pool, which is only as wide as the machine has cores and is shared by
+    /// the whole app. Blocking it is what deadlocked every async call in
+    /// CNotch once already.
+    private nonisolated static let shellQueue = DispatchQueue(
+        label: "com.cuonghm89.cnotch.netdoctor.shell", qos: .utility
+    )
+
+    private func savedNetworkCount() async -> Int? {
+        await withCheckedContinuation { continuation in
+            Self.shellQueue.async {
+                continuation.resume(returning: Self.readSavedNetworkCount())
+            }
+        }
+    }
+
+    private nonisolated static func readSavedNetworkCount() -> Int? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/sbin/networksetup")
+        process.arguments = ["-listpreferredwirelessnetworks", "en0"]
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+        guard (try? process.run()) != nil else { return nil }
+        // Bounded: a subprocess that never exits would hold this queue's
+        // thread for good.
+        let watchdog = DispatchWorkItem { if process.isRunning { process.terminate() } }
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 5, execute: watchdog)
+        let data = (try? pipe.fileHandleForReading.readToEnd()) ?? Data()
+        process.waitUntilExit()
+        watchdog.cancel()
+        // The first line is "Preferred networks on en0:".
+        let lines = String(decoding: data, as: UTF8.self)
+            .split(separator: "\n", omittingEmptySubsequences: true)
+        return max(0, lines.count - 1)
+    }
+
     private func announce(_ result: Result) {
         CNotchViewCoordinator.shared.toggleExpandingView(
             status: true,
@@ -547,6 +687,50 @@ final class NetworkDoctor: ObservableObject {
         case .filterBroken: "network.badge.shield.half.filled"
         case .dataStalled: "arrow.up.arrow.down.circle.fill"
         case .portBlocked: "lock.slash"
+        }
+    }
+}
+
+/// Counts how often the Wi-Fi link changes, so "not associated" can say
+/// whether the Mac is sitting still or hunting.
+///
+/// The hunt is the shape of a real bug seen twice: macOS joins a saved
+/// network, finds no way to the internet, leaves four to six seconds later
+/// and tries the next one, round and round. A single snapshot of that looks
+/// identical to a dead router -- it is only the churn that tells them apart,
+/// and a count is something this app can measure rather than guess at.
+///
+/// `linkDidChange` rather than `ssidDidChange`: reading the network's name
+/// needs Location permission, which this Mac has not granted, so the names
+/// would come back empty. The count needs no permission.
+@MainActor
+final class WiFiHops: NSObject, CWEventDelegate {
+    static let shared = WiFiHops()
+
+    /// Long enough to cover a hunt, short enough that yesterday's roaming
+    /// does not count towards today.
+    private static let window: TimeInterval = 10 * 60
+    private var changes: [Date] = []
+
+    func start() {
+        let client = CWWiFiClient.shared()
+        client.delegate = self
+        try? client.startMonitoringEvent(with: .linkDidChange)
+    }
+
+    /// Link changes in the last ten minutes. A join and a leave are two
+    /// events, so a hunt counts roughly double -- which is why the panel
+    /// talks about "changes" and not "networks".
+    var recentCount: Int {
+        let cutoff = Date().addingTimeInterval(-Self.window)
+        changes.removeAll { $0 < cutoff }
+        return changes.count
+    }
+
+    // Called on CoreWLAN's own thread.
+    nonisolated func linkDidChangeForWiFiInterface(withName interfaceName: String) {
+        Task { @MainActor [weak self] in
+            self?.changes.append(Date())
         }
     }
 }

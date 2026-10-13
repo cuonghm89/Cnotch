@@ -42,6 +42,31 @@ struct NetworkDoctorPanel: View {
                     if let flow = result.dataFlow, flow != .noConnection {
                         layerRow("Plain data transfer", ok: flow == .flowed)
                     }
+
+                    // The churn, when there is any. A still Mac that has
+                    // joined nothing and one that is hunting through its
+                    // saved networks look identical in the rows above, and
+                    // they want completely different things done about them.
+                    if let hops = result.wifiHops, hops >= 3 {
+                        Text("The Wi-Fi link changed \(hops) times in the last 10 minutes — the Mac is hunting through saved networks.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.leading, 23)
+                    }
+                    if let saved = result.savedNetworks, saved >= 50 {
+                        Text("\(saved) saved networks. Joining the one you actually want stops the hunting.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(nil)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.leading, 23)
+                    }
                 }
 
                 Divider()
