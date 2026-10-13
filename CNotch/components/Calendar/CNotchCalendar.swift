@@ -376,6 +376,7 @@ struct EventListView: View {
     let events: [EventModel]
     @Default(.autoScrollToNextEvent) private var autoScrollToNextEvent
     @Default(.showFullEventTitles) private var showFullEventTitles
+    @Default(.calendarJoinMeetingEnabled) private var joinMeetingEnabled
 
 
     static func filteredEvents(events: [EventModel]) -> [EventModel] {
@@ -419,16 +420,39 @@ struct EventListView: View {
         ScrollViewReader { proxy in
             List {
                 ForEach(filteredEvents) { event in
-                    Button(action: {
-                        if let url = event.calendarAppURL() {
-                            openURL(url)
+                    HStack(spacing: 8) {
+                        Button(action: {
+                            if let url = event.calendarAppURL() {
+                                openURL(url)
+                            }
+                        }) {
+                            eventRow(event)
                         }
-                    }) {
-                        eventRow(event)
+                        .buttonStyle(.plain)
+
+                        // A sibling of the row's button, never nested inside
+                        // it: two buttons sharing one hit area is a coin toss
+                        // over which one gets the click.
+                        if joinMeetingEnabled,
+                           event.eventStatus != .ended,
+                           let meeting = event.meetingURL {
+                            Button { openURL(meeting) } label: {
+                                Image(systemName: "video.fill")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 7)
+                                    .padding(.vertical, 5)
+                                    .background(
+                                        Color.accentColor,
+                                        in: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .help("Join the meeting")
+                        }
                     }
                     .id(event.id)
                     .padding(.leading, -5)
-                    .buttonStyle(.plain)
                     .listRowSeparator(.automatic)
                     .listRowSeparatorTint(.gray.opacity(0.2))
                     .listRowBackground(Color.clear)

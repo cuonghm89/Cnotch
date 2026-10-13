@@ -82,6 +82,52 @@ extension EventModel {
 
     var isMeeting: Bool { !participants.isEmpty }
 
+    /// The link that joins this meeting, if the invitation carries one.
+    ///
+    /// Invitations do not agree on where to put it: Google Calendar fills in
+    /// the event's URL field, Outlook writes it into the body, and people
+    /// paste it into the location by hand. All three are read, in that order,
+    /// and the first recognised link wins.
+    var meetingURL: URL? {
+        if let url, Self.isMeetingLink(url) { return url }
+        for text in [location, notes].compactMap({ $0 }) {
+            if let found = Self.firstMeetingLink(in: text) { return found }
+        }
+        return nil
+    }
+
+    /// Hosts whose links join a call rather than open a page. Deliberately a
+    /// short list of exact hosts: matching anything that merely looks like a
+    /// meeting would put a Join button on invitations that have no call, and
+    /// a button that sometimes goes nowhere is worse than no button.
+    private static let meetingHosts = [
+        "teams.microsoft.com", "teams.live.com", "teams.cloud.microsoft",
+        "meet.google.com", "zoom.us", "webex.com", "whereby.com", "meet.jit.si",
+    ]
+
+    static func isMeetingLink(_ url: URL) -> Bool {
+        guard let host = url.host?.lowercased() else { return false }
+        // The leading dot matters: without it "notzoom.us" would match.
+        return meetingHosts.contains { host == $0 || host.hasSuffix("." + $0) }
+    }
+
+    /// `NSDataDetector` rather than a regular expression of our own: finding
+    /// URLs inside prose is a solved problem, and invitation bodies are full
+    /// of wrapped lines, trailing punctuation and HTML that a hand-rolled
+    /// pattern gets wrong.
+    static func firstMeetingLink(in text: String) -> URL? {
+        guard !text.isEmpty,
+              let detector = try? NSDataDetector(
+                  types: NSTextCheckingResult.CheckingType.link.rawValue
+              )
+        else { return nil }
+        let range = NSRange(text.startIndex..., in: text)
+        for match in detector.matches(in: text, range: range) {
+            if let url = match.url, isMeetingLink(url) { return url }
+        }
+        return nil
+    }
+
     func calendarAppURL() -> URL? {
 
         guard let id = id.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else {

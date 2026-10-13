@@ -1417,6 +1417,9 @@ struct CalendarSettings: View {
                 Defaults.Toggle(key: .showFullEventTitles) {
                     Text("Always show full event titles")
                 }
+                Defaults.Toggle(key: .calendarJoinMeetingEnabled) {
+                    Text("Show a Join button on meetings")
+                }
             }
             .disabled(!hasAnyAccess || !showCalendar)
             Section(header: Text("Calendars")) {
