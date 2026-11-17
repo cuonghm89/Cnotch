@@ -212,7 +212,9 @@ jobs:
           git config --global credential.https://github.com.helper \
             "!f() { echo \"username=x-access-token\"; printf \"password=%s\\n\" \"\${GITHUB_TOKEN}\"; }; f"
           git fetch origin main
-          git checkout -B main origin/main
+          # -f: the tag's appcast.xml (already saved to RUNNER_TEMP) differs
+          # from main's whenever another release landed after this tag.
+          git checkout -f -B main origin/main
           cp "$RUNNER_TEMP/appcast.xml" updater/appcast.xml
           git add updater/appcast.xml
           git commit -m "Update appcast for ${TAG}" || true
