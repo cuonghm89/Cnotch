@@ -476,6 +476,50 @@ class MusicManager: ObservableObject {
 
     @MainActor
     private func fetchLyricsFromWeb(title: String, artist: String) async {
+        await fetchFromLRCLIB(title: title, artist: artist)
+        // LRCLIB often has only plain text (or nothing) for Vietnamese songs;
+        // NetEase usually has timed lyrics for them, which the compact pill needs.
+        guard syncedLyrics.isEmpty, songTitle == title else { return }
+        guard let lrc = await fetchNetEaseLRC(title: title, artist: artist), songTitle == title else { return }
+        // Drop NetEase's Chinese credit lines ("作词 : ...", "作曲 : ...").
+        let lines = parseLRC(lrc).filter { $0.text.range(of: #"^[\p{Han}\s]+[:：]"#, options: .regularExpression) == nil }
+        guard !lines.isEmpty else { return }
+        syncedLyrics = lines
+        if currentLyrics.isEmpty { currentLyrics = lines.map(\.text).joined(separator: "\n") }
+    }
+
+    /// NetEase Cloud Music public endpoints (no auth): search, then fetch LRC.
+    private func fetchNetEaseLRC(title: String, artist: String) async -> String? {
+        let searchTitle = stripFeaturing(title)
+        var search = URLComponents(string: "https://music.163.com/api/search/get")!
+        search.queryItems = [
+            .init(name: "s", value: "\(searchTitle) \(artist)"),
+            .init(name: "type", value: "1"),
+            .init(name: "limit", value: "5"),
+        ]
+        guard let searchURL = search.url,
+              let (data, _) = try? await URLSession.shared.data(from: searchURL),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let songs = (json["result"] as? [String: Any])?["songs"] as? [[String: Any]]
+        else { return nil }
+        for song in songs {
+            let artists = (song["artists"] as? [[String: Any]] ?? []).compactMap { $0["name"] as? String }.joined(separator: ", ")
+            guard let id = song["id"] as? Int,
+                  isPlausibleMatch(candidateTrack: song["name"] as? String ?? "", candidateArtist: artists,
+                                   queryTitle: searchTitle, queryArtist: artist),
+                  let url = URL(string: "https://music.163.com/api/song/lyric?id=\(id)&lv=1"),
+                  let (data, _) = try? await URLSession.shared.data(from: url),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let lrc = (json["lrc"] as? [String: Any])?["lyric"] as? String,
+                  lrc.contains("[")
+            else { continue }
+            return lrc
+        }
+        return nil
+    }
+
+    @MainActor
+    private func fetchFromLRCLIB(title: String, artist: String) async {
         let searchTitle = stripFeaturing(title)
         let cleanTitle = normalizedQuery(searchTitle)
         let cleanArtist = normalizedQuery(artist)
@@ -537,18 +581,19 @@ class MusicManager: ObservableObject {
         lrc.split(separator: "\n").forEach { lineSub in
             let line = String(lineSub)
             // Match [mm:ss.xx] or [m:ss]
-            let pattern = #"\[(\d{1,2}):(\d{2})(?:\.(\d{1,2}))?\]"#
+            let pattern = #"\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]"#
             guard let regex = try? NSRegularExpression(pattern: pattern) else { return }
             let nsLine = line as NSString
             if let match = regex.firstMatch(in: line, range: NSRange(location: 0, length: nsLine.length)) {
                 let minStr = nsLine.substring(with: match.range(at: 1))
                 let secStr = nsLine.substring(with: match.range(at: 2))
                 let csRange = match.range(at: 3)
-                let centiStr = csRange.location != NSNotFound ? nsLine.substring(with: csRange) : "0"
+                // ".5", ".50" and ".500" all mean half a second (NetEase uses ms).
+                let fracStr = csRange.location != NSNotFound ? nsLine.substring(with: csRange) : "0"
                 let minutes = Double(minStr) ?? 0
                 let seconds = Double(secStr) ?? 0
-                let centis = Double(centiStr) ?? 0
-                let time = minutes * 60 + seconds + centis / 100.0
+                let fraction = Double("0." + fracStr) ?? 0
+                let time = minutes * 60 + seconds + fraction
                 let textStart = match.range.location + match.range.length
                 let text = nsLine.substring(from: textStart).trimmingCharacters(in: .whitespaces)
                 if !text.isEmpty {
