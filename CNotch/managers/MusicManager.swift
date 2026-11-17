@@ -401,9 +401,15 @@ class MusicManager: ObservableObject {
                     end tell
                     """
                     if let result = try await AppleScriptHelper.execute(script), let lyricsString = result.stringValue, !lyricsString.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        self.currentLyrics = lyricsString.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let native = lyricsString.trimmingCharacters(in: .whitespacesAndNewlines)
+                        self.currentLyrics = native
                         self.isFetchingLyrics = false
-                        self.syncedLyrics = []
+                        // Apple Music's lyrics carry no timestamps, so the
+                        // compact pill (which needs syncedLyrics) would never
+                        // show a line. Still ask LRCLIB for timed lyrics, but
+                        // keep Apple's text for the full view.
+                        await self.fetchLyricsFromWeb(title: title, artist: artist)
+                        if self.songTitle == title { self.currentLyrics = native }
                         return
                     }
                 } catch {
